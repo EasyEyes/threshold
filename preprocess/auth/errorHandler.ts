@@ -57,25 +57,3 @@ export async function handleAuthError(error: any): Promise<void> {
   const { redirectToOauth2 } = await import("../user");
   await redirectToOauth2();
 }
-
-/**
- * Wrap an async function with authentication error handling
- * @param fn - Async function to wrap
- * @returns Wrapped function that handles auth errors
- */
-export function withAuthErrorHandling<T>(
-  fn: (...args: any[]) => Promise<T>,
-): (...args: any[]) => Promise<T> {
-  return async (...args: any[]): Promise<T> => {
-    try {
-      return await fn(...args);
-    } catch (error) {
-      if (isAuthenticationError(error)) {
-        await handleAuthError(error);
-        // handleAuthError redirects, so this line shouldn't be reached
-        throw error;
-      }
-      throw error;
-    }
-  };
-}

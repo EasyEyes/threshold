@@ -1,10 +1,7 @@
 import { random } from "./rng";
 import mergeBuffers from "merge-audio-buffers";
-import { soundCalibrationResults } from "./global";
 import {
   calculateDBFromRMS,
-  CompressorDb,
-  CompressorInverseDb,
   getGainValue,
   getMaxValueOfAbsoluteValueOfBuffer,
 } from "./soundTest";
@@ -12,14 +9,9 @@ import {
   setWaveFormToZeroDbSPL,
   adjustSoundDbSPL,
   audioCtx,
-  initSoundFiles,
-  loadVocoderPhraseSoundFiles,
   initSoundFilesWithPromiseAll,
 } from "./soundUtils";
-import {
-  getVocoderPhraseTrialData,
-  initVocoderPhraseSoundFiles,
-} from "./vocoderPhrase";
+import { initVocoderPhraseSoundFiles } from "./vocoderPhrase";
 
 var maskerList = {};
 var targetList = {};

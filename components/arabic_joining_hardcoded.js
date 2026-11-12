@@ -184,12 +184,6 @@ export const PositionalShape = {
   final: "final",
 };
 
-export const TargetAffixes = {
-  prefix: "",
-  suffix: "",
-  shape: PositionalShape.isolated,
-};
-
 /**
  * Given a triplet [L1, target, L3], compute the positional shape that the
  * target actually took, and return the prefix/suffix you should use to impose

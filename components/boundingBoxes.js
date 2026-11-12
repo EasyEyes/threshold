@@ -1,13 +1,7 @@
 import * as visual from "../psychojs/src/visual/index.js";
 import * as util from "../psychojs/src/util/index.js";
 import { PsychoJS } from "../psychojs/src/core/index.js";
-import {
-  CharacterSetRect,
-  logger,
-  norm,
-  Rectangle,
-  toFixedNumber,
-} from "./utils.js";
+import { norm, toFixedNumber } from "./utils.js";
 
 /**
  * Generate all the stim objects for the various bounding boxes, ie
@@ -129,55 +123,6 @@ const getDisplayCharacterSetBoundingPolies = (
     );
   }
   return { characters: characters, polies: polies };
-};
-
-/**
- * Add the bounding box stimulus objects to the trial's components list, ie so they cleaned up with the rest of trial stimuli after the trial
- * @param {boolean} showBoundingBox Whether or not to show the bounding box(s) of the stimuli around the stimuli
- * @param {boolean} showCharacterSetBoundingBox  Whether or not to show the bounding box(s) of the character set around the stimuli
- * @param {PsychoJS.visual.Rect[]} stimulusPolies Array of bounding box rects, placed over the stimulus, sized based on the individual stimulus objects.
- * @param {PsychoJS.visual.Rect[]} characterSetStims Array of bounding box rects, placed over the stimulus, sized based on the union bounding box of the character set.
- * @param {object} displayCharacterSetStims Collection of stims for showing the union bounding box of the charcter set, displayed over the full character set.
- * @param {PsychoJS.visual.TextStim[]} displayCharacterSetStims.characters The character stims for the display charcter set.
- * @param {PsychoJS.visual.Rect[]} displayCharacterSetStims.polies The bounding box rect stims for the display charcter set.
- * @param {string} spacingRelationToSize Experiment parameter of the same name.
- * @param {string} thresholdParameter Experiment parameter of the same name.
- * @param {any[]} trialComponents Array of psychoJS stim objects used in this trial routine
- */
-export const addBoundingBoxesToComponents = (
-  showBoundingBox,
-  showCharacterSetBoundingBox,
-  stimulusPolies,
-  characterSetPolies,
-  displayCharacterSetStims,
-  spacingRelationToSize,
-  thresholdParameter,
-  trialComponents,
-) => {
-  if (showBoundingBox) {
-    trialComponents.push(stimulusPolies.target);
-    if (
-      (spacingRelationToSize === "ratio" || spacingRelationToSize === "none") &&
-      thresholdParameter === "spacingDeg"
-    ) {
-      trialComponents.push(stimulusPolies.flanker1);
-      trialComponents.push(stimulusPolies.flanker2);
-    }
-  }
-  if (showCharacterSetBoundingBox) {
-    trialComponents.push(characterSetPolies.target);
-    if (
-      (spacingRelationToSize === "ratio" || spacingRelationToSize === "none") &&
-      thresholdParameter === "spacingDeg"
-    ) {
-      trialComponents.push(characterSetPolies.flanker1);
-      trialComponents.push(characterSetPolies.flanker2);
-    }
-    trialComponents.push(
-      ...displayCharacterSetStims.characters,
-      ...displayCharacterSetStims.polies,
-    );
-  }
 };
 
 /**
@@ -303,54 +248,6 @@ const updateDisplayCharacterSetBoundingBoxStims = (
       }
     }
   }
-};
-
-/**
- * Place and scale all the psychoJS stims related to visualizing bounding boxes
- * @param {object} boundingBoxVisibility Should the bounding boxes be shown based on...
- * @param {boolean} boundingBoxVisibility.stimulus ...the size of the individual stimuli?
- * @param {boolean} boundingBoxVisibility.characterSet ...the size of the full (ie overlayed) character set?
- * @param {object} tripletBoundingStimuli The arrays of bounding box stimuli which will be positioned over the triplet, and sized...
- * @param {visual.Rect{}} tripletBoundingStimuli.stimulus ... based on the individual stimuli sizes, ie a uniquely sized bounding box for each character of the stimulus (eg triplet).
- * @param {visual.Rect{}} tripletBoundingStimuli.characterSet ...based on the bounding box of the full character set, ie all bounding boxes on the stimulus are the same size.
- * @param {object} displayCharacterSetBoundingStimuli The stims for the (response-time) display of the full character set.
- * @param {visual.Rect[]} displayCharacterSetBoundingStimuli.polies The bounding box polygons, one for each character in the character set.
- * @param {visual.TextStim[]} displayCharacterSetBoundingStimuli.characters The stims for the characters of the display character set.
- * @param {visual.TextStim[]} triplet The actual stimulus objects of the target, ie the stimuls shown to the observer.
- * @param {CharacterSetRect} normalizedCharacterSetBoundingRect The normalized bounding box of the union of all characters in the character set.
- * @param {object} trialParameters Collection of parameters relating to the current trial
- * @param {number} trialParameters.heightPx The value used to set the height of the target stim
- * @param {string} trialParameters.spacingRelationToSize Experiment parameter of the same name
- * @param {string} trialParameters.thresholdParameter Experiment parameter of the same name
- * @param {string} trialParameters.font (Correctly escaped) Experiment parameter of the same name
- * @param {[number, number]} trialParameters.windowSize Current dimensions of the window, ie `psychoJS.window._size`
- */
-export const sizeAndPositionBoundingBoxes = (
-  boundingBoxVisibility,
-  tripletBoundingStimuli,
-  displayCharacterSetBoundingStimuli,
-  triplet,
-  normalizedCharacterSetBoundingRect,
-  trialParameters,
-) => {
-  sizeAndPositionTripletBoundingBoxes(
-    boundingBoxVisibility.stimulus,
-    boundingBoxVisibility.characterSet,
-    tripletBoundingStimuli.stimulus,
-    tripletBoundingStimuli.characterSet,
-    triplet,
-    normalizedCharacterSetBoundingRect,
-    trialParameters.heightPx,
-    trialParameters.spacingRelationToSize,
-    trialParameters.thresholdParameter,
-  );
-  if (boundingBoxVisibility.characterSet)
-    sizeAndPositionDisplayCharacterSet(
-      displayCharacterSetBoundingStimuli,
-      normalizedCharacterSetBoundingRect,
-      trialParameters.font,
-      trialParameters.windowSize,
-    );
 };
 
 const sizeAndPositionTripletBoundingBoxes = (

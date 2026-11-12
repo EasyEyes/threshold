@@ -4,14 +4,12 @@ import { updateColor } from "./color";
 import {
   _key_resp_allKeys,
   clickedContinue,
-  instructionFont,
   keypad,
   screenBackground,
   showConditionNameConfig,
   status,
   targetKind,
   totalBlocks,
-  trialCounterConfig,
   viewingDistanceCm,
 } from "./global";
 import { drawTargetSpecs, updateTargetSpecs } from "./showTrialInformation";

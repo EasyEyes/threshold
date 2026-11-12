@@ -60,21 +60,6 @@ export const getAllUserAcceptableFileExtensions = (): string[] => {
   ];
 };
 
-export const getAllUserAcceptableResourcesExtensions = (): string[] => {
-  return [
-    ...acceptableExtensions.fonts,
-    ...acceptableExtensions.forms,
-    ...acceptableExtensions.texts,
-    ...acceptableExtensions.folders,
-    ...acceptableExtensions.images,
-    ...acceptableExtensions.code,
-    ...acceptableExtensions.impulseResponses,
-    ...acceptableExtensions.frequencyResponses,
-    ...acceptableExtensions.targetSoundLists,
-    ...acceptableExtensions.phrases,
-  ];
-};
-
 export const acceptableResourcesExtensionsOfTextDataType: string[] = [
   "md",
   "txt",

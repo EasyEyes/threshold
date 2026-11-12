@@ -6,19 +6,13 @@ import {
   letterConfig,
   readingConfig,
   font as globalFont,
-  displayOptions,
   correctAns,
   keypad,
   targetKind,
   status,
 } from "./global";
 import { isFontLTR } from "./fontDirection.js";
-import {
-  colorRGBASnippetToRGBA,
-  safeExecuteFunc,
-  xyPxOfDeg,
-  logger,
-} from "./utils";
+import { colorRGBASnippetToRGBA, safeExecuteFunc, logger } from "./utils";
 import { canClick } from "./response";
 import { XYPxOfDeg } from "./multiple-displays/utils.ts";
 import {

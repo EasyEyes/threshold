@@ -1,4 +1,3 @@
-// import { debug, getTripletCharacters } from "./utils.js";
 // import { getTrialInfoStr } from "./trialCounter.js";
 // import { instructionsText } from "./instructions.js";
 // import { hideCursor, xyPxOfDeg } from "./utils.js";
@@ -10,11 +9,9 @@ import {
   rc,
   usingGaze,
   tolerances,
-  displayOptions,
   clickedContinue,
   letterConfig,
   repeatedLettersConfig,
-  repeatedLettersResponse,
   targetKind,
   status,
   timing,
@@ -40,7 +37,6 @@ import {
   rendererLostDuringTrial,
 } from "./rendererHealth";
 import {
-  logger,
   showCursor,
   addTrialStaircaseSummariesToData,
   toFixedNumber,
@@ -53,7 +49,6 @@ import {
   appendTargetSpecs,
 } from "./showTrialInformation";
 import { setupClickableCharacterSet } from "./showCharacterSet";
-import { prettyPrintPsychojsBoundingBox } from "./boundingBoxes.js";
 import { psychoJS } from "./globalPsychoJS";
 import { okayToRetryThisTrial, isConditionFinished } from "./retryTrials.ts";
 import {

@@ -1,7 +1,6 @@
 import { PsychoJS } from "../psychojs/src/core";
 import { TextStim } from "../psychojs/src/visual";
 import {
-  displayOptions,
   font,
   letterConfig,
   readingConfig,
@@ -29,11 +28,9 @@ import {
   sampleWithReplacement,
   shuffle,
   toFixedNumber,
-  xyPxOfDeg,
   showCursor,
   drawTimingBars,
 } from "./utils";
-import { Color } from "../psychojs/src/util";
 import {
   findReadingSize,
   getThisBlockPagesForAGivenCondition,
@@ -41,7 +38,6 @@ import {
 import {
   canonical,
   prepareReadingQuestions,
-  preprocessCorpusToWordList,
   tokenizeWordsIndividually,
 } from "./reading";
 
@@ -746,11 +742,6 @@ export const undrawAllRSVPReadingStims = () => {
   });
 };
 
-export const getRSVPReadingCategories = (targetSets) => {
-  const categories = targetSets.map((s) => new Category(s.word, s.foilWords));
-  return categories;
-};
-
 export const getRSVPReadingHeightPx = (reader, BC) => {
   // TODO make follow full specification, sizeIsHeight etc
   const sizeDeg = reader.read("targetSizeDeg", BC);
@@ -771,14 +762,6 @@ export const getRSVPReadingHeightPx = (reader, BC) => {
     ),
   );
   return heightPx;
-};
-
-export const resetTiming = (timing) => {
-  timing.past.push(structuredClone(timing.current));
-  timing.current.startSec = undefined;
-  timing.current.finishSec = undefined;
-  timing.current.drawnConfirmedTimestamp = undefined;
-  timing.current.undrawnConfirmedTimestamp = undefined;
 };
 
 export const registerKeypressForRSVPReading = (keypresses) => {

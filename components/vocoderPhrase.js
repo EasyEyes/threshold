@@ -3,16 +3,12 @@ import mergeBuffers from "merge-audio-buffers";
 import { soundCalibrationResults } from "./global";
 import {
   calculateDBFromRMS,
-  CompressorDb,
-  CompressorInverseDb,
-  getCorrectedInDbAndSoundDBSPL,
   getGainValue,
   getMaxValueOfAbsoluteValueOfBuffer,
 } from "./soundTest";
 import {
   adjustSoundDbSPL,
   audioCtx,
-  getRMSOfWaveForm,
   loadVocoderPhraseSoundFiles,
   setWaveFormToZeroDbSPL,
 } from "./soundUtils";

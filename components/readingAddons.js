@@ -2,7 +2,6 @@ import { random } from "./rng";
 import axios from "axios";
 
 import {
-  displayOptions,
   font,
   fontCharacterSet,
   readingCorpusArchive,
@@ -31,10 +30,8 @@ import {
   getRandomInt,
   logger,
   Rectangle,
-  xyPxOfDeg,
   colorRGBASnippetToRGBA,
   debug,
-  getUnionRect,
   isReadingWithSimultaneousQuestionAndAnswer,
 } from "./utils";
 import { findLongestMatchingTail } from "./misc.ts";

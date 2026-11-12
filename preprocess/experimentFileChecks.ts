@@ -11,7 +11,6 @@ import Papa from "papaparse";
 import {
   EasyEyesError,
   NO_BLOCK_PARAMETER,
-  UNBALANCED_COMMAS,
   INVALID_STARTING_BLOCK,
   NONSEQUENTIAL_BLOCK_VALUE,
   FORM_FILES_MISSING,
@@ -53,7 +52,6 @@ import {
   parseFrequencyResponseFile,
   parseTargetSoundListFile,
 } from "./utils";
-import { parseFontPixiMetricsStringDefault } from "./fontPixiMetricsStringDefault";
 import {
   normalizeVariantLigatures,
   variantLigaturesToFeatureEntries,
@@ -86,52 +84,6 @@ const commaSeparatedParamLengths = new Map([
   ["markFlies", 10],
   ["fixationOriginXYScreen", 2],
 ]);
-
-export const validatedCommas = (
-  parsed: Papa.ParseResult<string[]>,
-): EasyEyesError | undefined => {
-  // Map all row-lengths with the rows of that length
-  // A correctly formatted experiment would all be off the same length
-  const rowLengths: { [key: number]: number[] } = {};
-  parsed.data.forEach((row: string[], i: number): void => {
-    if (!rowLengths.hasOwnProperty(row.length)) {
-      rowLengths[row.length] = [i];
-    } else {
-      rowLengths[row.length].push(i);
-    }
-  });
-  // All the different row lengths found, sorted most common first.
-  const lengthOrdering = Object.keys(rowLengths).sort(
-    (a, b) => rowLengths[Number(b)].length - rowLengths[Number(a)].length,
-  );
-  // There should only be one unique row length, ie every row needs the same number of commas
-  if (lengthOrdering.length > 1) {
-    const offendingParams: {
-      parameter: string;
-      length: number;
-      correctLength: number;
-    }[] = [];
-    Object.entries(rowLengths)
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      .filter(([length, _]) => length !== lengthOrdering[0])
-      .forEach(([badLength, rowNums]) => {
-        const offendingOfThisLength = rowNums.map((i) => {
-          return {
-            parameter: parsed.data[i][0],
-            length: Number(badLength),
-            correctLength: Number(lengthOrdering[0]),
-          };
-        });
-        offendingParams.push(...offendingOfThisLength);
-      });
-    // Create an error message... just alphabetize the offending parameters first
-    return UNBALANCED_COMMAS(
-      offendingParams.sort((a, b) =>
-        a.parameter === b.parameter ? 0 : a.parameter > b.parameter ? 1 : -1,
-      ),
-    );
-  }
-};
 
 export const _superMatching = (parameter: string): boolean => {
   for (const superMatchingParameter of getSuperMatchingParams()) {
@@ -718,21 +670,6 @@ export const checkReadingFoils = (
   }
 
   return offendingConditions.map((c) => READING_CORPUS_INSUFFICIENT_FOILS(c));
-};
-
-export const getResponseTypedEasyEyesKeypadBool = (df: any): boolean[] => {
-  const viewingDistanceDesiredCm = getColumnValuesOrDefaults(
-    df,
-    "viewingDistanceDesiredCm",
-  );
-  const needKeypadBeyondCm = getColumnValuesOrDefaults(
-    df,
-    "needKeypadBeyondCm",
-  );
-  const needKeypad = viewingDistanceDesiredCm.map(
-    (v, i) => Number(v) > Number(needKeypadBeyondCm[i]),
-  );
-  return needKeypad;
 };
 
 export const isImpulseResponseMissing = (

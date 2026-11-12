@@ -3,7 +3,7 @@ import {
   type Condition,
   type ParamReader,
 } from "../parameters/paramReader";
-import { logger, readTargetTask, shuffle } from "./utils.js";
+import { readTargetTask, shuffle } from "./utils.js";
 import { getGlossary } from "../parameters/glossaryRegistry";
 import { isBlockShuffleGroupingParam } from "../preprocess/utils";
 import { rngFor } from "./rng";

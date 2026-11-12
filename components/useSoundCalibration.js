@@ -54,7 +54,6 @@ import {
   soundGainDBSPL,
   thisDevice,
   timeToCalibrate,
-  timeoutSec,
   authorEmail,
   webAudioDeviceNames,
   thisExperimentInfo,
@@ -66,8 +65,6 @@ import {
   flags,
   calibrateSoundBurstNormalizeBy1000HzGainBool,
   timeoutSoundCalibrationSec,
-  timeoutNewPhoneSec,
-  loudspeakerBrowserDetails,
   microphoneBrowserDetails,
   calibrateSoundBurstDownsample,
   //showSoundCalibrationResultsBool,
@@ -101,7 +98,7 @@ import {
   reportBrowserIdentificationToFirestore,
 } from "./soundCalibrationHelpers";
 import { showExperimentEnding } from "./forms";
-import { generateMinimumPhaseIR, getCurrentTimeString } from "./soundUtils";
+import { getCurrentTimeString } from "./soundUtils";
 import { isProlificExperiment } from "./externalServices.ts";
 import { psychoJS } from "./globalPsychoJS";
 import {
@@ -109,7 +106,6 @@ import {
   AllModelNames,
   AllModelNumbers,
   getAutoCompleteSuggestionElements,
-  addQRSkipButtons,
 } from "./compatibilityCheckHelpers";
 import {
   getPreferredModelNumberAndName,
@@ -117,7 +113,6 @@ import {
 } from "./compatibilityCheck";
 import { getInstructionText } from "./compatibilityCheck";
 import { quitPsychoJS } from "./lifetime";
-import { formatTimestamp } from "./utils";
 import { paramReader } from "../parameters/paramReader.ts";
 import {
   initializeMicrophoneDropdownForCalibration,
@@ -2664,48 +2659,6 @@ const startCalibration = async (
     : await parseMicrophoneCalibrationResults(results, isSmartPhone);
 };
 
-export const adjustDisplayBeforeRestart = (
-  elems,
-  isLoudspeakerCalibration,
-  isSmartPhone,
-  language,
-) => {
-  elems.displayUpdate.innerHTML = "";
-  elems.displayUpdate.style.display = "none";
-  elems.recordingInProgress.innerHTML = "";
-  elems.timeToCalibrate.innerHTML = "";
-  if (isLoudspeakerCalibration && !isSmartPhone) {
-    // Loudspeaker + Not Smartphone => page 5 of 5
-    elems.title.innerHTML = renderMarkdown(
-      readi18nPhrases("RC_loudspeakerCalibration", language),
-    )
-      .replace("[[N11]]", "4")
-      .replace("[[N22]]", "5");
-  } else if (isLoudspeakerCalibration && isSmartPhone) {
-    // Loudspeaker + Smartphone => page 7 of 7
-
-    elems.title.innerHTML = renderMarkdown(
-      readi18nPhrases("RC_loudspeakerCalibration", language),
-    )
-      .replace("[[N11]]", "5")
-      .replace("[[N22]]", "7");
-    console.log("Loudspeaker + Smartphone page 5 of 7");
-  } else if (!isLoudspeakerCalibration && !isSmartPhone) {
-    // Microphone + Not Smartphone => page 4 of 4
-    elems.title.innerHTML = renderMarkdown(
-      readi18nPhrases("RC_usbMicrophoneCalibration", language),
-    )
-      .replace("[[N11]]", "3")
-      .replace("[[N22]]", "4");
-  } else {
-    // Microphone + Smartphone => page 6 of 6
-    elems.title.innerHTML = renderMarkdown(
-      readi18nPhrases("RC_microphoneCalibration", language),
-    )
-      .replace("[[N11]]", "4")
-      .replace("[[N22]]", "6");
-  }
-};
 export const calibrateAgain = async (
   elems,
   isLoudspeakerCalibration,

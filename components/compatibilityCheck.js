@@ -6,14 +6,7 @@ import { checkBrowserSoundOutputSelectionSupport } from "./soundOutput.ts";
 import { renderMarkdown } from "./markdownInline.js";
 
 import { db } from "./firebase/firebase.js";
-import {
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  where,
-  collection,
-} from "firebase/firestore";
+import { doc, getDocs, query, where, collection } from "firebase/firestore";
 import {
   AllBrands,
   AllModelNames,

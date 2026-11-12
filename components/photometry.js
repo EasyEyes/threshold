@@ -2,9 +2,6 @@ import { measureLuminance } from "./global";
 import { paramReader } from "../parameters/paramReader.ts";
 import { psychoJS } from "./globalPsychoJS";
 import {
-  getGCD,
-  toFixedNumber,
-  logger,
   isFullscreen,
   requestNativeFullscreen,
   clearFullscreenWasLost,

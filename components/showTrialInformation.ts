@@ -13,7 +13,6 @@ import {
   status,
 } from "./global";
 import type { TextStim, TargetKind } from "./types";
-import { Screens } from "./multiple-displays/globals";
 import { toFixedNumber } from "./utils";
 
 // Type assertion for config object that gets modified at runtime

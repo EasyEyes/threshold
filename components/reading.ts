@@ -5,11 +5,7 @@ import {
   readingCorpusPastFoils,
   readingCorpusPastTargets,
 } from "./global";
-import {
-  logger,
-  sampleWithoutReplacement,
-  sampleWithReplacement,
-} from "./utils";
+import { sampleWithoutReplacement, sampleWithReplacement } from "./utils";
 import {
   canonical,
   preprocessCorpusToWordList,
@@ -390,17 +386,6 @@ export const getCorrectAnswer = (
 
   warning("Failed to get correct answer, reading.ts/getCorrectAnswer()");
   return ["a", 0];
-};
-
-export const wordFreqCloseEnoughToTarget = (
-  wordFreq: number,
-  targetFreq: number,
-  roundFetchingFoils: number,
-) => {
-  return (
-    wordFreq > targetFreq * (1 - 0.1 * roundFetchingFoils) &&
-    wordFreq < targetFreq * (1 + 0.1 * roundFetchingFoils)
-  );
 };
 
 /* -------------------------------------------------------------------------- */

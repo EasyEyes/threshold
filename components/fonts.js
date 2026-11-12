@@ -245,55 +245,6 @@ const validateAxisValuePair = (part) => {
 };
 
 /**
- * Validate font-variation-settings string format
- * Format: "axis1" value1, "axis2" value2, ...
- * @param {string} variableSettings - The font-variation-settings string
- * @returns {{isValid: boolean, error?: string}} - Validation result
- */
-export const validateFontVariableSettings = (variableSettings) => {
-  const stringValidation = validateVariableSettingsString(variableSettings);
-  if (!stringValidation.isValid) {
-    return stringValidation;
-  }
-
-  const parts = parseVariableSettingsParts(stringValidation.trimmed);
-  if (parts.length === 0) {
-    return {
-      isValid: false,
-      error: "fontVariableSettings must contain at least one axis setting",
-    };
-  }
-
-  for (const part of parts) {
-    const validation = validateAxisValuePair(part);
-    if (!validation.isValid) {
-      return validation;
-    }
-  }
-
-  return { isValid: true };
-};
-
-/**
- * Check if a font is a variable font based on fontVariableSettings parameter
- * A font is considered variable if fontVariableSettings is provided (non-empty string)
- *
- * @param {string} variableSettings - The fontVariableSettings parameter value
- * @returns {boolean} - True if the font should be treated as a variable font
- *
- * @todo In the future, we should:
- * - Introspect the actual font file to validate that the provided axes are supported by the font
- * - Validate that the values provided are within the font's axis ranges (min/max)
- * - This would require loading the font and checking its fvar table
- */
-export const isVariableFont = (variableSettings) => {
-  if (!variableSettings || typeof variableSettings !== "string") {
-    return false;
-  }
-  return variableSettings.trim().length > 0;
-};
-
-/**
  * Add the required file-specified fonts to the document as css font-faces.
  * @param {Object} fontsRequired
  */

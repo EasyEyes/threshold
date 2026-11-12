@@ -6,16 +6,10 @@ import {
   status,
   thisExperimentInfo,
 } from "./global";
-import {
-  colorRGBASnippetToRGBA,
-  logger,
-  Rectangle,
-  sendEmailForDebugging,
-} from "./utils";
+import { colorRGBASnippetToRGBA, sendEmailForDebugging } from "./utils";
 import { psychoJS } from "./globalPsychoJS";
 import { resolveAutoMode } from "./fontPreRenderAuto";
 import { AUTO_DECISION_OUTPUT_PARAMS } from "./outputParameters";
-import { ctx } from "./boundingNew";
 import { warning } from "./errorHandling";
 import { readFontMetricsCharacterSet } from "../preprocess/fontPixiMetricsStringDefault";
 import { paramReader } from "../parameters/paramReader.ts";

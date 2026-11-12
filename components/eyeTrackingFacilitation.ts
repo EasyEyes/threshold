@@ -4,7 +4,6 @@
  */
 
 import {
-  displayOptions,
   eyeTrackingStimulusRecords,
   fixationConfig,
   showConditionNameConfig,
@@ -139,18 +138,6 @@ export const getAppleCoordinatePosition = (x: number, y: number): number[] => {
   const appleX = Math.floor(x + windowWidth / 2);
   const appleY = Math.floor(-y + windowHeight / 2);
   return [appleX, appleY];
-};
-
-export const getPsychoJSCoordinatePositionFromAppleCoordinatePosition = (
-  x: number,
-  y: number,
-): number[] => {
-  const screenDimensions = getScreenDimensions();
-  const windowWidth = screenDimensions[0];
-  const windowHeight = screenDimensions[1];
-  const psychoJSX = x - windowWidth / 2;
-  const psychoJSY = windowHeight / 2 - y;
-  return [psychoJSX, psychoJSY];
 };
 
 /**

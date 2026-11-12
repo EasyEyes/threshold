@@ -12,11 +12,7 @@ import { serializeError } from "../psychojs/src/util/errorSerialization.js";
 
 // Where the trial counter used by error reports lives; re-exported so callers
 // keep importing it from here.
-export {
-  setActiveBlock,
-  setActiveTrial,
-  getFormattedTime,
-} from "./errorContext.js";
+export { setActiveBlock, setActiveTrial } from "./errorContext.js";
 
 /**
  * Check if an error contains any useful diagnostic content.

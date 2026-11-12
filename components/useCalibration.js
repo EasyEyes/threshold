@@ -2,17 +2,14 @@ import { readi18nPhrases } from "./readPhrases";
 import { renderMarkdown } from "./markdownInline";
 import { debug, ifTrue, loggerText } from "./utils";
 import {
-  soundGainDBSPL,
   invertedImpulseResponse,
   rc,
-  soundCalibrationLevelDBSPL,
   soundCalibrationResults,
   debugBool,
   allHzCalibrationResults,
   _calibrateSoundMinHz,
   _calibrateSoundMaxHz,
   calibrateMicrophonesBool,
-  microphoneCalibrationResults,
   calibrateSoundCheck,
   timeoutSec,
   _calibrateSoundAllHzBool,
@@ -33,7 +30,6 @@ import {
   _calibrateSound1000HzMaxSD_dB,
   _calibrateSound1000HzMaxTries,
   timeToCalibrate,
-  thisDevice,
   calibrateSoundIIRSec,
   calibrateSoundIIRPhase,
   calibrateSoundIRSec,
@@ -44,7 +40,6 @@ import {
   calibrateSoundBurstDbIsRelativeBool,
   loudspeakerInfo,
   microphoneInfo,
-  calibrationTime,
   calibrateSoundBackgroundSecs,
   _calibrateSoundSaveJSON,
   calibrateSoundSmoothOctaves,
@@ -89,11 +84,7 @@ import {
   displayVolumeRecordings,
   getListOfConnectedMicrophones,
 } from "./soundTest";
-import {
-  calculateTimeToCalibrate,
-  getCurrentTimeString,
-  getSoundCalibrationLevelDBSPLFromIIR,
-} from "./soundUtils";
+import { calculateTimeToCalibrate } from "./soundUtils";
 
 import {
   runCombinationCalibration,

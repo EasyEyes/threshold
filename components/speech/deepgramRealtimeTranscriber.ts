@@ -8,10 +8,6 @@ import {
   type TranscriberListener,
   type TranscriberState,
 } from "./transcriber";
-import {
-  createSpeechTokenProvider,
-  type SpeechTokenProviderOptions,
-} from "./speechToken";
 
 const PROVIDER = "deepgram";
 const DEFAULT_MODEL = "nova-3";
@@ -68,8 +64,6 @@ export interface DeepgramRealtimeTranscriberOptions {
   readonly now?: () => number;
 }
 
-export type DeepgramTokenProviderOptions = SpeechTokenProviderOptions;
-
 const validateLanguageCode = (languageCode: string): string => {
   const value = languageCode.trim();
   if (!/^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$/.test(value)) {
@@ -117,10 +111,6 @@ export const buildDeepgramRealtimeUrl = (
   }
   return url.toString();
 };
-
-export const createDeepgramTokenProvider = (
-  options: DeepgramTokenProviderOptions,
-): DeepgramTokenProvider => createSpeechTokenProvider(PROVIDER, options);
 
 const defaultWebSocketFactory: DeepgramWebSocketFactory = (url, protocols) => {
   if (typeof WebSocket === "undefined") {

@@ -61,7 +61,6 @@ import {
 } from "./errorMessages";
 import { getUserInfo } from "./user";
 import { tempAccessToken } from "./global";
-import { validateImpulseResponseFile } from "./experimentFileChecks";
 import { getGlossary } from "../parameters/glossaryRegistry";
 import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
 import { searchProjectByName } from "./gitlabSearch";

@@ -200,31 +200,3 @@ export async function refreshAccessToken(
     "Token refresh failed",
   );
 }
-
-/**
- * Get information about an access token (validates token and returns metadata)
- * @param accessToken - The access token to check
- * @returns Token information including resource_owner_id, scope, expires_in, etc.
- */
-export async function getTokenInfo(accessToken: string): Promise<{
-  resource_owner_id: number;
-  scope: string[];
-  expires_in: number | null;
-  application: { uid: string };
-  created_at: number;
-}> {
-  const response = await fetch(
-    "https://gitlab.pavlovia.org/oauth/token/info",
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    },
-  );
-
-  if (!response.ok) {
-    throw new Error(`Failed to get token info: ${response.status}`);
-  }
-
-  return response.json();
-}

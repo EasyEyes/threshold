@@ -2,7 +2,6 @@ import * as util from "../psychojs/src/util/index.js";
 import * as visual from "../psychojs/src/visual/index.js";
 import { warning } from "./errorHandling.js";
 import {
-  displayOptions,
   fixationConfig,
   letterConfig,
   targetKind,
@@ -13,15 +12,12 @@ import {
   targetTextStimConfig,
 } from "./global.js";
 import { degreesToPixels, rectFromPixiRect, toFixedNumber } from "./utils";
-import { readFontMetricsCharacterSet } from "../preprocess/fontPixiMetricsStringDefault";
 
 import { paramReader } from "../parameters/paramReader.ts";
 
 import { psychoJS } from "./globalPsychoJS.js";
 import {
-  logger,
   xyPxOfDeg,
-  xyDegOfPx,
   getUnionRect,
   isRectInRect,
   norm,
@@ -46,39 +42,6 @@ canvas.id = "boundingCanvas";
 // canvas.height = Screens[0].window._size[1];
 
 let appendToDocument = true;
-
-export const generateCharacterSetBoundingRects = (
-  paramReader,
-  cleanFontName,
-) => {
-  const rects = {};
-  for (const BC of paramReader.block_conditions) {
-    const characterSet = String(paramReader.read("fontCharacterSet", BC)).split(
-      "",
-    );
-    let font = paramReader.read("font", BC);
-    if (paramReader.read("fontSource", BC) === "file")
-      font = cleanFontName(font);
-    const typographicCrowding =
-      paramReader.read("spacingRelationToSize", BC) === "typographic" &&
-      paramReader.read("thresholdParameter", BC) === "spacingDeg";
-    const padding = paramReader.read("fontPadding", BC);
-    const letterRepeats = typographicCrowding ? 3 : 1;
-
-    rects[BC] = _getCharacterSetBoundingBox(
-      characterSet,
-      font,
-      psychoJS.window,
-      letterRepeats,
-      100,
-      padding,
-      0,
-      font.kerning,
-      readFontMetricsCharacterSet(paramReader, BC),
-    );
-  }
-  return rects;
-};
 
 export const _getCharacterSetBoundingBox = (
   characterSet,

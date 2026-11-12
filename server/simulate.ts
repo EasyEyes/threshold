@@ -22,7 +22,7 @@
 import { chromium } from "@playwright/test";
 import type { Page, BrowserContext } from "@playwright/test";
 import type { EventEnvelope } from "./diffEvents";
-import { mkdirSync, appendFileSync, existsSync, readFileSync } from "fs";
+import { mkdirSync, appendFileSync, readFileSync } from "fs";
 import * as path from "path";
 import * as os from "os";
 import { isSimConsoleNoise } from "./simNoiseFilter";

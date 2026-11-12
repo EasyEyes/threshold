@@ -2,7 +2,7 @@
 
 import { readi18nPhrases } from "./readPhrases";
 import { canClick, canType } from "./response";
-import { safeExecuteFunc, showCursor, logger } from "./utils";
+import { safeExecuteFunc, showCursor } from "./utils";
 import { status } from "./global";
 import { renderMarkdown } from "./markdownInline";
 

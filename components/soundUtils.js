@@ -11,8 +11,6 @@ import {
   calibrateSoundBurstMLSVersions,
   calibrateSoundBurstRepeats,
   calibrateSoundBurstSec,
-  calibrateSoundBurstsWarmup,
-  calibrateSoundCheck,
   targetSoundListFiles,
   targetSoundListMap,
 } from "./global";
@@ -93,11 +91,6 @@ export const playAudioBuffer = (
 };
 
 // get gain node
-export const getGainNode = (gain) => {
-  const gainNode = audioCtx.createGain();
-  gainNode.gain.value = gain;
-  return gainNode;
-};
 /**
  * Given an array of web audio nodes, builds the node graph in the order
  * they are placed into the array
@@ -265,92 +258,6 @@ export const playAudioBufferWithImpulseResponseCalibration = async (
     showImage,
     showImageFileName,
   );
-};
-
-export const getSoundCalibrationLevelDBSPLFromIIR = (iir) => {
-  const Fs = 48000;
-  //t=0:1/fs:length(iir)/fs; % time vector
-  const t = [0];
-  for (let i = 1; i < iir.length; i++) {
-    t.push(t[i - 1] + 1.0 / Fs);
-  }
-
-  const phase = t.map((val) => 2 * Math.PI * 1000 * val);
-  const cosPhase = phase.map((val) => Math.cos(val));
-  const sinPhase = phase.map((val) => Math.sin(val));
-  const cosPhaseIIRSquared = cosPhase.map((val, i) => (val * iir[i]) ** 2);
-  const sinPhaseIIRSquared = sinPhase.map((val, i) => (val * iir[i]) ** 2);
-  const sinCosSum = cosPhaseIIRSquared.map(
-    (val, i) => val + sinPhaseIIRSquared[i],
-  );
-  const energyFiltered = sinCosSum.reduce((acum, val) => acum + val);
-  const energyUnfiltered = 1;
-  const gain = Math.sqrt(energyFiltered / energyUnfiltered);
-
-  const normalizedIIR = iir.map((val) => val / gain);
-  const soundCalibrationLevelDBSPL = -20 * Math.log10(gain);
-
-  return {
-    normalizedIIR: normalizedIIR,
-    calibrationLevel: soundCalibrationLevelDBSPL,
-  };
-};
-
-export const initSoundFiles = async (trialsConditions) => {
-  var maskerList = {};
-  var targetList = {};
-
-  trialsConditions.map(async (condition) => {
-    maskerList[condition["block_condition"]] = [];
-    targetList[condition["block_condition"]] = [];
-    //load maskers
-    if (condition["maskerSoundFolder"]) {
-      await fetch(`folders/${condition["maskerSoundFolder"]}.zip`)
-        .then((response) => {
-          return response.blob();
-        })
-        .then((data) => {
-          var Zip = new JSZip();
-          Zip.loadAsync(data).then((zip) => {
-            zip.forEach((relativePath, zipEntry) => {
-              var name = zipEntry.name;
-              name = name.substring(0, name.lastIndexOf("."));
-              maskerList[condition["block_condition"]].push({
-                name: name,
-                file: zipEntry.async("arraybuffer").then((data) => {
-                  return getAudioBufferFromArrayBuffer(data);
-                }),
-              });
-            });
-          });
-        });
-    }
-
-    // load target
-    if (condition["targetSoundFolder"]) {
-      await fetch(`folders/${condition["targetSoundFolder"]}.zip`)
-        .then((response) => {
-          return response.blob();
-        })
-        .then((data) => {
-          var Zip = new JSZip();
-          Zip.loadAsync(data).then((zip) => {
-            zip.forEach((relativePath, zipEntry) => {
-              var name = zipEntry.name;
-              name = name.substring(0, name.lastIndexOf("."));
-              targetList[condition["block_condition"]].push({
-                name: name,
-                file: zipEntry.async("arraybuffer").then((data) => {
-                  return getAudioBufferFromArrayBuffer(data);
-                }),
-              });
-            });
-          });
-        });
-    }
-  });
-
-  return { maskers: maskerList, target: targetList };
 };
 
 const extractValidConditions = () => {
@@ -1008,53 +915,4 @@ export const calculateTimeToCalibrate = (gains) => {
   const timeMinute = (timeAllHzSec + time1000HzSec) / 60;
 
   return Math.round(timeMinute);
-};
-
-/**
- * Generates a minimum phase impulse response
- * @param {number} sampleRate - The sample rate in Hz
- * @param {number} numSamples - Length of the impulse response in samples
- * @param {number} resonantFreq - Resonant frequency in Hz
- * @param {number} bandwidth - Bandwidth of the resonance in Hz
- * @param {number} decayRate - Rate of exponential decay (higher = faster decay)
- * @returns {Array<number>} - Minimum phase impulse response
- */
-export const generateMinimumPhaseIR = (
-  sampleRate = 48000,
-  numSamples = 4800,
-  resonantFreq = 1000,
-  bandwidth = 200,
-  decayRate = 50,
-) => {
-  const ir = new Array(numSamples).fill(0);
-
-  // Generate a simple impulse response with exponential decay and resonance
-  for (let i = 0; i < numSamples; i++) {
-    const t = i / sampleRate;
-    const decay = Math.exp(-t * decayRate);
-    const resonance = Math.sin(2 * Math.PI * resonantFreq * t);
-    const bandlimited = Math.exp(-Math.pow(t * bandwidth, 2));
-
-    ir[i] = decay * resonance * bandlimited;
-  }
-
-  // Convert to minimum phase using FFT method
-  // For a simple test case, we'll skip the full minimum phase calculation
-  // and just ensure the impulse starts at t=0 with max energy near the beginning
-  ir.sort((a, b) => Math.abs(b) - Math.abs(a));
-
-  // Add some smoothing to make it more realistic
-  for (let i = 1; i < numSamples; i++) {
-    ir[i] = 0.9 * ir[i] + 0.1 * ir[i - 1];
-  }
-
-  // Normalize to peak of 1.0
-  let maxAmp = 0;
-  for (let i = 0; i < numSamples; i++) {
-    const absValue = Math.abs(ir[i]);
-    if (absValue > maxAmp) {
-      maxAmp = absValue;
-    }
-  }
-  return ir.map((sample) => sample / maxAmp);
 };

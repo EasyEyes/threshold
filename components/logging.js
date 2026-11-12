@@ -1,6 +1,6 @@
 import { paramReader } from "../parameters/paramReader.ts";
 import { status } from "./global";
-import { toFixedNumber, debug } from "./utils";
+import { toFixedNumber } from "./utils";
 
 export const logQuest = (msg, value = "", BC = undefined) => {
   BC ??= status.block_condition;
@@ -29,27 +29,4 @@ export const logNotice = (msg, value = "", BC = undefined) => {
     // "border-radius: 1px",
   ].join(";");
   console.log("%c " + msg + " " + timestamp + "(sec)", styles, value);
-};
-
-export const logDisplay = (msg, value = "", duration = 3000) => {
-  if (!debug) return;
-  const containerId = "logDisplayContainer";
-  let container = document.getElementById(containerId);
-  if (container === null) {
-    container = document.createElement("div");
-    container.id = containerId;
-    container.style.position = "absolute";
-    container.style.top = "200px";
-    container.style.left = "200px";
-    container.style.display = "flex";
-    container.style.flexDirection = "column";
-    document.body.append(container);
-  }
-  const div = document.createElement("h2");
-  div.innerText = `${msg} ${value}`;
-  div.style.padding = "10px";
-  container.appendChild(div);
-  setTimeout(() => {
-    container.removeChild(div);
-  }, duration);
 };

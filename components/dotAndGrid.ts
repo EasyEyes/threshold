@@ -1,5 +1,5 @@
 import { random } from "./rng";
-import { xyDegOfPx, xyPxOfDeg, pxScalar } from "./utils";
+import { pxScalar } from "./utils";
 import { ShapeStim, Polygon } from "../psychojs/src/visual";
 import { psychoJS } from "./globalPsychoJS";
 import { util } from "../psychojs/src";

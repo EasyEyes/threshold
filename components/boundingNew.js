@@ -35,7 +35,6 @@ import { readFontDirection } from "./fontDirection.js";
 import { readFontTextRendering } from "./fontTextRendering.js";
 import { readFontMetricsCharacterSet } from "../preprocess/fontPixiMetricsStringDefault";
 import { getGlossary } from "../parameters/glossaryRegistry";
-import { PsychoJS } from "../psychojs/src/core/PsychoJS.js";
 import { getMaxNominalFontSizePx } from "./fontMaxPhysicalPx";
 
 //create a canvas
@@ -52,30 +51,6 @@ document.body.appendChild(canvas);
 // NOTE I replaced with a psychoJS ShapeStim, for consistency with stimulus - Gus
 //      eg target = new TextStim();
 //         visualBoundingBox = getBoundingBoxVisualRect(target);
-// export const drawTripletBoundingBox = (
-//   characterSetRectPx,
-//   showTripletBoundingBox,
-//   fontSizePx,
-//   ascentPxPerFontSize = null,
-//   color = "blue",
-// ) => {
-//   if (
-//     paramReader.read("showBoundingBoxBool", status.block_condition) &&
-//     showTripletBoundingBox
-//   ) {
-//     canvas.width = Screens[0].window._size[0];
-//     canvas.height = Screens[0].window._size[1];
-//     ctx.clearRect(0, 0, canvas.width, canvas.height);
-//     characterSetRectPx.drawOnCanvas(ctx, {
-//       strokeStyle: color,
-//       lineWidth: 1,
-//       baselinePxFromPenY: ascentPxPerFontSize
-//         ? fontSizePx * ascentPxPerFontSize
-//         : null,
-//     });
-//   }
-// };
-
 export const clearBoundingBoxCanvas = () => {
   if (canvas && ctx) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -1358,45 +1333,6 @@ const getPixelDataOfRect = (ctx, rect, testPoints) => {
       pixel !== null && pixel[0] === 0 && pixel[1] === 0 && pixel[2] === 0,
   );
   return allBlack;
-};
-
-export const drawTextOffscreen = (text) => {
-  const screenLowerLeft = [
-    -Screens[0].window._size[0] / 2,
-    -Screens[0].window._size[1] / 2,
-  ];
-  const screenUpperRight = [
-    Screens[0].window._size[0] / 2,
-    Screens[0].window._size[1] / 2,
-  ];
-
-  const BC = status.block_condition;
-  let font = paramReader.read("font", BC);
-  if (paramReader.read("fontSource", BC) === "file") {
-    font = cleanFontName(font);
-  }
-  const padding = paramReader.read("fontPadding", BC);
-  const height = paramReader.read("fontSizeReferencePx", BC);
-  const textStim = new visual.TextStim({
-    name: "drawTextOffscreen",
-    ...targetTextStimConfig,
-    win: psychoJS.window,
-    color: new util.Color("black"),
-    text: text,
-    pos: [5000, 0],
-    height: height,
-    font: font,
-    padding: padding,
-  });
-  textStim.setAutoDraw(true);
-  return textStim;
-};
-
-export const removeOffscreenText = (textStim) => {
-  if (textStim !== null && textStim.status === PsychoJS.Status.STARTED) {
-    textStim.setAutoDraw(false);
-  }
-  return null;
 };
 
 const getXHeight = (testStim) => {

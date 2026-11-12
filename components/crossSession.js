@@ -1,7 +1,6 @@
 import Swal from "sweetalert2";
 import { localStorageKey } from "./global";
 import { readi18nPhrases } from "./readPhrases";
-import { sleep } from "./utils";
 import { downloadTextFile } from "./saveFile.js";
 import { thisExperimentInfo } from "./global.js";
 import { isProlificExperiment } from "./externalServices.ts";

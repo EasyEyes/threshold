@@ -26,7 +26,6 @@
 import { execSync } from "child_process";
 import {
   copyFileSync,
-  existsSync,
   mkdirSync,
   readdirSync,
   readFileSync,

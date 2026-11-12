@@ -22,37 +22,26 @@ import { Polygon, ShapeStim, TextStim } from "../psychojs/src/visual";
 import { Color, to_px } from "../psychojs/src/util";
 import { psychoJS } from "./globalPsychoJS";
 import {
-  displayOptions,
   fixationConfig,
   rsvpReadingTargetSets,
   rsvpReadingTiming,
   status,
-  targetEccentricityDeg,
   targetTextStimConfig,
-  viewingDistanceCm,
 } from "./global";
 import {
-  xyPxOfDeg,
   cursorNearFixation,
   colorRGBASnippetToRGBA,
-  sleep,
   hideCursor,
   showCursor,
 } from "./utils";
 import { warning } from "./errorHandling";
 import { Screens } from "./multiple-displays/globals.js";
-import { XYDegOfPx, XYPxOfDeg } from "./multiple-displays/utils.js";
+import { XYPxOfDeg } from "./multiple-displays/utils.js";
 import { setEEState, simulateActive } from "./simulatedState";
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
-
-export type FixationAfterTargetOnset =
-  | "disappear"
-  | "freeze"
-  | "continueMovingButIndependently"
-  | "continueMovingAsOrigin";
 
 export interface FixationBehavior {
   /** Whether the crosshair is visible during stimulus. */

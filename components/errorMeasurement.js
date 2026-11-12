@@ -16,11 +16,9 @@ import {
 } from "./letter";
 import { logQuest } from "./logging";
 import {
-  xyDegOfPx,
   norm,
   psychojsUnitsFromWindowUnits,
   toFixedNumber,
-  logger,
   rectFromPixiRect,
   getPairs,
   isRectTouchingRect,

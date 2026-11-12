@@ -55,10 +55,6 @@ export interface EventEnvelope<E> {
   e: E;
 }
 
-export type EventEnvelopeOf<E extends { type: string }> = EventEnvelope<E> & {
-  e: E;
-};
-
 /** First line of every stream, before any event envelope. */
 export interface StreamHeader {
   type: "stream.header";

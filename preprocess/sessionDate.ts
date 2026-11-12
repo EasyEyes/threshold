@@ -86,10 +86,3 @@ export const earliestSessionDate = (
   }
   return earliest;
 };
-
-export const earliestSessionDateForZip = (
-  texts: Iterable<unknown>,
-): Date | undefined => {
-  const session = earliestSessionDate(texts);
-  return session ? sessionDateToZipDate(session) : undefined;
-};

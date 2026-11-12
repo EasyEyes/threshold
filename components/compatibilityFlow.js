@@ -68,7 +68,6 @@ import {
   COMPAT_LIST_LINE_HEIGHT,
   fillPhrase,
   getCompatibilityBodyTopOffset,
-  ifTrue,
   isLanguageRTL as isRTL,
   mountCompatibilityChrome,
   renderPhraseHTML,

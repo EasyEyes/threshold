@@ -75,8 +75,7 @@ import {
 import { readi18nPhrases } from "../components/readPhrases";
 import { compatibilityRequirements } from "./global";
 import { durations, EstimateDurationForScientistPage } from "./getDuration";
-import { userRepoFiles, PROLIFIC_SUPPORTED_CURRENCIES } from "./constants";
-import { getGlossary } from "../parameters/glossaryRegistry";
+import { PROLIFIC_SUPPORTED_CURRENCIES } from "./constants";
 import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
 import { getAuthConfig } from "./auth/config";
 import { parsePhraseFile } from "../../source/components/parsePhraseFile";

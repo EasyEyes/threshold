@@ -5,7 +5,6 @@ export const debug = process.env.debug;
 
 import {
   displayOptions,
-  eyeTrackingStimulusRecords,
   fixationConfig,
   skipTrialOrBlock,
   status,
@@ -56,24 +55,6 @@ export function fillNumberLength(n, length) {
   return str;
 }
 
-export const cleanFileName = (filename) => {
-  // remove the path
-  let name = filename.split("/").pop();
-  // remove the extension
-  name = name.split(".").shift();
-
-  return name;
-};
-
-// export const colorRGBStringToHex = (rgbString) => {
-//   let rgb = rgbString.match(/\d+/g);
-//   let hex = "#";
-//   for (let i = 0; i < 3; i++) {
-//     hex += ("0" + parseInt(rgb[i]).toString(16)).slice(-2);
-//   }
-//   return hex;
-// }
-
 export const colorRGBASnippetToRGBA = (rgbaSnippet) => {
   // 0.8,0.8,0.8,1 to rgba(0.8 * 255,0.8 * 255,0.8 * 255,1)
   let rgba = rgbaSnippet.split(",");
@@ -95,39 +76,6 @@ export const colorRGBSnippetToRGB = (rgbSnippet) => {
   // 0.8,0.8,0.8 to rgb(0.8 * 255,0.8 * 255,0.8 * 255)
   let rgb = rgbSnippet.split(",").map((v) => parseFloat(v) * 255);
   return `rgb(${rgb.join(",")})`;
-};
-
-/**
- * Create a mapping between an arbitrary set of strings, ie `possibleResponses`,
- * and a set of ascii-supported keys, ie [0,1,...,9,A,B,...Z].
- *
- * Example: given the response options:
- *              ["#", "@", "≠"],
- *          will create the mapping:
- *              {1: "#", 2: "@", 3:"≠"},
- *          such that a participant can press the "1" key to respond "#", the "2" key to respond, or the "3" key to respond "≠"
- * @param {string[]} possibleResponses the (order-sensitive) array of actual responses; the keys of the produced mapping
- * @returns {Object.<string, number>} { response: ascii keycode }  mapping, to be used for simplified signaling of responses
- */
-export const createSignalingMap = (possibleResponses) => {
-  const zeroNum = 48;
-  const nineNum = 57;
-  const ANum = 65;
-  const ZNum = 90;
-
-  const digits = [...new Array(nineNum - zeroNum).keys()].map(
-    (x) => x + zeroNum,
-  );
-  const letters = [...new Array(ZNum - ANum).keys()].map((x) => x + ANum);
-  const signalingCharacterSet = [...digits, ...letters].slice(
-    0,
-    possibleResponses.length,
-  );
-  const signalingMap = {};
-  possibleResponses.map((response, i) => {
-    signalingMap[response] = signalingCharacterSet[i];
-  });
-  return signalingMap;
 };
 
 // https://stackoverflow.com/a/2450976
@@ -178,10 +126,6 @@ export const showCursor = () => {
 
 export const logger = (label, value) => {
   if (debug) console.log(`%c${label}`, "color: red", value);
-};
-
-export const logIf = (label, bool) => {
-  if (debug && bool) console.log(`%c${label}`, "color: red; font-style: bold;");
 };
 
 export const loggerText = (text) => {
@@ -694,12 +638,6 @@ export const reportStartOfNewBlock = (blockNumer, experiment) => {
   experiment.nextEntry();
 };
 
-export const addObjectItemsToData = (object, experiment) => {
-  for (const [name, value] of Object.entries(object)) {
-    experiment.addData(name, value);
-  }
-};
-
 export const addTrialStaircaseSummariesToData = (currentLoop, psychoJS) => {
   // TODO What to do when data saving is rejected?
   if (currentLoop._currentStaircase) {
@@ -886,36 +824,6 @@ export const arraysEqual = (a, b) => {
 
 export const log = (x, base) => {
   return Math.log(x) / Math.log(base);
-};
-
-export const getPixPerCm = (rc) => {
-  if (!rc.screenWidthCm)
-    console.warn("[Screen Width] Using arbitrary screen width. Enable RC.");
-  const windowWidthCm = rc.screenWidthCm ? rc.screenWidthCm.value : 30;
-  const windowWidthPx = rc.displayWidthPx.value;
-  const pixPerCm = windowWidthPx / windowWidthCm;
-  return pixPerCm;
-};
-
-export const getViewingDistanceCm = (rc, reader, condition = "") => {
-  let viewingDistanceDesiredCm;
-  if (!condition) {
-    viewingDistanceDesiredCm = reader.read("viewingDistanceDesiredCm")[0];
-  } else if (!isNaN(condition)) {
-    viewingDistanceDesiredCm = reader.read(
-      "viewingDistanceDesiredCm",
-      Number(condition),
-    )[0];
-  } else {
-    viewingDistanceDesiredCm = reader.read(
-      "viewingDistanceDesiredCm",
-      condition,
-    );
-  }
-  const viewingDistanceCm = rc.viewingDistanceCm
-    ? rc.viewingDistanceCm.value
-    : viewingDistanceDesiredCm;
-  return viewingDistanceCm;
 };
 
 export const rotate = (l) => {
@@ -1269,6 +1177,8 @@ export class CharacterSetRect extends Rectangle {
     this.characterSetHeight = characterSetHeight;
     this.characterOffsetPxPerFontSize = characterOffsetPxPerFontSize;
     this.typographicFactor = typographicFactor;
+    this.ascentPxPerFontSize = ascentPxPerFontSize;
+    this.meanWidthPxPerFontSize = meanWidthPxPerFontSize;
   }
   scale(scalar) {
     let newCenters = structuredClone(this.centers);
@@ -1286,9 +1196,14 @@ export class CharacterSetRect extends Rectangle {
       this.units,
       this.characterSet,
       newCenters,
-      this.ascentToDescent,
-      this.xHeightPt,
-      this.spacingPt,
+      this.ascentToDescent, // dimensionless ratio
+      this.xHeight * scalar,
+      this.spacing * scalar,
+      this.characterSetHeight * scalar,
+      this.characterOffsetPxPerFontSize * scalar,
+      this.typographicFactor, // dimensionless ratio
+      this.ascentPxPerFontSize * scalar,
+      this.meanWidthPxPerFontSize * scalar,
     );
     return scaled;
   }
@@ -1303,8 +1218,13 @@ export class CharacterSetRect extends Rectangle {
       this.characterSet,
       this.centers,
       this.ascentToDescent,
-      this.xHeightPt,
-      this.spacingPt,
+      this.xHeight,
+      this.spacing,
+      this.characterSetHeight,
+      this.characterOffsetPxPerFontSize,
+      this.typographicFactor,
+      this.ascentPxPerFontSize,
+      this.meanWidthPxPerFontSize,
     );
     return offsetted;
   }
@@ -1320,8 +1240,13 @@ export class CharacterSetRect extends Rectangle {
       this.characterSet,
       this.centers,
       this.ascentToDescent,
-      this.xHeightPt,
-      this.spacingPt,
+      this.xHeight,
+      this.spacing,
+      this.characterSetHeight,
+      this.characterOffsetPxPerFontSize,
+      this.typographicFactor,
+      this.ascentPxPerFontSize,
+      this.meanWidthPxPerFontSize,
     );
   }
 }
@@ -1330,10 +1255,6 @@ export const norm = (v) => {
   return Math.sqrt(
     v.map((x) => x ** 2).reduce((previous, current) => previous + current),
   );
-};
-
-export const getTripletCharacters = (charset) => {
-  return sampleWithoutReplacement(charset, 3);
 };
 
 export const sampleWithoutReplacement = (
@@ -1363,37 +1284,6 @@ export const sampleWithReplacement = (population, sampleSize) => {
   );
 };
 
-export const getCharSetBaselineOffsetPosition = (
-  XYPix,
-  normalizedCharacterSetRect,
-  heightPx,
-) => {
-  const descent = normalizedCharacterSetRect.descent;
-  const ascent = normalizedCharacterSetRect.ascent;
-  const yOffset = descent * heightPx;
-  // const yOffset = descent * (heightPx * (descent/(descent + ascent)));
-  return [XYPix[0], XYPix[1] + yOffset];
-};
-
-/**
- * Survey all the values for a given parameter.
- * Returns an object mapping each block_condition to its `parameter` value.
- * @param {ParamReader} reader Parameter reader initialized for this experiment
- * @param {string} parameter The parameter being queried
- * @returns Object enumerating the value of `parameter` for each `block_condition`
- */
-export const surveyParameter = (reader, parameter) => {
-  const conditionIds = reader.block_conditions;
-  const parameterValues = reader.read(parameter, "__ALL_BLOCKS__");
-  // Create a mapping of {block_condition -> value}
-  // see: https://www.geeksforgeeks.org/how-to-create-an-object-from-two-arrays-in-javascript/
-  return Object.assign(
-    ...conditionIds.map((conditionId, i) => ({
-      [conditionId]: parameterValues[i],
-    })),
-  );
-};
-
 export const validateRectPoints = ([lowerLeft, upperRight]) => {
   if (lowerLeft[0] > upperRight[0])
     console.error(
@@ -1403,18 +1293,6 @@ export const validateRectPoints = ([lowerLeft, upperRight]) => {
     console.error(
       "INVALID RECT y of lowerLeft is greater than y of upperRight",
     );
-};
-
-/**
- * Given two XY positions, return the X and Y displacements
- * @param {[number, number]} a
- * @param {[number, number]} b
- * @returns {[number, number]}
- */
-export const displacementBetweenXY = (a, b) => {
-  const xDisplacement = a[0] - b[0];
-  const yDisplacement = a[1] - b[1];
-  return [xDisplacement, yDisplacement];
 };
 
 export const psychojsUnitsFromWindowUnits = (
@@ -1463,35 +1341,6 @@ export const getEvenlySpacedValues = (numberOfValues, intervalSize) => {
   return values;
 };
 
-/**
- * Given an (increasing) interval (ie [a,b] given a < b), return an array of values
- * representing maximally, evenly spaced points.
- * eg
- *  getValuesEvenlySpacedWithinInterval(4, [1,4]) => [1,2,3,4]
- *  getValuesEvenlySpacedWithinInterval(3, [0,1]) => [0,0.5,1]
- * @param {Number} numberOfValues The number of points to spread within the interval
- * @param {Number[]} interval Increasing array of length=2, the (inclusive) range within which to place points
- * @returns {Number[]}
- */
-export const getValuesEvenlySpacedWithinInterval = (
-  numberOfValues,
-  interval,
-) => {
-  if (interval.length !== 2)
-    throw new Error(
-      "getValuesEvenlySpacedWithinInterval::Must provide a 2D interval (array of length=2)",
-    );
-  if (!(interval[0] < interval[1]))
-    throw new Error(
-      "getValuesEvenlySpacedWithinInterval::Interval must be increasing (interval[0] > interval[1])",
-    );
-  const intervalRange = Math.abs(interval[1] - interval[0]);
-  const intervalSize = intervalRange / numberOfValues;
-  const intervalCenter = (interval[0] + interval[1]) / 2;
-  const offsets = getEvenlySpacedValues(numberOfValues, intervalSize);
-  return offsets.map((o) => o + intervalCenter);
-};
-
 export const trueCenter = (textStim) => {
   const bb = textStim.getBoundingBox(true);
   return [bb.x, bb.y];
@@ -1520,36 +1369,7 @@ export const centerAt = async (textStim, nominalPos) => {
     textStim.setPos(nominalPos);
 };
 
-/**
- * Add an event listener to save the experiment data when the pare closes
- * (literally, when the pages loses visibility, for best coverage of browsers,
- * ie mobile browsers)
- * @param {*} experiment
- */
-export const saveDataOnWindowClose = (experiment) => {
-  // https://www.igvita.com/2015/11/20/dont-lose-user-and-app-state-use-page-visibility/
-  window.addEventListener("visibilitychange", (e) => {
-    if (document.visibilityState === "hidden") {
-      console.log(
-        " experiment.extraInfo['dataSaved']",
-        experiment.extraInfo["dataSaved"],
-      );
-      experiment.save({ sync: true });
-      if (eyeTrackingStimulusRecords.length)
-        experiment.saveCSV(eyeTrackingStimulusRecords);
-    }
-  });
-  window.addEventListener("beforeunload", (e) => {
-    experiment.save({ sync: true });
-    if (eyeTrackingStimulusRecords.length)
-      experiment.saveCSV(eyeTrackingStimulusRecords);
-    e.preventDefault();
-    return null;
-  });
-};
-
 export const tand = (deg) => Math.tan((deg * Math.PI) / 180);
-export const atand = (x) => (Math.atan(x) * 180) / Math.PI;
 
 export const getCursorLocation = () => {
   // Analog to [cX, cY] (see _takeFixationClick), as determined by psychojs
@@ -1581,67 +1401,12 @@ export const getViewingDistancedCm = (vCm, displayOptions, screenHeightPx) => {
 };
 
 /**
- * @source https://stackoverflow.com/questions/27082377/get-number-of-decimal-places-with-javascript
- */
-const countDecimals = (value) => {
-  let text = value.toString();
-  // verify if number 0.000005 is represented as "5e-6"
-  if (text.indexOf("e-") > -1) {
-    let [base, trail] = text.split("e-");
-    let deg = parseInt(trail, 10);
-    return deg;
-  }
-  // count decimals for number in representation like "0.123456"
-  if (Math.floor(value) !== value) {
-    return value.toString().split(".")[1].length || 0;
-  }
-  return 0;
-};
-
-/**
- * Get the greatest common divisor of two floats
- * @param {number} a float
- * @param {number} b float
- * @returns
- */
-export const getGCD = (a, b) => {
-  const decimalsA = countDecimals(a);
-  const decimalsB = countDecimals(b);
-  if (decimalsA === 0 && decimalsB === 0) return gcd(a, b);
-  const maxDecimals = Math.max(decimalsA, decimalsB);
-  const intA = Math.floor(a * 10 ** maxDecimals);
-  const intB = Math.floor(b * 10 ** maxDecimals);
-  return gcd(intA, intB) / maxDecimals;
-};
-
-/**
- * Get the greatest common divisor of two integers
- * @param {number} a int
- * @param {number} b int
- * @returns
- */
-const gcd = (a, b) => {
-  if (a < b) return gcd(b, a);
-  if (a % b === 0) return b;
-  return gcd(a % b, b);
-};
-
-/**
  * Determine whether a blockOrCondition string represents a block, eg "1" rather than "1_1"
  * @param {str} blockOrConditionLabel
  * @returns bool
  */
 export const isBlockLabel = (blockOrConditionLabel) => {
   return !isNaN(blockOrConditionLabel);
-};
-
-/**
- * Determine whether a blockOrCondition string represents a condition, eg "1_1" rather than "1"
- * @param {str} blockOrConditionLabel
- * @returns bool
- */
-export const isConditionLabel = (blockOrConditionLabel) => {
-  return !isBlockLabel(blockOrConditionLabel);
 };
 
 /**
@@ -1758,20 +1523,6 @@ export const setTargetEccentricityDeg = (reader, blockOrCondition) => {
   targetEccentricityDeg.y = y;
 };
 
-export function formatTimestamp(timestamp) {
-  // Convert the timestamp to a Date object
-  const date = timestamp;
-  //.toDate(); // called when recieved from firebase
-
-  // Format the day, month, and year
-  const day = String(date.getDate()).padStart(2, "0"); // Adds leading zero if needed
-  const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-based
-  const year = date.getFullYear();
-
-  // Format the date as DD.MM.YYYY
-  return `${year}.${month}.${day}`;
-}
-
 export const createTimingBars = () => {
   const canvas = document.createElement("canvas");
   canvas.id = "timingBarsCanvas";
@@ -1846,13 +1597,6 @@ export const drawTimingBars = (showTimingBarsBool, type, present) => {
   } else if (type === "TargetRequest") {
     ctx.fillStyle = present ? "white" : "black";
     ctx.fillRect(xPos, yPosMiddleBottom, barWidth, barHeight);
-  }
-};
-
-export const removeTimingBars = () => {
-  const canvas = document.getElementById("timingBarsCanvas");
-  if (canvas) {
-    canvas.remove(); // Remove the canvas from the document
   }
 };
 
@@ -2088,29 +1832,6 @@ export const requestFullscreenSafe = async (rcRef) => {
 let _buzzAudioCtx = null;
 
 /**
- * Play a brief low-frequency buzz (500 Hz, 0.3 s) to signal that a keypress
- * was rejected because fullscreen was lost.
- */
-export const playBuzzSound = () => {
-  try {
-    if (!_buzzAudioCtx)
-      _buzzAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const ctx = _buzzAudioCtx;
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = "square";
-    osc.frequency.value = 500;
-    gain.gain.value = 0.08;
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.3);
-  } catch (e) {
-    console.warn("playBuzzSound failed:", e);
-  }
-};
-
-/**
  * Tracks whether fullscreen was lost since last acknowledged by a gate.
  * Set true by the fullscreenchange listener when exiting fullscreen.
  * Cleared by requireFullscreenForTrialInitiation after it restores fullscreen.
@@ -2120,7 +1841,6 @@ export const playBuzzSound = () => {
  */
 let _fullscreenWasLost = false;
 
-export const fullscreenWasLost = () => _fullscreenWasLost;
 export const clearFullscreenWasLost = () => {
   _fullscreenWasLost = false;
 };

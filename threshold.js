@@ -34,15 +34,12 @@ await Promise.all(cssPromises);
 import {
   reportStartOfNewBlock,
   arraysEqual,
-  centerAt,
   colorRGBASnippetToRGBA,
   colorRGBSnippetToRGB,
   debug,
-  getTripletCharacters,
   ifTrue,
   log,
   norm,
-  saveDataOnWindowClose,
   sleep,
   getParamValueForBlockOrCondition,
   sendEmailForDebugging,
@@ -50,16 +47,11 @@ import {
   _testPxDegConversion,
   createTimingBars,
   drawTimingBars,
-  cursorNearFixation,
   getUseWordDigitBool,
-  Rectangle,
-  rectFromPixiRect,
   runDiagnosisReport,
   readTargetTask,
   isFullscreen,
   clearFullscreenWasLost,
-  playBuzzSound,
-  setupFullscreenMonitoring,
   requireFullscreenForTrialInitiation,
   requestFullscreenSafe,
 } from "./components/utils.js";
@@ -185,7 +177,6 @@ import {
   repeatedLettersResponse,
   rsvpReadingWordsForThisBlock,
   soundCalibrationResults,
-  soundGainTWR,
   debugBool,
   screenBackground,
   customInstructionText,
@@ -195,10 +186,8 @@ import {
   _key_resp_allKeys,
   allHzCalibrationResults,
   microphoneCalibrationResults,
-  thisDevice,
   loudspeakerInfo,
   measureLuminance,
-  uniComponentConfig,
   microphoneInfo,
   needPhoneSurvey,
   needComputerSurveyBool,
@@ -250,12 +239,10 @@ import {
   showCursor,
   sampleWithoutReplacement,
   toShowCursor,
-  xyPxOfDeg,
   addConditionToData,
   addTrialStaircaseSummariesToData,
   addBlockStaircaseSummariesToData,
   addApparatusInfoToData,
-  getViewingDistancedCm,
   areQuestionAndAnswerParametersPresent,
   isReadingWithSimultaneousQuestionAndAnswer,
 } from "./components/utils.js";
@@ -278,7 +265,6 @@ import {
 import {
   canClick,
   canType,
-  clearPhraseIdentificationRegisters,
   getResponseType,
   keypadActive,
   resetResponseType,
@@ -294,10 +280,7 @@ import {
 // are no longer imported here — the legacy runtime bake path is removed.
 // The eager pre-bake inside loadFonts (bakeAllFonts in
 // components/fontInstancing.js) is the single source of truth.
-import {
-  loadRecruitmentServiceConfig,
-  recruitmentServiceData,
-} from "./components/recruitmentService.js";
+import { loadRecruitmentServiceConfig } from "./components/recruitmentService.js";
 
 import {
   addBeepButton,
@@ -312,7 +295,6 @@ import {
   checkIfCursorIsTrackingFixation,
   resetTrackingStats,
   addHandlerForClickingFixation,
-  returnOrClickProceed,
   getInstructionTextMarginPx,
 } from "./components/instructions.js";
 import {
@@ -366,8 +348,6 @@ import {
 import {
   _getCharacterSetBoundingBox,
   constrainLevelByThresholdParameterMax,
-  generateCharacterSetBoundingRects,
-  restrictLevel,
 } from "./components/bounding.js";
 
 import { Grid } from "./components/grid.js";
@@ -382,7 +362,6 @@ import {
   publishBootEvent,
   publishBlockBegin,
   publishBlockEnd,
-  publishSummary,
 } from "./components/simulatedState.ts";
 import { startSimulatedParticipant } from "./components/simulatedParticipant.ts";
 
@@ -530,23 +509,17 @@ import {
 } from "./components/vocoderPhrase.js";
 import {
   readTrialLevelLetterParams,
-  getTargetStim,
   getStimulusReuseCount,
   resetStimulusReuseCount,
-  logLetterParamsToFormspree,
   logHeapToFormspree,
 } from "./components/letter.js";
 import {
   readTrialLevelRepeatedLetterParams,
-  generateRepeatedLettersStims,
-  restrictRepeatedLettersSpacing,
   registerResponseForRepeatedLetters,
 } from "./components/repeatedLetters.js";
 import { KeyPress } from "./psychojs/src/core/index.js";
 import {
-  Category,
   constrainRSVPReadingSpeed,
-  generateRSVPReadingTargetSets,
   getThisBlockRSVPReadingWords,
   registerKeypressForRSVPReading,
   _rsvpReading_trialRoutineEachFrame,
@@ -566,7 +539,6 @@ import {
 import {
   createExperimentProgressBar,
   updateExperimentProgressBar,
-  destroyExperimentProgressBar,
   showExperimentProgressBar,
   hideExperimentProgressBar,
 } from "./components/progressBar.js";
@@ -660,10 +632,7 @@ import {
 import {
   checkForBlackout,
   clearBoundingBoxCanvas,
-  ctx,
   generateCharacterSetBoundingRects_New,
-  restrictLevelAfterFixation,
-  restrictLevelBeforeFixation,
 } from "./components/boundingNew.js";
 import {
   okayToRetryThisTrial,
@@ -700,7 +669,6 @@ import {
   getAnswerValue,
   clearAnswerValueMaps,
   readTrialLevelImageParams,
-  startImageAdjust,
   stopImageAdjust,
   imageAdjustState,
   prepareImageAdjust,

@@ -409,21 +409,6 @@ export const transpose = (nestedArray: any[]): any => {
 };
 
 /**
- * Check whether an array of file objects contains one with the name of the value of targetFileName
- * @param {File[]} fileList
- * @param {String} targetFileName
- * @returns {Boolean}
- */
-export const fileListContainsFileOfName = (
-  fileList: File[],
-  targetFileName: string,
-): any => {
-  const isFileOfTargetName = (candidateFile: File) =>
-    candidateFile.name == targetFileName;
-  return fileList.filter(isFileOfTargetName).length > 0;
-};
-
-/**
  * Given the content returned by PapaParse on our csv file, provide a dfjs Dataframe
  * @param {Object} parsedContent .csv file as parsed by PapaParse
  * @returns {dfjs.DataFrame}
@@ -638,18 +623,6 @@ export const getNumericalSuffix = (n: number): string => {
  */
 export const isExpTableFile = (file: File): boolean => {
   return file.name.includes("xlsx") || file.name.includes("csv");
-};
-
-export const addNewUnderscoreParam = (
-  df: any,
-  paramName: string,
-  paramValue: any,
-): any => {
-  const columnName = paramName[0] !== "_" ? "_" + paramName : paramName;
-  if (df.listColumns().includes(columnName)) return df;
-  return df.withColumn(columnName, (_: any, i: number) =>
-    i === 0 ? paramValue : "",
-  );
 };
 
 export const addNewInternalParam = (

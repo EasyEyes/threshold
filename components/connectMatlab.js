@@ -47,18 +47,6 @@ export const sendMessage = async (message) => {
     });
 };
 
-export const sendFileName = async (fileName) => {
-  axios
-    .post(url + "filename", fileName)
-    .then((response) => {
-      sendMessage("Record");
-      console.log(response.data);
-    })
-    .catch((error) => {
-      console.error(error);
-    });
-};
-
 export const resetAllMessages = () => {
   axios
     .post(url + "filename", "")

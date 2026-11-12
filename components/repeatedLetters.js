@@ -4,19 +4,11 @@ import {
   letterConfig,
   repeatedLettersConfig,
   repeatedLettersResponse,
-  displayOptions,
-  fixationConfig,
   correctAns,
   status,
 } from "./global";
 import { psychoJS } from "./globalPsychoJS";
-import {
-  logger,
-  sampleWithoutReplacement,
-  Rectangle,
-  xyPxOfDeg,
-  xyDegOfPx,
-} from "./utils";
+import { logger, sampleWithoutReplacement, Rectangle } from "./utils";
 import { getLargestBoundsRatio } from "./bounding";
 import {
   incrementTrialCompletedThisBlock,

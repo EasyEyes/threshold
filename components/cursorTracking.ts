@@ -6,7 +6,6 @@ import { getCursorLocation } from "./utils";
 import {
   cursorTracking,
   viewingDistanceCm,
-  displayOptions,
   fixationConfig,
   showConditionNameConfig,
   status,

@@ -21,11 +21,6 @@ export {
   checkVectorValue,
   isLegalVectorElement,
 } from "../components/vectorParsing";
-export type {
-  VectorTypeSpec,
-  VectorElementType,
-  VectorValueResult,
-} from "../components/vectorParsing";
 
 /** Human-readable description of the type, for error messages. */
 export const describeVectorType = (spec: VectorTypeSpec): string => {

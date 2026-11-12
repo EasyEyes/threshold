@@ -2,7 +2,6 @@ import { readi18nPhrases } from "./readPhrases";
 import { db } from "./firebase/firebase.js";
 import {
   calibrateSoundUMIKBase_dB,
-  fontSize,
   microphoneInfo,
   invertedImpulseResponse,
   loudspeakerIR,
@@ -19,7 +18,6 @@ import {
   addDoc,
   updateDoc,
   setDoc,
-  arrayUnion,
   getDocs,
   query,
   where,
@@ -51,30 +49,6 @@ export const identifyDevice = async () => {
     console.error("Error fetching or executing script:", error.message);
     return null;
   }
-};
-
-export const getDebugIIR = () => {
-  return [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
-};
-
-export const getDebugSoundCalibrationResults = () => {
-  return {
-    outDBSPL1000Values: [103.3, 102.9, 102.0, 95.3, 85.2, 75],
-    thdValues: [
-      85.7, 82.1, 79.3, 78.2, 76.4, 74.5, 73.4, 70.3, 63.0, -60.1, 47.8, 11.4,
-    ],
-    outDBSPLValues: [
-      85.7, 82.1, 79.3, 78.2, 76.4, 74.5, 73.4, 70.3, 63.0, -60.1, 47.8, 11.4,
-    ],
-    parameters: {
-      T: 100,
-      W: 10,
-      R: 1000,
-      backgroundDBSPL: 18.6,
-      gainDBSPL: 125,
-      RMSError: 0.1,
-    },
-  };
 };
 
 export const saveLoudSpeakerInfoToFirestore = async (

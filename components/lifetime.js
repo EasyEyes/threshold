@@ -1,7 +1,6 @@
 import { disposeStudyInteractions } from "./interaction/termination";
 import { ExperimentHandler } from "../psychojs/src/data/ExperimentHandler.js";
 import { Scheduler } from "../psychojs/src/util/index.js";
-import { isProlificExperiment } from "./externalServices.ts";
 import Swal from "sweetalert2";
 import { stopInteractionObservation } from "./interaction/observation";
 
@@ -33,7 +32,7 @@ import {
   publishSummary,
   simulateActive,
 } from "./simulatedState.ts";
-import { showCursor, sleep } from "./utils";
+import { showCursor } from "./utils";
 import { stopPartialSaveScheduler } from "./partialSaveScheduler.ts";
 import { useMatlab, closeMatlab } from "./connectMatlab";
 import { readi18nPhrases } from "./readPhrases.js";

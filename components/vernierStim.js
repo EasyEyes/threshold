@@ -9,7 +9,6 @@ import {
   Rectangle,
   colorRGBASnippetToRGBA,
   isRectInRect,
-  logger,
   createDisposableCanvas,
 } from "./utils";
 import { Screens } from "./multiple-displays/globals.ts";

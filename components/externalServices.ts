@@ -14,16 +14,6 @@ const getProlificUrlParams = () => {
   };
 };
 
-export const isProlificPreviewExperiment = () => {
-  let searchParams = window.location.search;
-  return (
-    searchParams.search("participant") != -1 &&
-    searchParams.search("session") != -1 &&
-    searchParams.search("study_id") != -1 &&
-    searchParams.search("preview") != -1
-  );
-};
-
 export const isProlificExperiment = async () => {
   // Assuming URLSearchParams is faster than Papa.parse-ing recruitmentServiceConfig, check the former first
   const { participant, session, study_id } = getProlificUrlParams();

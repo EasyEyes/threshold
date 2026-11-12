@@ -22,10 +22,8 @@ import { Screens } from "./multiple-displays/globals";
 import {
   areQuestionAndAnswerParametersPresent,
   colorRGBASnippetToRGBA,
-  debug,
   fillNumberLength,
   isFullscreen,
-  playBuzzSound,
   clearFullscreenWasLost,
   requestFullscreenSafe,
   readTargetTask,
@@ -37,15 +35,12 @@ import Swal from "sweetalert2";
 import { styleNodeAndChildrenRecursively } from "./misc";
 import { getCorrectSynth, getWrongSynth } from "./sound";
 import { readi18nPhrases } from "./readPhrases";
-import { createSkipBlockKeyHandler } from "./skipTrialOrBlock";
 import { isFontLTR, readFontDirection } from "./fontDirection.js";
 import {
   extractAnswerValueMap,
   getQuestionAndAnswerColumnName,
-  getQuestionAndAnswerSeparator,
   normalizeNewQuestionAnswerFormat,
   parseQuestionComponents,
-  splitQuestionAndAnswerString,
 } from "./questionAndAnswer";
 
 const doesFileNameContainIgnoreDirectory = (filename, ignoreDirectories) =>
@@ -1329,10 +1324,6 @@ export const bindImageAdjustStim = (imageStim) => {
 
 // Back-compat wrapper that combines prepare + bind in one call (for callers
 // that already have the stim ready).
-export const startImageAdjust = (imageStim, BC) => {
-  prepareImageAdjust(BC);
-  bindImageAdjustStim(imageStim);
-};
 
 // Final report for an adjust trial; call BEFORE stopImageAdjust. When
 // adjusting horizontal eccentricity:

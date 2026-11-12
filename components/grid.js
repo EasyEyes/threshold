@@ -1,16 +1,10 @@
 import * as util from "../psychojs/src/util/index.js";
 import * as visual from "../psychojs/src/visual/index.js";
-import { grid, fixationConfig, screenBackground } from "./global.js";
+import { grid, fixationConfig } from "./global.js";
 import { Screens } from "./multiple-displays/globals.ts";
 import { XYDegOfPx, XYPxOfDeg } from "./multiple-displays/utils.ts";
 
-import {
-  colorRGBASnippetToRGBA,
-  degreesToPixels,
-  xyPxOfDeg,
-  xyDegOfPx,
-  isInRect,
-} from "./utils.js";
+import { degreesToPixels, isInRect } from "./utils.js";
 
 const ptMultiplier = 24;
 const inMultiplier = 1 / 5;

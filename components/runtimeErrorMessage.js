@@ -130,8 +130,6 @@ const escapeHtml = (text) =>
       })[character],
   );
 
-export const escapeHtmlAttribute = escapeHtml;
-
 const paragraph = (text, style = "", allowBold = false) => {
   const escapedText = escapeHtml(text);
   const html = allowBold

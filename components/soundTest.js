@@ -1,13 +1,10 @@
 import JSZip from "jszip";
 import { renderMarkdown } from "./markdownInline";
 import {
-  invertedImpulseResponse,
-  soundGainDBSPL,
   soundCalibrationLevelDBSPL,
   soundCalibrationResults,
   calibrateSoundCheck,
   _calibrateSound1000HzBool,
-  _calibrateSoundAllHzBool,
   _calibrateSound1000HzDB,
   _calibrateSound1000HzPreSec,
   _calibrateSound1000HzSec,
@@ -49,19 +46,14 @@ import {
   plotSoundLevels1000Hz,
   plotRecordings,
   plotVolumeRecordings,
-  standardDeviation,
   PlotsForTestPage,
 } from "./soundTestPlots";
 import {
   adjustSoundDbSPL,
-  connectAudioNodes,
-  createAudioNodeFromBuffer,
-  createImpulseResponseFilterNode,
   generatePureTone,
   generateTones,
   getAudioBufferFromArrayBuffer,
   getCurrentTimeString,
-  getGainNode,
   getRMSOfWaveForm,
   playAudioBuffer,
   playAudioBufferWithImpulseResponseCalibration,
@@ -484,10 +476,6 @@ const addSoundTestCss = () => {
   soundTestStyleSheet.innerText = styles;
   document.head.appendChild(soundTestStyleSheet);
 };
-
-// export const removeSoundTestElements = (elems) => {
-//     Object.values(elems).forEach((elem) => elem.remove());
-// }
 
 const addToggleSwitch = () => {
   const toggleSwitch = document.createElement("label");
@@ -1851,14 +1839,6 @@ export const getGainValue = (dbSPL) => {
   return gain;
 };
 
-export const getRMSLimit = (dbSPL, buffer) => {
-  const sMax = getMaxValueOfAbsoluteValueOfBuffer(buffer);
-  const sRms = getRMSOfWaveForm(buffer);
-  const rmsLimit = sRms / sMax;
-  const rms = getGainValue(dbSPL);
-  return Math.min(rmsLimit, rms);
-};
-
 // function to get the max value of the absolute value of the buffer
 export const getMaxValueOfAbsoluteValueOfBuffer = (buffer) => {
   const absValue = buffer.map((value) => Math.abs(value));
@@ -1874,27 +1854,6 @@ export const getMax = (arr) => {
     max = arr[len] > max ? arr[len] : max;
   }
   return max;
-};
-
-export const CompressorInverseDb = (outDb, T, R, W) => {
-  let inDb = 0;
-  let a = 0;
-  let b = 0;
-  let c = 0;
-  let inDb2 = 0;
-
-  if (outDb > T + W / 2 / R) {
-    inDb = T + R * (outDb - T);
-  } else if (outDb > T - W / 2) {
-    a = 1;
-    b = 2 * (W / (1 / R - 1) - (T - W / 2));
-    c = (-outDb * 2 * W) / (1 / R - 1) + (T - W / 2) ** 2;
-    inDb2 = -b / 2 - Math.sqrt(b ** 2 - 4 * c) / 2;
-    inDb = inDb2;
-  } else {
-    inDb = outDb;
-  }
-  return inDb;
 };
 
 export const CompressorDb = (inDb, T, R, W) => {

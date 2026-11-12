@@ -166,11 +166,6 @@ export function normalizeTag(raw: string): string {
   return raw.toLowerCase().padEnd(4, " ");
 }
 
-/** Return true iff `raw` is a registered OpenType feature tag. */
-export function isRegisteredFeatureTag(raw: string): boolean {
-  return TAG_RE.test(raw) && REGISTERED_FEATURE_TAGS.has(normalizeTag(raw));
-}
-
 /**
  * Validate a full `fontFeatureSettings` string. Returns one offense per bad
  * tag/value. An empty string is valid (no-op) → []. Tags may be quoted

@@ -584,9 +584,8 @@ export const targetSoundListTrialData = {
 };
 
 export const speechInNoiseTargetList = { current: undefined };
-export const musicExpert = { current: undefined }; // TEMP
+// TEMP
 export const speechInNoiseShowClickable = { current: true };
-export const vocoderPhraseSoundFiles = { current: undefined, loaded: false };
 export const vocoderPhrases = {
   targetPhrase: undefined,
   maskerPhrase: undefined,
@@ -740,9 +739,7 @@ export const attenuatorGainDB = {
   system: undefined,
   component: undefined,
 };
-export const soundGainTWR = { T: undefined, W: undefined, R: undefined };
 export const debugBool = { current: false };
-export const ICalibDBSPL = { current: undefined };
 export const calibrateMicrophonesBool = { current: false };
 export const rsvpReadingWordsForThisBlock = { current: undefined };
 export const timeToCalibrate = {
@@ -866,15 +863,6 @@ export const measureLuminance = {
   currentMovieValueIndex: 0,
   pretendBool: false,
   movieSec: 0,
-};
-
-/**
- * `State used when rerunning stimulus generation (ie trialInstructionRoutineBegin)
- *  ie when the participant has significantly changed their viewing distance.
- */
-export const preStimulus = {
-  interval: undefined,
-  running: false,
 };
 
 export const keypad = {

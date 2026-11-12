@@ -6,7 +6,6 @@ import {
   modalButtonTriggeredViaKeyboard,
   targetKind,
   status,
-  displayOptions,
   fontCharacterSet,
 } from "./global.js";
 import { cleanFontName } from "./fonts.js";

@@ -12,7 +12,7 @@ import { generateRSVPReadingTargetSets } from "./rsvpReading";
 import { warning } from "./errorHandling";
 import { getTargetStim } from "./letter";
 import { beginAutoTrial, recordAutoRasterSec } from "./fontPreRenderAuto";
-import { logger, readTargetTask } from "./utils";
+import { readTargetTask } from "./utils";
 import { isFontLTR, readFontDirection } from "./fontDirection.js";
 import { PsychoJS } from "../psychojs/src/core";
 import type { TextStim } from "./types";
@@ -26,7 +26,6 @@ import type {
   VernierState,
   LetterStimulusResults,
   RepeatedLettersStimulusResults,
-  RsvpReadingStimulusResults,
   VernierStimulusResults,
   TextStimsLetter,
   CharactersLetter,

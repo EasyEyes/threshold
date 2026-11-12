@@ -1,5 +1,3 @@
-import { logger } from "./utils";
-
 export const populateQuestDefaults = (
   conditionsList,
   reader,

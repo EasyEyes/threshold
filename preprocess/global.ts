@@ -5,13 +5,6 @@ export interface Experiment {
   experimentUrl: string;
 }
 
-export const experimentRecruitmentAndRunInfo: Experiment = {
-  participantRecruitmentServiceName: "",
-  participantRecruitmentServiceUrl: "",
-  participantRecruitmentServiceCode: "",
-  experimentUrl: "",
-};
-
 export const tempAccessToken = { t: undefined };
 
 export const compatibilityRequirements = {

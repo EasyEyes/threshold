@@ -50,17 +50,6 @@ The routine does not check whether this display is occluded by another display,
 but the nearest display won’t be occluded.
 */
 
-export const EccentricityIsOnScreenBool = (
-  x: number,
-  y: number,
-  screen: Screen_,
-  eye: string,
-): boolean => {
-  screen.eye = eye;
-  const [xPx, yPx] = PxOfDegXY(x, y, screen);
-  return PixelIsOnScreenBool(xPx, yPx, screen);
-};
-
 //TEMP
 const PxOfDegXY = (x: number, y: number, screen: Screen_): [number, number] => {
   return [0, 0];
@@ -108,35 +97,6 @@ const whichScreen = (
   if (isFinite(distanceCm[iScreen]))
     return { iScreen, distanceCm: distanceCm[iScreen] };
   return { iScreen: -1, distanceCm: NaN };
-};
-
-export const whichEyeAndScreen = (
-  xyDeg: number[],
-  screens: Screen_[],
-): { eye: string; iScreen: number; distanceCm: number } => {
-  const left = whichScreen(xyDeg, screens, "left");
-  const right = whichScreen(xyDeg, screens, "right");
-  if (isNaN(left.distanceCm) && isNaN(right.distanceCm)) {
-    return { eye: "neither", iScreen: -1, distanceCm: NaN };
-  }
-
-  if (isNaN(left.distanceCm)) {
-    return {
-      eye: "right",
-      iScreen: right.iScreen,
-      distanceCm: right.distanceCm,
-    };
-  }
-
-  if (isNaN(right.distanceCm)) {
-    return { eye: "left", iScreen: left.iScreen, distanceCm: left.distanceCm };
-  }
-
-  if (left.distanceCm < right.distanceCm) {
-    return { eye: "left", iScreen: left.iScreen, distanceCm: left.distanceCm };
-  }
-
-  return { eye: "right", iScreen: right.iScreen, distanceCm: right.distanceCm };
 };
 
 export const parseViewMonitorsXYDeg = (paramReader: any) => {

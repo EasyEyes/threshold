@@ -1,7 +1,6 @@
 import { readi18nPhrases } from "./readPhrases";
 import { checkBrowserSoundOutputSelectionSupport } from "./soundOutput.ts";
 import { getWebGLRequirements } from "./webglRequirements";
-import { renderMarkdown } from "./markdownInline.js";
 
 // ---------------------------------------------------------------------------
 // Layout constants.

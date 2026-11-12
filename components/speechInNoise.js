@@ -1,7 +1,6 @@
 import { random } from "./rng";
 import mergeBuffers from "merge-audio-buffers";
 import {
-  soundCalibrationResults,
   targetSoundListFiles,
   targetSoundListMap,
   targetSoundListTrialData,
@@ -9,8 +8,6 @@ import {
 import {
   calculateDBFromRMS,
   cloneAudioBuffer,
-  CompressorDb,
-  CompressorInverseDb,
   getGainValue,
   getMaxValueOfAbsoluteValueOfBuffer,
 } from "./soundTest";
@@ -19,9 +16,7 @@ import {
   setWaveFormToZeroDbSPL,
   adjustSoundDbSPL,
   audioCtx,
-  initSoundFiles,
   initSoundFilesWithPromiseAll,
-  getAudioBufferFromArrayBuffer,
 } from "./soundUtils";
 //var maskerList = {};
 var targetList = {};

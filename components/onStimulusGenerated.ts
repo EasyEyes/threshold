@@ -7,7 +7,7 @@ import { warning } from "./errorHandling";
 import { defineTargetForCursorTracking } from "./cursorTracking";
 import { updateTargetSpecs } from "./showTrialInformation";
 import { logLetterParamsToFormspree } from "./letter";
-import { norm, logger } from "./utils";
+import { norm } from "./utils";
 import {
   setupPhraseIdentification,
   clearPhraseIdentificationRegisters,

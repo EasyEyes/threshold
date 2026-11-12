@@ -5,7 +5,6 @@ import JSZip from "jszip";
 import { saveAs } from "file-saver";
 import Swal from "sweetalert2";
 import Papa from "papaparse";
-import { DataFrame } from "dataframe-js";
 import * as XLSX from "xlsx";
 import * as sentry from "../components/sentry";
 import { isAuthenticationError } from "./auth/errorHandler";
@@ -31,14 +30,12 @@ import {
   getTextFileDataFromGitLab,
   readXLSXFile,
 } from "./fileUtils";
-import { getDateAndTimeString } from "./utils";
 import { compatibilityRequirements, typekit } from "./global";
-import { durations, padToSameLength } from "./getDuration";
+import { durations } from "./getDuration";
 import {
   convertLanguageToLanguageCode,
   getCompatibilityRequirements,
 } from "../components/compatibilityCheck";
-import { isExpTableFile } from "../preprocess/utils";
 import { getGlossary } from "../parameters/glossaryRegistry";
 import { getAuthConfig } from "./auth/config";
 import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
@@ -1713,41 +1710,6 @@ const preprocessDataframe = (df: any) => {
   return df.head(1);
 };
 // read experiment data folder and return a list of dataframes
-export const getExperimentDataFrames = async (user: User, project: any) => {
-  const dataFramesClient = GitLabOAuthClient.loadFromStorage(
-    getAuthConfig().clientId,
-    getAuthConfig().redirectUri,
-  );
-  if (!dataFramesClient) throw new Error("Not authenticated");
-  user.accessToken = dataFramesClient.getAccessToken();
-
-  const dataFolder = await dataFramesClient
-    .apiRequest(
-      `/projects/${project.id}/repository/tree/?path=data&per_page=500&recursive=false`,
-    )
-    .then((response) => response.json());
-
-  const dataframes = [];
-
-  for (const file of dataFolder) {
-    const fileName = file.name;
-    if (fileName.includes(".csv")) {
-      const fileContent = await dataFramesClient
-        .apiRequest(`/projects/${project.id}/repository/blobs/${file.id}`)
-        .then((response) => response.json())
-        .then((result) => Buffer.from(result.content, "base64"));
-      const parsed = Papa.parse(fileContent.toString());
-      const data = parsed.data.slice(1); // Rows
-      const columns = parsed.data[0] as any[]; // Header
-      let df = new DataFrame(data, columns);
-      console.log("preprocess: ", file.name);
-
-      df = preprocessDataframe(df);
-      dataframes.push(df);
-    }
-  }
-  return dataframes;
-};
 
 // fetch data folder
 export const getdataFolder = async (user: User, project: any) => {

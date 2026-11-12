@@ -315,50 +315,6 @@ export const clearPhraseIdentificationRegisters = () => {
 };
 
 /* -- SPEECH RECOGNITION -- */
-export const setupSpeechRecognition = () => {
-  // SEE https://github.com/mdn/dom-examples/blob/master/web-speech-api/speech-color-changer/script.js
-  var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
-  // var SpeechGrammarList = SpeechGrammarList || window.webkitSpeechGrammarList;
-  // var SpeechRecognitionEvent = SpeechRecognitionEvent || webkitSpeechRecognitionEvent;
-
-  speechRecognizer.recognition = new SpeechRecognition();
-
-  speechRecognizer.recognition.continuous = false;
-  speechRecognizer.recognition.lang = "en-US";
-  speechRecognizer.recognition.interimResults = false;
-  speechRecognizer.recognition.maxAlternatives = 1;
-
-  speechRecognizer.status = "ready";
-  logger("rsvp speechRecognition status set to ready", speechRecognizer.status);
-
-  speechRecognizer.recognition.onresult = onWordRecognized;
-
-  speechRecognizer.recognition.onspeechend = (e) => {
-    // NOTE this is specific for non-continuous recognition,
-    // ie we only want one word at a time.
-    // speechRecognizer.recognition.stop();
-    logger("recognition onspeechend", e);
-  };
-
-  speechRecognizer.recognition.onnomatch = (e) => {
-    logger("recognition onnomatch", e);
-  };
-
-  speechRecognizer.recognition.onerror = (e) => {
-    logger("recognition onerror", e);
-  };
-
-  speechRecognizer.recognition.onaudiostart = (e) => {
-    logger("recognition onaudiostart", e);
-  };
-
-  speechRecognizer.recognition.onspeechstart = (e) => {
-    logger("recognition onspeechstart", e);
-  };
-
-  speechRecognizer.recognition.start();
-  logger("recognition", speechRecognizer.recognition);
-};
 
 const onWordRecognized = (e) => {
   logger("onWordRecognized e.results", e.results);

@@ -40,7 +40,7 @@ export {
   fontFaultIsTolerated,
   needBrowserMayUseHarfBuzz,
 } from "./fontFaultPolicy";
-export type { FontFault, OpenTypeLayoutTable } from "./fontFaultPolicy";
+export type { OpenTypeLayoutTable } from "./fontFaultPolicy";
 
 /* -------------------------------------------------------------------------- */
 /*                          Container format handling                          */
