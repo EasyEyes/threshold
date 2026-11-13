@@ -60,6 +60,7 @@ jest.mock("../components/simulatedState", () => ({
 }));
 
 jest.mock("sweetalert2", () => ({
+  __esModule: true,
   default: { isVisible: jest.fn(() => false), close: jest.fn() },
 }));
 
@@ -112,6 +113,24 @@ const fireOnUnhandledRejection = () =>
   (window as any).onunhandledrejection({ reason: new Error("async boom") });
 
 describe("crash watchdog — crash breadcrumbs in error rows", () => {
+  test("dismisses an open SweetAlert2 modal without logging a warning", () => {
+    const warnings: string[] = [];
+    const spy = jest
+      .spyOn(console, "warn")
+      .mockImplementation((...args: unknown[]) => {
+        warnings.push(args.map(String).join(" "));
+      });
+    try {
+      buildWindowErrorHandling(mockParamReader);
+      fireOnError();
+    } finally {
+      spy.mockRestore();
+    }
+    expect(
+      warnings.filter((w) => w.includes("Could not dismiss SweetAlert2")),
+    ).toEqual([]);
+  });
+
   test("window.onerror records error JSON + currentFunction (no unmetNeeds cell)", () => {
     buildWindowErrorHandling(mockParamReader);
     fireOnError();

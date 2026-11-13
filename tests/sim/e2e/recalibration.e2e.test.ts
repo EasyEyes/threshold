@@ -183,7 +183,7 @@ E2E(
     afterAll(async () => {
       await browser?.close();
       await stopDevServer(server, PORT);
-    });
+    }, 120_000);
 
     const openExperiment = async (): Promise<Page> => {
       const context = await browser.newContext();
@@ -451,7 +451,7 @@ E2E(
     afterAll(async () => {
       await browser?.close();
       await stopDevServer(server, FIVE_PORT);
-    });
+    }, 120_000);
 
     test("recalibration after 3 completed trials restarts the block with a full fresh 5 trials", async () => {
       const context = await browser.newContext();
@@ -647,7 +647,7 @@ E2E(
     afterAll(async () => {
       await browser?.close();
       await stopDevServer(server, ADJUST_PORT);
-    });
+    }, 120_000);
 
     test("mid-adjust recalibration restarts the block; fresh TrialHandler runs conditionTrials", async () => {
       const context = await browser.newContext();
@@ -803,7 +803,7 @@ E2E(
     afterAll(async () => {
       await browser?.close();
       await stopDevServer(server, MULTI_PORT);
-    });
+    }, 120_000);
 
     const openExperiment = async (): Promise<Page> => {
       const context = await browser.newContext();

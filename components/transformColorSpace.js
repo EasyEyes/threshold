@@ -32,17 +32,22 @@ const lin2pq = (L) => {
 };
 
 const pq2lin = (V) => {
-  // Convert from PQ-encoded values V (between 0 and 1) to absolute linear values (between 0.005 and 10000)
+  // Convert from PQ-encoded codes (0..1) back to absolute linear luminance
+  // (0..Lmax). Inverse of lin2pq: solve
+  //   V^(1/m) = (c2 t + c1) / (1 + c3 t)  for t = (L/Lmax)^n.
   const Lmax = 10000;
   const n = 0.1593017578125;
   const m = 78.84375;
   const c1 = 0.8359375;
   const c2 = 18.8515625;
   const c3 = 18.6875;
-
-  // const im_t = Math.pow(Math.max(V, 0), 1/m)
-  // const L = Lmax * Math.pow(Math.max(im_t - c1, 0) / (c2 - c3*im_t), 1/n)
-  return L;
+  return V.map((row) =>
+    row.map((v) => {
+      const im_t = Math.pow(Math.max(v, 0), 1 / m);
+      const ratio = (im_t - c1) / (c2 - c3 * im_t);
+      return Lmax * Math.pow(Math.max(ratio, 0), 1 / n);
+    }),
+  );
 };
 
 // const im2colvec = (im) => {
@@ -100,7 +105,7 @@ export const im_ctrans = (
   fromCS = null,
   toCS = null,
   M = null,
-  exposure = 100
+  exposure = 100,
 ) => {
   /*Transform an image or a colour vector from one colour space into another
     Parameters:

@@ -4477,8 +4477,12 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           block: status.block,
           blockTotal: snapshot.nTotal,
           nthBlock: status.nthBlock ?? 0,
-          targetKind: targetKind.current,
-          targetTask: targetTask.current,
+          // Read this block's own kind/task: `targetKind.current` is
+          // re-preset further down this routine, so at this point it still
+          // holds the PREVIOUS block's kind, and the event projection would
+          // then overwrite the correct value published via setEEState below.
+          targetKind: paramReader.read("targetKind", status.block)[0] ?? "",
+          targetTask: readTargetTask(`${status.block}_1`) ?? "",
         });
 
       if (simulateActive) {

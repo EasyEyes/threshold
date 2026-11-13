@@ -23,11 +23,12 @@
  * Full E2E is opt-in: RUN_E2E=1 npm test
  */
 
-import { expect, describe, test } from "@jest/globals";
+import { expect, describe, test, beforeAll } from "@jest/globals";
 import { readFileSync, existsSync, readdirSync } from "fs";
 import * as path from "path";
 import { simE2EPort } from "./helpers/ports";
 import { parseCsv } from "./helpers/csv";
+import { ensureSimTableBuilt } from "./helpers/runSimTable";
 
 const RUN_E2E = process.env.RUN_E2E === "1";
 const BUILT_INDEX = (table: string) =>
@@ -180,6 +181,20 @@ describe("sound-output sim infrastructure (source contract)", () => {
 (RUN_E2E ? describe : describe.skip)("sound output selection (e2e)", () => {
   jest.setTimeout(300_000);
   let portOffset = 0;
+
+  // Rebuild when the table or any build input changed. Without this a stale
+  // generated table silently runs against old defaults (e.g. a hard-coded
+  // _needWebGL floor) and the failures look like product bugs.
+  const TABLES = [
+    "test-sound-output",
+    "test-sound-output-block0",
+    "test-sound-output-oldname",
+  ];
+  beforeAll(() => {
+    for (const name of TABLES) {
+      ensureSimTableBuilt({ name, tableFile: `${name}.csv`, copyTable: false });
+    }
+  }, 600_000);
 
   // One sim run per table, shared across tests in this suite.
   const simCache = new Map<string, Promise<any>>();
@@ -421,14 +436,15 @@ describe("sound-output sim infrastructure (source contract)", () => {
       expect(reminders[0].text).toMatch(/headphones/i);
       expect(reminders[1].text).toMatch(/remove/i);
 
-      // The block-0 table already routed headphones at compat exit (its
-      // Setting-sound-output page), and its single block demands
-      // headphones again → NO reminder.
+      // The block-0 table routes headphones at compat exit (its
+      // Setting-sound-output page), block 1 demands headphones again → no
+      // reminder; block 2 switches to loudspeakers → exactly one reminder.
       const b0 = await runSim("test-sound-output-block0");
       expect(b0.status).toBe("completed");
-      expect(actionsOf(b0).filter((a: any) => a.action === "reminder")).toEqual(
-        [],
+      const b0Reminders = actionsOf(b0).filter(
+        (a: any) => a.action === "reminder",
       );
+      expect(b0Reminders.map((r: any) => r.kind)).toEqual(["loudspeakers"]);
     });
   });
 });

@@ -75,3 +75,35 @@ describe("skipped-trial path (source contract)", () => {
     expect(block).toContain("return Scheduler.Event.NEXT");
   });
 });
+
+/**
+ * `#ee-state[data-target-kind]` comes from the `block.entered` event, and the
+ * event projection is authoritative over direct setEEState writes. Publishing
+ * `targetKind.current` therefore publishes the PREVIOUS block's kind: the
+ * per-block preset happens later in the same routine. In a study that mixes
+ * kinds (Compare3Languages: Q&A blocks then reading blocks) the simulated
+ * participant then sends RETURN on a reading instruction page, which only
+ * advances on SPACE — the c3lFullRun "Stuck at phase=instructions" stall.
+ */
+describe("block.entered carries the block's own targetKind (source contract)", () => {
+  const publishCall = (): string => {
+    const start = thresholdSrc.indexOf("publishBlockBegin({");
+    expect(start).toBeGreaterThan(0);
+    const end = thresholdSrc.indexOf("});", start);
+    return thresholdSrc.slice(start, end);
+  };
+
+  it("reads targetKind for the current block instead of the stale current", () => {
+    const call = publishCall();
+    expect(call).not.toMatch(/targetKind:\s*targetKind\.current/);
+    expect(call).toMatch(
+      /targetKind:\s*paramReader\.read\("targetKind",\s*status\.block\)/,
+    );
+  });
+
+  it("reads targetTask for the current block", () => {
+    const call = publishCall();
+    expect(call).not.toMatch(/targetTask:\s*targetTask\.current/);
+    expect(call).toMatch(/targetTask:\s*readTargetTask\(/);
+  });
+});

@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import wasm from "vite-plugin-wasm";
 import topLevelAwait from "vite-plugin-top-level-await";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
+import { coveragePlugin } from "./server/coverage/istanbulPlugin";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 dotenv.config({ path: resolve(__dirname, "../.env") });
@@ -167,6 +168,9 @@ export default defineConfig(({ mode }) => {
           return code.replace(/\/\/# sourceMappingURL=.*$/gm, "");
         },
       },
+      // Per-source-file coverage of the simulated participant's real run.
+      // Opt in with EE_COVERAGE=1 (see server/coverage/).
+      coveragePlugin({ root: __dirname }),
       wasm(),
       topLevelAwait(),
 

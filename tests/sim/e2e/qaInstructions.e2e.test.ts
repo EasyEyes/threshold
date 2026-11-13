@@ -30,7 +30,7 @@ const RUN_E2E = process.env.RUN_E2E === "1";
 const TABLE_NAME = "qa-instructions-sim";
 const E2E_PORT = simE2EPort("qaInstructions");
 let backend: BackendStub | undefined;
-afterAll(() => backend?.stop());
+afterAll(() => backend?.stop(), 120_000);
 
 (RUN_E2E ? describe : describe.skip)(
   "questionAndAnswer shows instructionForBlock and instructionForResponse (spec)",

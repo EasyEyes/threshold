@@ -2,6 +2,9 @@ module.exports = {
   setupFilesAfterEnv: ["<rootDir>/tests/helpers/consoleNoiseFilter.ts"],
   preset: "ts-jest/presets/js-with-ts-esm",
   testEnvironment: "node",
+  // Worker RSS across 8 workers is what intermittently kills a worker with
+  // SIGSEGV, losing whichever suite it held. Recycle workers above this.
+  workerIdleMemoryLimit: "512MB",
   extensionsToTreatAsEsm: [".ts", ".tsx"],
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.js$": "$1",
@@ -11,7 +14,7 @@ module.exports = {
     "\\.(css|less|scss)$": "<rootDir>/tests/__mocks__/styleMock.js",
   },
   transform: {
-    "^.+\\.[tj]sx?$": ["ts-jest", { useESM: true, isolatedModules: true }],
+    "^.+\\.[tj]sx?$": ["ts-jest", { useESM: true }],
   },
   testMatch: [
     "<rootDir>/tests/**/*.[jt]s?(x)",

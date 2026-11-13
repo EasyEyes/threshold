@@ -15,6 +15,7 @@ import {
   parseSimulateFlag,
   countConditionColumns,
 } from "../../../examples/simulateInject";
+import { resolveCacheDir } from "../../../examples/cacheDir";
 
 describe("parseSimulateFlag", () => {
   it("returns true when --simulate is present", () => {
@@ -253,5 +254,39 @@ describe("injectSimulatedEnvironmentDefaults", () => {
       "TRUE",
     );
     expect(result.find((r) => r[0] === "_needWebGL")).toBeDefined();
+  });
+});
+
+// The glossary/phrases cache is shared mutable state under examples/.cache.
+// Concurrent suites (the audit-command suite writes it, every sim build reads
+// it) must be able to point it somewhere private.
+describe("resolveCacheDir", () => {
+  it("defaults to examples/.cache", () => {
+    expect(resolveCacheDir({}, "/repo/examples")).toBe("/repo/examples/.cache");
+  });
+
+  it("honours EXAMPLES_CACHE_DIR", () => {
+    expect(
+      resolveCacheDir(
+        { EXAMPLES_CACHE_DIR: "/tmp/ee-cache" },
+        "/repo/examples",
+      ),
+    ).toBe("/tmp/ee-cache");
+  });
+
+  it("ignores an empty EXAMPLES_CACHE_DIR", () => {
+    expect(resolveCacheDir({ EXAMPLES_CACHE_DIR: "" }, "/repo/examples")).toBe(
+      "/repo/examples/.cache",
+    );
+  });
+
+  it("resolves a relative EXAMPLES_CACHE_DIR against the given base", () => {
+    expect(
+      resolveCacheDir(
+        { EXAMPLES_CACHE_DIR: "cache" },
+        "/repo/examples",
+        "/repo/examples",
+      ),
+    ).toBe("/repo/examples/cache");
   });
 });

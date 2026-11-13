@@ -99,8 +99,6 @@ describe("source.zip export includes readingCorpus texts", () => {
       userData: { email: "s@s.com" },
     };
     await downloadCommonResources(user, "myExp", "myExp");
-    // saveAs fires inside an unawaited generateAsync().then()
-    await new Promise((r) => setTimeout(r, 50));
 
     const blob = (saveAs as jest.Mock).mock.calls[0][0];
     const buf = await (blob as Blob).arrayBuffer();

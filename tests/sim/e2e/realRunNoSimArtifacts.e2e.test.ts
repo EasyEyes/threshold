@@ -48,7 +48,7 @@ const PORT = simE2EPort("realRunNoSimArtifacts");
   afterAll(async () => {
     await browser?.close();
     await stopDevServer(server, PORT);
-  });
+  }, 120_000);
 
   test("boots with zero sim artifacts and no errors", async () => {
     const context = await browser.newContext();

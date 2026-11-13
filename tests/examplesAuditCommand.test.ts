@@ -15,10 +15,11 @@ const output = path.join(examples, "generated", name);
 const otherOutput = path.join(examples, "generated", `${name}-other`);
 const table = path.join(examples, "tables", `${name}.csv`);
 let temp: string;
+let cache: string;
 let preload: string;
 let validTable: string;
 const validPhraseKey = "EE_ConsentTitle";
-const originalCaches = new Map<string, Buffer | undefined>();
+const repoCacheSnapshot = new Map<string, Buffer | undefined>();
 
 beforeAll(async () => {
   await loadGlossaryForTests();
@@ -27,11 +28,15 @@ beforeAll(async () => {
   };
   expect(phrases.phrases).toHaveProperty(validPhraseKey);
   temp = fs.mkdtempSync(path.join(os.tmpdir(), "ee-example-audit-"));
+  // Private cache dir: the repo's examples/.cache is read by every concurrent
+  // build, so mutating it here leaks into other suites' runs.
+  cache = path.join(temp, "cache");
+  fs.mkdirSync(cache, { recursive: true });
   for (const resource of ["glossary", "phrases"]) {
-    const file = path.join(examples, ".cache", `${resource}.json`);
-    originalCaches.set(
-      file,
-      fs.existsSync(file) ? fs.readFileSync(file) : undefined,
+    const repoFile = path.join(examples, ".cache", `${resource}.json`);
+    repoCacheSnapshot.set(
+      repoFile,
+      fs.existsSync(repoFile) ? fs.readFileSync(repoFile) : undefined,
     );
     const payload = JSON.parse(
       fs.readFileSync(
@@ -39,9 +44,8 @@ beforeAll(async () => {
         "utf8",
       ),
     );
-    fs.mkdirSync(path.dirname(file), { recursive: true });
     fs.writeFileSync(
-      file,
+      path.join(cache, `${resource}.json`),
       JSON.stringify({
         fetchedAt: Date.now(),
         pinnedVersion: payload.version,
@@ -134,9 +138,10 @@ beforeAll(async () => {
 });
 
 afterAll(() => {
-  for (const [file, bytes] of originalCaches) {
-    if (bytes) fs.writeFileSync(file, bytes);
-    else fs.rmSync(file, { force: true });
+  // The suite must never have touched the repo's shared cache.
+  for (const [file, bytes] of repoCacheSnapshot) {
+    const now = fs.existsSync(file) ? fs.readFileSync(file) : undefined;
+    expect(now?.toString()).toBe(bytes?.toString());
   }
   for (const file of [table, output, otherOutput, temp])
     if (file) fs.rmSync(file, { recursive: true, force: true });
@@ -160,6 +165,7 @@ const runExample = (mode: string) =>
         GLOSSARY_URL: "",
         PHRASES_URL: "",
         EXAMPLES_NO_CACHE: "",
+        EXAMPLES_CACHE_DIR: cache,
         EE_TEST_AUDIT: mode,
         NO_COLOR: mode.startsWith("color-") ? "" : process.env.NO_COLOR,
       },
@@ -238,7 +244,7 @@ const seedOldGlossaryCache = () => {
   );
   payload.version = "old-local-cache";
   fs.writeFileSync(
-    path.join(examples, ".cache/glossary.json"),
+    path.join(cache, "glossary.json"),
     JSON.stringify({
       fetchedAt: Date.now(),
       pinnedVersion: payload.version,
@@ -269,14 +275,14 @@ it("R2 refreshes mismatched cached catalogs once and reuses the refreshed cache 
   expect(recovered.stdout).toContain("SUCCESS");
   expect(catalogGets()).toHaveLength(2);
   expect(auditGets()).toHaveLength(2);
-  const cache = JSON.parse(
-    fs.readFileSync(path.join(examples, ".cache/glossary.json"), "utf8"),
+  const cachedGlossary = JSON.parse(
+    fs.readFileSync(path.join(temp, "cache", "glossary.json"), "utf8"),
   );
   const fresh = JSON.parse(
     fs.readFileSync(path.join(temp, "glossary.json"), "utf8"),
   );
-  expect(cache.payload.version).toBe(fresh.version);
-  expect(cache.pinnedVersion).toBe(fresh.version);
+  expect(cachedGlossary.payload.version).toBe(fresh.version);
+  expect(cachedGlossary.pinnedVersion).toBe(fresh.version);
   const next = runExample("refresh-recover");
   expect(next.stdout).toContain("SUCCESS");
   expect(next.stdout).toContain("Glossary pin unchanged");

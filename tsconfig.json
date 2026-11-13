@@ -7,11 +7,12 @@
     "target": "es2021",
     "lib": ["es2022", "dom", "dom.iterable"],
     "strict": true,
+    "isolatedModules": true,
     "allowJs": true,
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
-    "skipLibCheck": true,
+    "skipLibCheck": true
   },
   "exclude": ["node_modules", "js", "tests", "notes"]
 }

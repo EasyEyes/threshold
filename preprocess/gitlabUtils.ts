@@ -694,25 +694,23 @@ export const downloadCommonResources = async (
           }),
         );
 
-        zip
-          .generateAsync({ type: "blob" })
-          .then((zipBlob) => {
-            saveAs(zipBlob, `${experimentFileName}.source.zip`);
-            Swal.close();
-          })
-          .catch((error) => {
-            Swal.close();
-            Swal.fire({
-              icon: "error",
-              title: "Download source failed",
-              text: "Could not create the source download. Please refresh the page and try again.",
-              confirmButtonColor: "#666",
-            });
-            sentry.captureError(
-              error,
-              "downloadCommonResources zip generation failed",
-            );
+        try {
+          const zipBlob = await zip.generateAsync({ type: "blob" });
+          saveAs(zipBlob, `${experimentFileName}.source.zip`);
+          Swal.close();
+        } catch (error) {
+          Swal.close();
+          Swal.fire({
+            icon: "error",
+            title: "Download source failed",
+            text: "Could not create the source download. Please refresh the page and try again.",
+            confirmButtonColor: "#666",
           });
+          sentry.captureError(
+            error,
+            "downloadCommonResources zip generation failed",
+          );
+        }
       } catch (error) {
         Swal.close();
         Swal.fire({

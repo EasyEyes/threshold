@@ -105,7 +105,7 @@ const FREEZE_BIG_MODAL = `
         await browser?.close();
       } catch {}
       await stopDevServer(server, PORT);
-    });
+    }, 120_000);
 
     const metrics = () =>
       page.evaluate(`(() => {

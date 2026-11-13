@@ -116,7 +116,7 @@ E2E("showImage block data shape + restart", () => {
   afterAll(async () => {
     await browser?.close();
     await stopDevServer(server, SHOW_PORT);
-  });
+  }, 120_000);
 
   const openExperiment = async (): Promise<Page> => {
     const context = await browser.newContext();
@@ -135,23 +135,24 @@ E2E("showImage block data shape + restart", () => {
 
   // Column-key signature every row shares (secs is volatile). Captured
   // from current behavior; the restart seam must not change it. Re-baselined
-  // 2026-10: two rows (block metadata row + merged completion row — the
-  // trailing third row is gone) and the key set now carries the camera-
-  // selection telemetry + color-pipeline + easyEyesVersion columns.
+  // 2026-11: cameraAttemptJSON, canvasContextType and finalSaveOutcomeJSON
+  // joined the row (camera-attempt telemetry, unified canvas context state,
+  // final-save outcome).
   const EXPECTED_KEYS =
     "EasyEyesID,PavloviaSessionID,ProlificParticipantID,ProlificSessionID," +
     "ProlificStudyID,URL,WebGLUnmaskedRenderer,WebGLVersion,WebGL_Report," +
     "actualPavloviaSessionID,availableCameras,block,blocks.order,blocks.ran," +
     "blocks.thisIndex,blocks.thisN,blocks.thisRepN,blocks.thisTrialN," +
-    "builtInScore,cameraArray,cameraFindSec,cameraIncorporation," +
-    "cameraIncorporationReported,cameraName,cameraResolutionXY,class," +
+    "builtInScore,cameraArray,cameraAttemptJSON,cameraFindSec," +
+    "cameraIncorporation,cameraIncorporationReported,cameraName," +
+    "cameraResolutionXY,canvasContextType,class," +
     "completionCodeEnglish,completionCodeRandom,computeRandomMHz," +
     "currentFunction,dataSaved,date,debriefDurationSec,deviceBrowser," +
     "deviceBrowserVersion,deviceLanguage,deviceMemoryGB,devicePixelRatio," +
     "deviceSystem,deviceSystemFamily,deviceType,durationOfExperimentSec," +
     "easyEyesVersion,experiment,experimentCompleteBool,experimentFilename," +
-    "externalScore,frameRateReportedByPsychoJS,hardwareConcurrency," +
-    "longTaskSec,maxTextureSize,maxViewportSize," +
+    "externalScore,finalSaveOutcomeJSON,frameRateReportedByPsychoJS," +
+    "hardwareConcurrency,longTaskSec,maxTextureSize,maxViewportSize," +
     "monitorFrameRate,participant,psychojsWindowDimensions,psychopyVersion," +
     "pxPerCm,reportedRGBBits,reportsAtLeast10BitsPerChannel," +
     "reportsHDRCapability,screenColorPipeline,screenHeightPx,screenWidthPx," +

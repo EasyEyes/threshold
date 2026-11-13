@@ -27,7 +27,7 @@ const TABLE_NAME = "qa-unequal-counts-sim";
 const E2E_PORT = simE2EPort("qaUnequalCounts");
 
 let backend: BackendStub | undefined;
-afterAll(() => backend?.stop());
+afterAll(() => backend?.stop(), 120_000);
 
 (RUN_E2E ? describe : describe.skip)(
   "questionAndAnswer blocks with unequal per-condition question counts",

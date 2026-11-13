@@ -16,6 +16,7 @@ import {
 import { initGlossary } from "../parameters/glossaryRegistry";
 import { initPhrases } from "../parameters/phrasesRegistry";
 import { wait, getRetryDelayMs } from "../preprocess/retry";
+import { resolveCacheDir } from "./cacheDir";
 import {
   injectSimulatedEnvironmentDefaults,
   parseSimulateFlag,
@@ -89,7 +90,7 @@ async function pinVersionForLocalDev(
  * version matches the cached payload version, so a stale pin can last at
  * most one TTL window.
  */
-const CACHE_DIR = resolve(__dirname, ".cache");
+const CACHE_DIR = resolveCacheDir();
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
 interface ResourceCache<T> {

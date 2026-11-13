@@ -128,6 +128,8 @@ htmlcov/
 .cache
 nosetests.xml
 coverage.xml
+# this repo's merged jest + browser coverage output (npm run coverage*)
+/coverage/
 *.cover
 *.py,cover
 .hypothesis/

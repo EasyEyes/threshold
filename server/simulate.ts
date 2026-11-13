@@ -27,6 +27,14 @@ import * as path from "path";
 import * as os from "os";
 import { isSimConsoleNoise } from "./simNoiseFilter";
 import { pollUrl, spawnDevServer, stopDevServer } from "./devServer";
+import {
+  COVERAGE_STORAGE_KEY,
+  coverageDirFor,
+  coverageEnabled,
+  installCoveragePersister,
+  parseCoverageJson,
+  writeBrowserCoverage,
+} from "./coverage/harvest";
 
 export { killProcessTree } from "./devServer";
 
@@ -60,6 +68,9 @@ export interface SimulateOptions {
    * Consumed by simulatedParticipant stubs (soundOutputPolicy, deviceScript,
    * simNoSinkSupport). */
   simOptions?: Record<string, unknown>;
+  /** Directory for browser coverage dumps. Defaults to EE_COVERAGE_DIR or
+   * <cwd>/coverage/browser; only used when EE_COVERAGE=1. */
+  coverageDir?: string;
 }
 
 export interface SimulateResult {
@@ -99,6 +110,8 @@ export interface SimulateResult {
   /** The __eeEvents event stream fetched at run end (empty when not
    * simulated or the run died before boot). Envelope order = seq. */
   events: EventEnvelope[];
+  /** Browser coverage dump written when EE_COVERAGE=1, else null. */
+  coverageFile?: string | null;
   seed: number;
   durationMs: number;
 }
@@ -268,8 +281,13 @@ export async function simulate(
     jsonlPath,
     video = false,
     simOptions,
+    coverageDir,
     urlParams,
   } = options;
+
+  const coverageOut =
+    coverageDir ??
+    (coverageEnabled() ? coverageDirFor(cwd ?? process.cwd()) : null);
 
   if (screenshotDir) mkdirSync(screenshotDir, { recursive: true });
 
@@ -338,6 +356,10 @@ export async function simulate(
   await context.addInitScript((s: number) => {
     (window as any).__SIM_SEED__ = s;
   }, seed);
+  // Accumulate istanbul coverage across navigations; only when instrumented.
+  if (coverageOut) {
+    await context.addInitScript(installCoveragePersister, COVERAGE_STORAGE_KEY);
+  }
   if (simOptions) {
     await context.addInitScript((o: Record<string, unknown>) => {
       (window as any).__SIM_OPTIONS__ = o;
@@ -774,6 +796,23 @@ export async function simulate(
       } catch {}
     }
     await Promise.allSettled(csvReads);
+    if (coverageOut) {
+      try {
+        const harvested = await page.evaluate(
+          (key: string) => ({
+            live: (window as any).__coverage__ ?? {},
+            stored: window.sessionStorage.getItem(key),
+          }),
+          COVERAGE_STORAGE_KEY,
+        );
+        result.coverageFile = writeBrowserCoverage(
+          coverageOut,
+          experimentName,
+          harvested.live as any,
+          parseCoverageJson(harvested.stored),
+        );
+      } catch {}
+    }
     await browser.close();
     await stopDevServer(server, port);
   }
