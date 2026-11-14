@@ -117,17 +117,29 @@ export async function preloadStudyMedia({
   const panel = document.createElement("div");
   panel.setAttribute("role", "status");
   panel.style.cssText =
-    "position:fixed;inset:0;background:#eee;z-index:10000000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;font:20px system-ui;color:#222";
+    "position:fixed;inset:0;background:#eee;z-index:10000000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:16px;text-align:center;font:20px system-ui;color:#222";
   const title = document.createElement("div");
-  title.textContent = "Loading study media";
+  title.textContent = "Loading study files…";
   const progress = document.createElement("progress");
   progress.max = urls.length + (models ? 1 : 0) || 1;
   let modelsReady = !models;
   const detail = document.createElement("div");
+  detail.style.lineHeight = "1.5";
+  const fileCount = document.createElement("div");
+  const downloaded = document.createElement("div");
+  const timeRemaining = document.createElement("div");
+  const modelStatus = document.createElement("div");
+  fileCount.hidden = downloaded.hidden = urls.length === 0;
+  modelStatus.hidden = !models;
+  detail.append(fileCount, downloaded, timeRemaining, modelStatus);
+  const failure = document.createElement("div");
+  failure.hidden = true;
+  failure.textContent =
+    "Some study files or tracking models couldn’t be loaded. Check your connection and try again. Anything already loaded will be kept.";
   const retry = document.createElement("button");
   retry.textContent = "Try again";
   retry.hidden = true;
-  panel.append(title, progress, detail, retry);
+  panel.append(title, progress, detail, failure, retry);
   document.body.append(panel);
   const stats = new Map();
   let started = performance.now();
@@ -154,18 +166,24 @@ export async function preloadStudyMedia({
       0,
     );
     const speed = bytes / Math.max(1, (performance.now() - started) / 1000);
-    const estimate =
+    fileCount.textContent = "[[DONE]] of [[TOTAL]] files downloaded"
+      .replace("[[DONE]]", complete)
+      .replace("[[TOTAL]]", urls.length);
+    downloaded.textContent = "[[MB]] MB downloaded".replace(
+      "[[MB]]",
+      (bytes / 1048576).toFixed(1),
+    );
+    timeRemaining.hidden = complete === urls.length;
+    timeRemaining.textContent =
       known && speed > 0
-        ? `About ${Math.max(
-            1,
-            Math.ceil(remaining / speed / 60),
-          )} minute(s) remaining`
-        : "Estimating remaining time…";
-    detail.textContent = `${complete} of ${urls.length} files · ${(
-      bytes / 1048576
-    ).toFixed(1)} MB downloaded · ${estimate}${
-      models ? ` · Tracking models ${modelsReady ? "ready" : "loading…"}` : ""
-    }`;
+        ? "About [[MINUTES]] min of downloading remaining".replace(
+            "[[MINUTES]]",
+            Math.max(1, Math.ceil(remaining / speed / 60)),
+          )
+        : "Estimating download time…";
+    modelStatus.textContent = modelsReady
+      ? "Tracking models ready"
+      : "Preparing tracking models…";
   };
   try {
     while (true) {
@@ -214,8 +232,8 @@ export async function preloadStudyMedia({
         "Media preload failed",
         errors.map((error) => error.message),
       );
-      detail.textContent =
-        "Some study media could not be downloaded. Check your connection and try again. Completed files are kept.";
+      detail.hidden = true;
+      failure.hidden = false;
       retry.hidden = false;
       await new Promise((resolve, reject) => {
         const cleanup = () => {
@@ -233,6 +251,8 @@ export async function preloadStudyMedia({
         signal?.addEventListener("abort", cancel, { once: true });
       });
       retry.hidden = true;
+      failure.hidden = true;
+      detail.hidden = false;
     }
     if (distance)
       await rc.preloadInstructionMedia({
