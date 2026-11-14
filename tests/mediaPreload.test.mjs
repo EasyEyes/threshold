@@ -108,6 +108,7 @@ test("distance false skips all RC media; true supplies cached phrase media to RC
       );
       imported = true;
     },
+    async preloadModels() {},
   };
   await m.preloadStudyMedia({
     reader: { conditions: [] },
@@ -192,6 +193,74 @@ test("old RC fails explicitly instead of silently allowing late downloads", asyn
   const m = await fresh();
   await assert.rejects(
     m.preloadStudyMedia({ reader, rc: {}, distance: true }),
+    /updated RemoteCalibrator/,
+  );
+});
+
+test("face-tracking tasks preload their models before the study continues", async () => {
+  const m = await fresh();
+  globalThis.fetch = async () => new Response("file");
+  const calibrationTasks = [
+    { name: "screenSize" },
+    { name: "trackGaze", options: {} },
+  ];
+  let requested;
+  await m.preloadStudyMedia({
+    reader: { conditions: [] },
+    rc: {
+      async preloadModels(options) {
+        requested = options;
+      },
+    },
+    distance: false,
+    calibrationTasks,
+  });
+  assert.deepEqual(requested, { calibrationTasks });
+});
+test("model failure offers retry and does not reload after success", async () => {
+  const m = await fresh(true);
+  const fetched = [];
+  globalThis.fetch = async (url) => {
+    fetched.push(url);
+    return new Response("file");
+  };
+  let calls = 0;
+  await m.preloadStudyMedia({
+    reader,
+    rc: {
+      async preloadModels() {
+        if (++calls === 1) throw new Error("model download failed");
+      },
+    },
+    distance: false,
+    calibrationTasks: [{ name: "measureDistance", options: {} }],
+  });
+  assert.equal(calls, 2);
+  assert.equal(fetched.length, 4);
+});
+test("studies without face tracking never ask RC for models", async () => {
+  const m = await fresh();
+  globalThis.fetch = async () => new Response("file");
+  await m.preloadStudyMedia({
+    reader: { conditions: [] },
+    rc: {
+      preloadModels() {
+        throw new Error("should not preload models");
+      },
+    },
+    distance: false,
+    calibrationTasks: [{ name: "screenSize" }],
+  });
+});
+test("old RC without model preloading fails explicitly for face tracking", async () => {
+  const m = await fresh();
+  await assert.rejects(
+    m.preloadStudyMedia({
+      reader: { conditions: [] },
+      rc: {},
+      distance: false,
+      calibrationTasks: [{ name: "trackGaze", options: {} }],
+    }),
     /updated RemoteCalibrator/,
   );
 });

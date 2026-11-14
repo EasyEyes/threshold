@@ -7,7 +7,7 @@ The participant Vite server substitutes the sibling remote-calibrator/lib/Remote
 3. Use a fresh page/browser cache and Network throttling. Complete Device Compatibility. The media-loading screen must appear before consent; required files must finish before proceeding.
 4. Test calibrateDistanceBool TRUE and FALSE, phrase-linked videos, showImage, image folders, audio target/masker folders, and target sound lists. Duplicate URLs should download once.
 5. Block one media request: loading must stop with Try again. Unblock it and retry; completed files must not download again.
-6. After media loading, block the media hosts/paths and navigate calibration instructions and media blocks. No media requests should occur. Full offline calibration may still require separately preloading tracking models; live STT and sound-calibration services also remain network-dependent.
+6. After media loading, block the media hosts/paths and navigate calibration instructions and media blocks. No media or model requests should occur. Studies with trackDistance, measureDistance or trackGaze also load their tracking models (FaceMesh, hand detector) on the loading screen; live STT and sound-calibration services remain network-dependent.
 
 Focused checks:
 

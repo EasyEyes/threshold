@@ -92,10 +92,15 @@ export async function preloadStudyMedia({
   compressed,
 }) {
   const instructionMedia = { calibrationTasks, compressed };
+  // Tasks that start face tracking; RC decides which models each one needs.
+  const models = (calibrationTasks || []).some(({ name }) =>
+    ["trackDistance", "measureDistance", "trackGaze"].includes(name),
+  );
   if (
-    distance &&
-    (typeof rc.getInstructionMediaUrls !== "function" ||
-      typeof rc.preloadInstructionMedia !== "function")
+    (distance &&
+      (typeof rc.getInstructionMediaUrls !== "function" ||
+        typeof rc.preloadInstructionMedia !== "function")) ||
+    (models && typeof rc.preloadModels !== "function")
   ) {
     throw new Error(
       "This study requires the updated RemoteCalibrator media preloader. Rebuild the local RemoteCalibrator bundle.",
@@ -116,7 +121,8 @@ export async function preloadStudyMedia({
   const title = document.createElement("div");
   title.textContent = "Loading study media";
   const progress = document.createElement("progress");
-  progress.max = urls.length || 1;
+  progress.max = urls.length + (models ? 1 : 0) || 1;
+  let modelsReady = !models;
   const detail = document.createElement("div");
   const retry = document.createElement("button");
   retry.textContent = "Try again";
@@ -127,7 +133,7 @@ export async function preloadStudyMedia({
   let started = performance.now();
   const update = () => {
     const complete = urls.filter((url) => entries.has(url)).length;
-    progress.value = complete;
+    progress.value = complete + (models && modelsReady ? 1 : 0);
     const values = [...stats.values()];
     const bytes = values.reduce((sum, s) => sum + s.loaded, 0);
     const measured = values.filter((s) => s.total > 0);
@@ -157,7 +163,9 @@ export async function preloadStudyMedia({
         : "Estimating remaining time…";
     detail.textContent = `${complete} of ${urls.length} files · ${(
       bytes / 1048576
-    ).toFixed(1)} MB downloaded · ${estimate}`;
+    ).toFixed(1)} MB downloaded · ${estimate}${
+      models ? ` · Tracking models ${modelsReady ? "ready" : "loading…"}` : ""
+    }`;
   };
   try {
     while (true) {
@@ -168,8 +176,19 @@ export async function preloadStudyMedia({
       const pending = urls.filter((url) => !entries.has(url));
       let index = 0;
       const errors = [];
-      await Promise.all(
-        Array.from({ length: Math.min(3, pending.length) }, async () => {
+      // RC keeps models that loaded, so a retry only reloads the failed ones.
+      const modelLoad = modelsReady
+        ? null
+        : rc.preloadModels({ calibrationTasks }).then(
+            () => {
+              modelsReady = true;
+              update();
+            },
+            (error) => errors.push(error),
+          );
+      await Promise.all([
+        modelLoad,
+        ...Array.from({ length: Math.min(3, pending.length) }, async () => {
           while (index < pending.length && !signal?.aborted) {
             const url = pending[index++];
             try {
@@ -188,7 +207,7 @@ export async function preloadStudyMedia({
             }
           }
         }),
-      );
+      ]);
       if (signal?.aborted) throw new DOMException("Study ended", "AbortError");
       if (!errors.length) break;
       console.error(
