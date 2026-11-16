@@ -189,7 +189,7 @@ export const LOGGING_CAUTION = (
     quotaSentence = ` So far this month we have used <strong>${quota.used.toLocaleString()}</strong> of our <strong>${quota.limit.toLocaleString()}</strong> Formspree submissions (<strong>${percent}%</strong>).`;
   }
   return {
-    name: `⚠️ LOGGING CAUTION`,
+    name: `Logging caution`,
     message:
       `This experiment enables one or more of the logging parameters: ${enabled}. ` +
       `These parameters cause the running experiment to log many details in the Formspree server, which you can review in Analyzer at your leisure. ` +

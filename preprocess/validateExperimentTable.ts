@@ -2026,7 +2026,7 @@ const checkTargetImageSpareFractionTooSmall = (
   const plural = off.length > 1;
   return [
     makeCaution({
-      name: "⚠️ targetImageSpareFraction CAUTION",
+      name: "targetImageSpareFraction caution",
       message: `When an image (targetKind=image) or a page of text (targetKind=reading) is shown together with a questionAndAnswer, ${param(
         "targetImageSpareFraction",
       )} is the fraction of the screen reserved for the question. A value at or below 0.2 (including the default 0) leaves little or no room, so the question may overlap the target. We suggest about 0.3.`,

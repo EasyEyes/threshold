@@ -2731,7 +2731,7 @@ export const handleCantReadQROnError = async (
   );
 };
 
-const getMessageForQR = (
+export const getMessageForQR = (
   needAnySmartphone,
   needCalibratedSmartphoneMicrophone,
   needPhoneSurvey,
@@ -2754,7 +2754,7 @@ const getMessageForQR = (
           readi18nPhrases("RC_needPhoneSurvey", language) +
           "<br>" +
           `<p style="margin-top:10px; margin-bottom:10px">${readi18nPhrases(
-            "RC_needPhoneSurveyParticipate",
+            "RC_UseQRCodeToParticipate",
             language,
           )}</p>`)
       : (messageForQr +=
@@ -2768,7 +2768,6 @@ const getMessageForQR = (
       : (messageForQr += readi18nPhrases("RC_needPhoneKeypad", language));
     messageForQr += " " + readi18nPhrases("RC_needsPointCameraAtQR", language);
   }
-  //  + readi18nPhrases("RC_needPhoneSurveyParticipate",language)
   return messageForQr;
 };
 const checkModelNumberandNameForIOS = (

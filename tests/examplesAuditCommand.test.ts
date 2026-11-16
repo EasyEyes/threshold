@@ -71,9 +71,27 @@ beforeAll(async () => {
       const Module = require("module");
       const load = Module._load;
       Module._load = function (request, ...args) {
+        const imported = load.call(this, request, ...args);
         if (request.endsWith("terminalFormat"))
           Object.defineProperty(process.stdout, "isTTY", {value:true, configurable:true});
-        return load.call(this, request, ...args);
+        if (process.env.EE_TEST_AUDIT === "color-matching" && request.endsWith("localAnalysisIndex"))
+          return {
+            ...imported,
+            loadLocalAnalysisIndex: (...options) => {
+              const index = imported.loadLocalAnalysisIndex(...options);
+              return {
+                ...index,
+                sites: [...index.sites, {
+                  id: "terminal-warning-fixture",
+                  file: "terminal-warning-fixture.js",
+                  line: 1,
+                  keys: ["EE_terminalWarningFixture"],
+                  guards: []
+                }]
+              };
+            }
+          };
+        return imported;
       };
     }
     if (process.env.EE_TEST_AUDIT === "builder-failure") {
@@ -371,6 +389,6 @@ it("colors complete audit errors red and source-analysis warnings yellow in a te
   );
   expect(errorBlock).not.toContain("\x1b[33m");
   const warning = runExample("color-matching");
-  expect(warning.stdout).toContain("\x1b[33m[1/1] ⚠️ WARNING:");
+  expect(warning.stdout).toContain("\x1b[33m[1/1] ⚠️ Warning:");
   expect(warning.stdout).toContain("SUCCESS");
 });

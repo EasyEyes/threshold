@@ -166,16 +166,14 @@ export async function checkStudyPhraseAnalysis(
       const count = uncertainMissing.length;
       errors.push({
         code: "study_phrase_candidates_missing",
-        name: `⚠️ WARNING: ${count} missing ${
-          count === 1 ? "phrase" : "phrases"
-        }`,
+        name: `Warning: ${count} missing ${count === 1 ? "phrase" : "phrases"}`,
         message: `This study’s source references ${count} ${
           count === 1 ? "key that is" : "keys that are"
         } not defined in International Phrases:<br>${uncertainMissing
           .map(linkedKey)
           .join(
             "<br>",
-          )}<br><br>CAN I RUN THE STUDY? Yes, if the missing phrases are not essential. If the study tries to display one, it will show a missing-phrase error instead.<br><br>REPORT THE PROBLEM. Please select “Report bug” at the top of this page to notify the developers. To fix the problem, they will either remove unused keys from the source or add missing keys and their translations to International Phrases.`,
+          )}<br><span class="diagnostic-section"><strong>Can I run the study?</strong> Yes, if the missing phrases are not essential. If the study tries to display one, it will show a missing-phrase error instead.</span><br><span class="diagnostic-section"><strong>Report the problem.</strong> Please select “Report bug” at the top of this page to notify the developers. To fix the problem, they will either remove unused keys from the source or add missing keys and their translations to International Phrases.</span>`,
         hint: "",
         context: "preprocessor",
         kind: "warning",

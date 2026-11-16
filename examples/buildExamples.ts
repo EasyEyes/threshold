@@ -180,9 +180,9 @@ const formatError = (
 ): string => {
   const indexColor = severity === "error" ? color.boldRed : color.boldYellow;
   const lines = [
-    `${indexColor(`[${index + 1}/${total}]`)} ${htmlToTerminal(
-      err.name ?? "",
-    )}`,
+    `${indexColor(`[${index + 1}/${total}]`)} ${
+      severity === "warning" ? "⚠️ " : ""
+    }${htmlToTerminal(err.name ?? "")}`,
   ];
   if (err.parameters?.length)
     lines.push(`  parameters: ${color.boldYellow(err.parameters.join(", "))}`);

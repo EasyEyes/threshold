@@ -259,7 +259,7 @@ export const checkCrossSessionId = async (
           Swal.clickConfirm();
         } else {
           const invalidFileError = readi18nPhrases(
-            "EE_ID_invalidFile",
+            "EE_ID_uploadOrValidID",
             language,
           );
           Swal.showValidationMessage(invalidFileError);

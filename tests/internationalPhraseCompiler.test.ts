@@ -169,7 +169,7 @@ it("warns about a missing source candidate without blocking a defined study key"
   expect(result.warnings).toEqual(
     expect.arrayContaining([
       expect.objectContaining({
-        name: "⚠️ WARNING: 1 missing phrase",
+        name: "Warning: 1 missing phrase",
         kind: "warning",
       }),
     ]),

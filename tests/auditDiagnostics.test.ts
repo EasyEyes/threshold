@@ -56,7 +56,7 @@ it.each([
 it("shows source-analysis phrase references while keeping the diagnostic a warning", () => {
   const warning = diagnostic({
     code: "study_phrase_candidates_missing",
-    name: "⚠️ WARNING: 1 missing phrase",
+    name: "Warning: 1 missing phrase",
     kind: "warning",
     message:
       '<a href="https://example.org/phrases?key=EE_missing">EE_missing</a>',
