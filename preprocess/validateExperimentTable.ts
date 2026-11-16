@@ -15,6 +15,7 @@ import {
   type Offender,
   type EasyEyesError,
   IMPROPER_GLOSSARY_FONT_PIXI_METRICS_STRING_DEFAULT,
+  OBSOLETE_PARAMETER,
 } from "./errorMessages";
 import { ExperimentTable } from "./experimentTable";
 import {
@@ -187,14 +188,20 @@ const invisibleValueHints = (values: string[], g: GlossaryEntry): string => {
 const similarlySpelledCandidates = (
   proposedParameter: string,
   parameters: string[],
-  numberOfCandidatesToReturn = 4,
+  numberOfCandidatesToReturn = 3,
 ): string[] => {
-  const closest = parameters.sort(
-    (a: string, b: string) =>
-      levDist(proposedParameter, a) - levDist(proposedParameter, b),
-  );
-
-  const candidates = closest.slice(0, numberOfCandidatesToReturn - 1);
+  // Avoid presenting an unrelated name as a likely correction. Allow roughly
+  // one edit per three characters, with at least one edit for short names.
+  const maxDistance = Math.max(1, Math.floor(proposedParameter.length / 3));
+  const candidates = parameters
+    .map((name) => ({
+      name,
+      distance: levDist(proposedParameter, name.replace(/@/g, "9")),
+    }))
+    .filter(({ distance }) => distance <= maxDistance)
+    .sort((a, b) => a.distance - b.distance)
+    .slice(0, numberOfCandidatesToReturn)
+    .map(({ name }) => name);
   // "@" appears in glossary keys for parameter variants; display as "9".
   return candidates.map((c) => c.replace(/@/g, "9"));
 };
@@ -777,12 +784,18 @@ const checkParametersRecognized = (t: ExperimentTable): EasyEyesError[] => {
   const e: EasyEyesError[] = [];
   const gl = getGlossary();
   for (const n of t.params) {
+    if (gl[n]?.type === "obsolete") {
+      e.push(OBSOLETE_PARAMETER(n));
+      continue;
+    }
     if (n in gl || _superMatching(n)) continue;
-    const closest = similarlySpelledCandidates(n, Object.keys(gl));
-    // The supplied name is already shown above the error title, so the
-    // message states only the suggestion. A name with an invisible character
-    // inside renders as nothing there, so its reveal goes in the hint.
-    const diff = diffSuggestion(n, closest[0]);
+    const closest = similarlySpelledCandidates(
+      n,
+      Object.keys(gl).filter((name) => gl[name].type !== "obsolete"),
+    );
+    // The parameters field already identifies the supplied name. Reveal any
+    // invisible characters in the hint so the spelling difference is visible.
+    const diff = closest.length ? diffSuggestion(n, closest[0]) : null;
     const reveal = containsInvisibleCharacters(n)
       ? `The name ${annotateInvisibleCharacters(
           n,
@@ -791,12 +804,22 @@ const checkParametersRecognized = (t: ExperimentTable): EasyEyesError[] => {
     e.push(
       makeError({
         name: "Parameter is unrecognized",
-        message: `The closest supported parameter is ${param(closest[0])}${
-          diff ? ` (${diff})` : ""
-        } &#8212 is that what you meant?`,
-        hint: `${reveal}The other closest supported parameters found were ${param(
-          closest[1],
-        )} and ${param(closest[2])}. All parameters are case-sensitive.`,
+        message:
+          "This parameter is not defined in the Parameter Glossary." +
+          (closest.length
+            ? ` The closest supported parameter is ${param(closest[0])}${
+                diff ? ` (${diff})` : ""
+              } &#8212 is that what you meant?`
+            : ""),
+        hint: `${reveal}${
+          closest.length > 1
+            ? `Other similarly spelled parameters: ${verballyEnumerate(
+                closest.slice(1).map(param),
+              )}. `
+            : closest.length === 0
+            ? "No similarly spelled supported parameters were found. Check the parameter name in the Parameter Glossary. "
+            : ""
+        }All parameters are case-sensitive.`,
         parameters: [n],
       }),
     );

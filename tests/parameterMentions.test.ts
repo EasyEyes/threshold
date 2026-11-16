@@ -33,6 +33,7 @@ beforeAll(async () => {
 /** Representative args per factory. Parameter-name args use real glossary
  * names so the scanner sees realistic mentions. */
 const FACTORY_ARGS: Record<string, unknown[]> = {
+  OBSOLETE_PARAMETER: ["_online2PayCurrency"],
   UNBALANCED_COMMAS: [[{ parameter: "block", length: 5, correctLength: 4 }]],
   PROLIFIC_TITLE_TOO_LONG: [121, 120],
   PROLIFIC_CURRENCY_NOT_SUPPORTED: ["EUR", ["USD", "GBP"]],

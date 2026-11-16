@@ -145,7 +145,7 @@ describe("middle invisible characters: not stripped, but made visible", () => {
   });
 });
 
-describe("dissimilar suggestions stay plain", () => {
+describe("suggestions stay relevant and retain glossary links", () => {
   it("the parenthetical diff never becomes a glossary link; the suggestion does", async () => {
     const error = unrecognized(`${BASE}\ntargetKindz,,letter`);
     // With real glossary rows loaded, wrapping must link ONLY the standalone
@@ -167,23 +167,21 @@ describe("dissimilar suggestions stay plain", () => {
     __resetGlossaryRowsForTests();
   });
 
-  it("no red/green spans when the names aren't close", () => {
+  it("no guesses or red/green spans when the names aren't close", () => {
     const error = unrecognized(`${BASE}\nzzzNotARealParam,,x`);
     expect(error).toBeDefined();
     expect(error!.message).toBe(
-      `The closest supported parameter is ${PARAM(
-        "_consentForm",
-      )} &#8212 is that what you meant?`,
+      "This parameter is not defined in the Parameter Glossary.",
     );
     expect(error!.message).not.toContain("#bb2c22");
     expect(error!.message).not.toContain("#147133");
   });
 
-  it("message states only the suggestion; no echo of the supplied name", () => {
+  it("message explains the missing definition before the suggestion", () => {
     const error = unrecognized(`${BASE}\ntargetKindz,,letter`);
     expect(error).toBeDefined();
     expect(error!.message).toBe(
-      `The closest supported parameter is ${PARAM(
+      `This parameter is not defined in the Parameter Glossary. The closest supported parameter is ${PARAM(
         "targetKind",
       )} (targetKind${RED("z")}) &#8212 is that what you meant?`,
     );
@@ -191,11 +189,9 @@ describe("dissimilar suggestions stay plain", () => {
     expect(error!.message).not.toContain("couldn't recognize");
   });
 
-  it("hint and parameters field keep their existing shape", () => {
+  it("does not pad the hint with unrelated suggestions", () => {
     const error = unrecognized(`${BASE}\ntargetKindz,,letter`);
     expect(error!.parameters).toEqual(["targetKindz"]);
-    expect(error!.hint).toMatch(
-      /^The other closest supported parameters found were <span class="error-parameter">[a-zA-Z0-9_@]+<\/span> and <span class="error-parameter">[a-zA-Z0-9_@]+<\/span>\. All parameters are case-sensitive\.$/,
-    );
+    expect(error!.hint).toBe("All parameters are case-sensitive.");
   });
 });

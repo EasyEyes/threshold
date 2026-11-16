@@ -16,6 +16,7 @@ import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
 import JSZip from "jszip";
+import { read, write } from "xlsx";
 
 import { loadGlossaryForTests } from "./helpers/glossary";
 import { loadPhrasesForTests } from "./helpers/phrases";
@@ -109,10 +110,24 @@ const assembleResourcesRoot = (): void => {
  * EasyEyesResources file the tokens reference, zipped flat.
  */
 const buildSourceArchive = async (expandTilde = true): Promise<Buffer> => {
-  const tableFile = new File(
-    [fs.readFileSync(path.join(FIXTURES, TABLE))],
-    TABLE,
-  );
+  // Keep this resource round-trip fixture valid under the current Glossary.
+  // The historical workbook predates these two parameter renames.
+  const workbook = read(fs.readFileSync(path.join(FIXTURES, TABLE)), {
+    type: "buffer",
+  });
+  const replacements: Record<string, string> = {
+    _online2PayCurrency: "_online2PayCurrencyCode",
+    fontMaxPx: "fontMaxPhysicalPx",
+  };
+  const sheet = workbook.Sheets[workbook.SheetNames[0]];
+  for (const address of Object.keys(sheet)) {
+    if (/^A\d+$/.test(address) && replacements[sheet[address].v]) {
+      sheet[address].v = replacements[sheet[address].v];
+      delete sheet[address].w;
+    }
+  }
+  const tableBuffer = write(workbook, { type: "buffer", bookType: "xlsx" });
+  const tableFile = new File([tableBuffer], TABLE);
   const rows = await parseSpreadsheetRows(tableFile);
 
   expect(findPhrasesSpreadsheetName(rows)).toBe(PHRASES);
@@ -130,7 +145,7 @@ const buildSourceArchive = async (expandTilde = true): Promise<Buffer> => {
   }
 
   const zip = new JSZip();
-  zip.file(TABLE, fs.readFileSync(path.join(FIXTURES, TABLE)));
+  zip.file(TABLE, tableBuffer);
   await addReferencedResources(zip, tokens, tmpRoot);
   return zip.generateAsync({ type: "nodebuffer" });
 };

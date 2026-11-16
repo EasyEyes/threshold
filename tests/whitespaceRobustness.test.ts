@@ -36,8 +36,8 @@ jest.setTimeout(300_000);
 /* -------------------------------------------------------------------------- */
 /* Base table: minimal sound-calibration table modeled on the 2024 report.    */
 /* Covers every value class involved: boolean, categorical, multicategorical  */
-/* (plus a %-commented row), integer, text, and the obsolete-typed numeric    */
-/* list that was the report's exact cell.                                     */
+/* (plus a %-commented row), integer, text, and the numeric list from the      */
+/* report, using its current Glossary name.                                  */
 /* -------------------------------------------------------------------------- */
 
 const BASE: Record<string, string> = {
@@ -48,13 +48,13 @@ const BASE: Record<string, string> = {
   _authors: "A Scientist",
   _calibrateMicrophonesBool: "TRUE", // requires the three _author* rows above
   _calibrateSoundCheck: "speakerAndMic",
+  _calibrateSound1000HzDB: "-50,-40,-30,-25,-20,-15,-10,-3.1",
   _needBrowser: "Chrome,Safari,Edge",
   _needDeviceType: "desktop",
   _needProcessorCoresMinimum: "4",
   // Condition parameters — value in column C.
   block: "1",
   calibrateScreenSizeBool: "FALSE",
-  calibrateSound1000HzDB: "-50,-40,-30,-25,-20,-15,-10,-3.1",
   conditionEnabledBool: "TRUE",
   conditionName: "Q&A",
   conditionTrials: "1",
@@ -199,19 +199,19 @@ describe("GREEN: space-class mutations compile clean", () => {
     const booleanRow = good.findIndex(
       (r) => r[0] === "calibrateScreenSizeBool",
     );
-    const dbRow = good.findIndex((r) => r[0] === "calibrateSound1000HzDB");
+    const dbRow = good.findIndex((r) => r[0] === "_calibrateSound1000HzDB");
     good[booleanRow] = ["calibrateScreenSizeBool", "", false]; // boolean cell
     good[dbRow] = [
-      "calibrateSound1000HzDB",
-      "",
+      "_calibrateSound1000HzDB",
       " -50, -40,-30,-25,-20,-15,-10,-3.1",
+      "",
     ];
     const mangled = good.map((r) => [...r]) as (string | boolean)[][];
     mangled[booleanRow] = ["calibrateScreenSizeBool", "", "FALSE"]; // text cell
     mangled[dbRow] = [
-      "calibrateSound1000HzDB",
-      "",
+      "_calibrateSound1000HzDB",
       "-50,-40,-30,-25,-20,-15,-10,-3.1",
+      "",
     ];
 
     const goodResult = await compileVariantXlsx("numbers-good", good);
@@ -229,7 +229,7 @@ describe("GREEN: space-class mutations compile clean", () => {
     // The space change is semantically inert under the runtime idiom
     // (split(",") + parseFloat, as in useCalibration/soundTest).
     const toLevels = (r: any) =>
-      (blockCondition(r).calibrateSound1000HzDB as string)
+      (blockCondition(r)._calibrateSound1000HzDB as string)
         .split(",")
         .map(parseFloat);
     expect(toLevels(mangledResult)).toEqual(toLevels(goodResult));
@@ -238,10 +238,10 @@ describe("GREEN: space-class mutations compile clean", () => {
 
   it("odd spaces in a numeric list value: ends trimmed, interior preserved, runtime-parseable", async () => {
     const result = await compileVariant("db-oddspaces", {
-      calibrateSound1000HzDB: "  -50 , -40 ,-30,-25,-20,-15,-10,-3.1  ",
+      _calibrateSound1000HzDB: "  -50 , -40 ,-30,-25,-20,-15,-10,-3.1  ",
     });
     expect(errorNames(result)).toEqual([]);
-    const value = blockCondition(result).calibrateSound1000HzDB;
+    const value = blockCondition(result)._calibrateSound1000HzDB;
     expect(value).toBe("-50 , -40 ,-30,-25,-20,-15,-10,-3.1"); // ends trimmed only
     expect(value.split(",").map(parseFloat)).toEqual([
       -50, -40, -30, -25, -20, -15, -10, -3.1,
@@ -405,10 +405,10 @@ describe("GREEN: runtime ParamReader consumes mutated tables safely", () => {
 
   it("numeric list value is returned as a string the split/parseFloat idiom parses", async () => {
     const result = await compileVariant("db-oddspaces", {
-      calibrateSound1000HzDB: "  -50 , -40 ,-30,-25,-20,-15,-10,-3.1  ",
+      _calibrateSound1000HzDB: "  -50 , -40 ,-30,-25,-20,-15,-10,-3.1  ",
     });
     const reader = makeReader(result);
-    const value = reader.read("calibrateSound1000HzDB")[0];
+    const value = reader.read("_calibrateSound1000HzDB")[0];
     expect(typeof value).toBe("string");
     expect(value.split(",").map(parseFloat)).toEqual([
       -50, -40, -30, -25, -20, -15, -10, -3.1,
