@@ -34,7 +34,8 @@ export const showForm = async (formName, showPaymentInfo = null) => {
   // eslint-disable-next-line no-async-promise-executor
   return new Promise(async (resolve) => {
     // if form name is invalid, continue experiment
-    if (!(typeof formName === "string" && formName.length > 0)) resolve(false);
+    if (!(typeof formName === "string" && formName.length > 0))
+      return resolve(false);
 
     // reset all form outputs
     hideForm();

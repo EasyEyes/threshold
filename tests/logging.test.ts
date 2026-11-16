@@ -81,7 +81,9 @@ describe("logNotice", () => {
     expect(logged).toHaveLength(1);
     const line = String(logged[0][0]);
     expect(line).toContain("block start");
-    expect(line).toMatch(/\d+\.\d{3}\(sec\)/);
+    // toFixedNumber returns a Number, so trailing zeros drop when printed
+    // ("123.4", not "123.400") — pin at-most-3 decimals, not exactly-3
+    expect(line).toMatch(/\d+(\.\d{1,3})?\(sec\)/);
     expect(logged[0][2]).toEqual({ block: 3 });
   });
 });

@@ -358,7 +358,8 @@ export const addQRSkipButtons = (
     event.preventDefault();
     createAndShowPopup(lang);
   });
-  explanation.querySelector("a#check-connection").replaceWith(checkConnection);
+  const anchor = explanation.querySelector("a#check-connection");
+  if (anchor) anchor.replaceWith(checkConnection);
   textColumn.appendChild(explanation);
 
   // Column 3: Buttons

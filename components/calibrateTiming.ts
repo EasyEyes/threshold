@@ -16,7 +16,7 @@ export const calibrateTiming = async (intervals: number[]) => {
 };
 
 export const interpretCalibrateTimingIntervalsString = (
-  requestedIntervals: string
+  requestedIntervals: string,
 ): number[] => {
   const splitIntervals = requestedIntervals.split(",");
   if (splitIntervals.length % 2 !== 0) return [];
@@ -62,7 +62,6 @@ export const sleep = (ms: number) => {
 const measureTimingSleep = async (durationSec: number) => {
   const durationMs = durationSec * 1000;
   const startTime = performance.now();
-  console.log("durationMs", durationMs);
   await sleep(durationMs);
   const stopTime = performance.now();
   const measuredDurationMs = stopTime - startTime;

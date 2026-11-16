@@ -15,7 +15,7 @@
     "test:loader": "NODE_OPTIONS=--experimental-vm-modules jest --config jest.esm.config.cjs --no-coverage",
     "setup:psychojs": "cd psychojs && git checkout threshold-prod && npm ci && cd ..",
     "setup:psychojs:if-needed": "sh server/setup-psychojs-if-needed.sh",
-    "coverage": "npm run coverage:jest && npm run coverage:sim && npm run coverage:report",
+    "coverage": "tsx server/coverageRun.ts",
     "coverage:sim": "rm -f coverage/browser/*.json && EE_COVERAGE=1 tsx server/simulate.cli.ts image-identify-sim reading-identify-sim rsvpReading-identify-sim --no-build --jobs=1 || echo 'sim tier failed; tracking jest only'",
     "coverage:report": "tsx server/coverageReport.ts && npm run coverage:track",
     "format": "prettier --write \"**/*.{js,css,html,md,ts}\"",

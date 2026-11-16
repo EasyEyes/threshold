@@ -7,8 +7,11 @@
  */
 
 import path from "path";
+import { existsSync, readFileSync } from "fs";
+import { execFileSync } from "child_process";
 import { trackCoverage } from "./coverage/track";
 import { readBrowserDumps, readCoverageJson } from "./coverage/readCoverage";
+import { formatTldr, tldrFromHistory } from "./coverage/tldr";
 
 const ROOT = process.cwd();
 
@@ -28,6 +31,21 @@ const parseArgs = (argv: string[]) => {
   return args;
 };
 
+/** The committed history, for a delta the commit message actually wants. */
+const readHeadHistory = (historyFile: string): string[] | undefined => {
+  try {
+    const rel = path.relative(process.cwd(), historyFile) || ".";
+    const text = execFileSync(
+      "git",
+      ["show", `HEAD:./${rel.split(path.sep).join("/")}`],
+      { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] },
+    );
+    return text.split(/\r?\n/);
+  } catch {
+    return undefined; // not a repo, file untracked in HEAD, no git
+  }
+};
+
 const main = () => {
   const args = parseArgs(process.argv.slice(2));
   try {
@@ -38,6 +56,19 @@ const main = () => {
     });
     if (result.appended) console.log(`+ ${result.line}`);
     else console.log(`= unchanged: ${result.line}`);
+
+    const history = existsSync(args.history)
+      ? readFileSync(args.history, "utf8").split(/\r?\n/)
+      : [];
+    const tldr = tldrFromHistory(history, {
+      baseline: readHeadHistory(args.history),
+    });
+    if (tldr)
+      console.log(
+        formatTldr(tldr, {
+          color: !!process.stdout.isTTY && !process.env.NO_COLOR,
+        }),
+      );
   } catch (error) {
     console.error((error as Error).message);
     process.exit(1);

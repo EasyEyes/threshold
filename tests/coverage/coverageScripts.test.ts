@@ -24,10 +24,18 @@ const tableArgs =
     .filter(Boolean) ?? [];
 
 describe("npm run coverage wiring", () => {
-  test("the umbrella chains jest, the sim tier, and the tracked report", () => {
-    expect(scripts.coverage).toBe(
-      "npm run coverage:jest && npm run coverage:sim && npm run coverage:report",
-    );
+  test("the umbrella runs the unified single-screen runner", () => {
+    expect(scripts.coverage).toBe("tsx server/coverageRun.ts");
+  });
+
+  test("the unified runner chains jest, the sim tier, report, and track", () => {
+    const src = readFileSync(path.join(ROOT, "server/coverageRun.ts"), "utf8");
+    expect(src).toContain('run("jest"');
+    expect(src).toContain("simulate.cli.ts");
+    expect(src).toContain("coverageReport.ts");
+    expect(src).toContain("coverageTrack.ts");
+    expect(src).toContain('EE_COVERAGE: "1"');
+    for (const table of tableArgs) expect(src).toContain(`"${table}"`); // the canonical set
   });
 
   test("the jest tier is runnable alone and does not track by itself", () => {

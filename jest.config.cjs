@@ -2,6 +2,9 @@ module.exports = {
   setupFilesAfterEnv: ["<rootDir>/tests/helpers/consoleNoiseFilter.ts"],
   preset: "ts-jest/presets/js-with-ts-esm",
   testEnvironment: "node",
+  // Grid reporter: one cell per test file, redrawn in place, console noise
+  // withheld unless a file fails. Non-TTY runs delegate to DefaultReporter.
+  reporters: ["<rootDir>/server/jestGridReporter.js"],
   // Worker RSS across 8 workers is what intermittently kills a worker with
   // SIGSEGV, losing whichever suite it held. Recycle workers above this.
   workerIdleMemoryLimit: "512MB",

@@ -389,7 +389,7 @@ export const xyDegOfPx = (xyPx, useRealFixationXY = true) => {
     return [...deltaXYDeg.map((z, i) => z + Screens[0].nearestPointXYZDeg[i])];
   };
   if (isSinglePoint(xyPx)) return getXYDeg(xyPx);
-  return [...xyDeg.map(getXYDeg)];
+  return [...xyPx.map(getXYDeg)];
 };
 
 /**
@@ -1315,7 +1315,7 @@ export const psychojsUnitsFromWindowUnits = (
 /**
  * Get an array of values, length=numberOfValues, evenly spaced by intervalSize and centered at 0.
  * eg
- *  getEvenlySpacedValues(4, 25) => [-50, -25, 25, 50]
+ *  getEvenlySpacedValues(4, 25) => [-37.5, -12.5, 12.5, 37.5]
  *  getEvenlySpacedValues(3, 25) => [-25, 0, 25]
  * @param {Number} numberOfValues Length of returned array
  * @param {Number} intervalSize Distance between values in returned array
