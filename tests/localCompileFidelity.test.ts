@@ -364,6 +364,43 @@ describe("RED: environment-constrained checks are reported, not silently skipped
 });
 
 describe("glossary usage compiler integration", () => {
+  it.each([false, true])(
+    "reports both obsolete parameters once before any audit request (local audit=%s)",
+    async (localAudit) => {
+      const fetchSpy = jest
+        .spyOn(globalThis, "fetch")
+        .mockRejectedValue(new Error("Audit offline"));
+      try {
+        const result = await compileExperimentTableLocally(
+          writeTable(
+            "obsolete.csv",
+            makeTable({
+              _online2PayCurrency: "USD",
+              fontLeftToRightBool: "TRUE",
+            }),
+          ),
+          localCompileTestOptions({
+            resourcesRoot: tmpRoot,
+            glossaryAudit: localAudit ? glossaryAuditFixture() : undefined,
+          }),
+        );
+        expect(
+          result.blockingErrors.map((e) => [e.name, e.parameters]),
+        ).toEqual([
+          ["Parameter is obsolete", ["_online2PayCurrency"]],
+          ["Parameter is obsolete", ["fontLeftToRightBool"]],
+        ]);
+        expect(result.fileStringList).toEqual([]);
+        expect(
+          fetchSpy.mock.calls.some(([url]) =>
+            String(url).includes("glossary-audit-compiler"),
+          ),
+        ).toBe(false);
+      } finally {
+        fetchSpy.mockRestore();
+      }
+    },
+  );
   it("C2 blocks a known unused study parameter before generating condition files", async () => {
     const table = writeTable("unused-font.csv", makeTable({ font: "Arial" }));
     const result = await compileExperimentTableLocally(

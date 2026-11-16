@@ -28,9 +28,9 @@ exports[`Part A: example tables demoFlickeringGaborMovie.csv — error output is
 [
   {
     "context": "preprocessor",
-    "hint": "The other closest supported parameters found were <span class="error-parameter">_debriefForm</span> and <span class="error-parameter">_logFontBool</span>. All parameters are case-sensitive.",
+    "hint": "All parameters are case-sensitive.",
     "kind": "error",
-    "message": "The closest supported parameter is <span class="error-parameter">_consentForm</span> (<span style="color: #bb2c22; font-weight: bold; text-decoration: line-through;">%</span>_consentForm) &#8212 is that what you meant?",
+    "message": "This parameter is not defined in the Parameter Glossary. The closest supported parameter is <span class="error-parameter">_consentForm</span> (<span style="color: #bb2c22; font-weight: bold; text-decoration: line-through;">%</span>_consentForm) &#8212 is that what you meant?",
     "name": "Parameter is unrecognized",
     "parameters": [
       "%_consentForm",
@@ -59,9 +59,9 @@ exports[`Part A: example tables demoFlickeringGaborMovie.csv — error output is
   },
   {
     "context": "preprocessor",
-    "hint": "The other closest supported parameters found were <span class="error-parameter">_consentForm</span> and <span class="error-parameter">_debugBool</span>. All parameters are case-sensitive.",
+    "hint": "All parameters are case-sensitive.",
     "kind": "error",
-    "message": "The closest supported parameter is <span class="error-parameter">_debriefForm</span> (<span style="color: #bb2c22; font-weight: bold; text-decoration: line-through;">%</span>_debriefForm) &#8212 is that what you meant?",
+    "message": "This parameter is not defined in the Parameter Glossary. The closest supported parameter is <span class="error-parameter">_debriefForm</span> (<span style="color: #bb2c22; font-weight: bold; text-decoration: line-through;">%</span>_debriefForm) &#8212 is that what you meant?",
     "name": "Parameter is unrecognized",
     "parameters": [
       "%_debriefForm",
@@ -76,7 +76,20 @@ exports[`Part A: example tables gpos-features-test.csv — error output is uncha
 
 exports[`Part A: example tables grid-nearest-point-sim.csv — error output is unchanged 1`] = `[]`;
 
-exports[`Part A: example tables image-adjust-recalibrate-sim.csv — error output is unchanged 1`] = `[]`;
+exports[`Part A: example tables image-adjust-recalibrate-sim.csv — error output is unchanged 1`] = `
+[
+  {
+    "context": "preprocessor",
+    "hint": "Use <span class="error-parameter">needKeypadBeyondCm</span> instead.",
+    "kind": "error",
+    "message": "",
+    "name": "Parameter is obsolete",
+    "parameters": [
+      "needEasyEyesKeypadBeyondCm",
+    ],
+  },
+]
+`;
 
 exports[`Part A: example tables image-identify-sim.csv — error output is unchanged 1`] = `[]`;
 
@@ -92,11 +105,50 @@ exports[`Part A: example tables letter-mixed-modality-sim.csv — error output i
 
 exports[`Part A: example tables letter-none-instruction-sim.csv — error output is unchanged 1`] = `[]`;
 
-exports[`Part A: example tables letter-recalibrate-5trial-sim.csv — error output is unchanged 1`] = `[]`;
+exports[`Part A: example tables letter-recalibrate-5trial-sim.csv — error output is unchanged 1`] = `
+[
+  {
+    "context": "preprocessor",
+    "hint": "Use <span class="error-parameter">needKeypadBeyondCm</span> instead.",
+    "kind": "error",
+    "message": "",
+    "name": "Parameter is obsolete",
+    "parameters": [
+      "needEasyEyesKeypadBeyondCm",
+    ],
+  },
+]
+`;
 
-exports[`Part A: example tables letter-recalibrate-multiblock-sim.csv — error output is unchanged 1`] = `[]`;
+exports[`Part A: example tables letter-recalibrate-multiblock-sim.csv — error output is unchanged 1`] = `
+[
+  {
+    "context": "preprocessor",
+    "hint": "Use <span class="error-parameter">needKeypadBeyondCm</span> instead.",
+    "kind": "error",
+    "message": "",
+    "name": "Parameter is obsolete",
+    "parameters": [
+      "needEasyEyesKeypadBeyondCm",
+    ],
+  },
+]
+`;
 
-exports[`Part A: example tables letter-recalibrate-sim.csv — error output is unchanged 1`] = `[]`;
+exports[`Part A: example tables letter-recalibrate-sim.csv — error output is unchanged 1`] = `
+[
+  {
+    "context": "preprocessor",
+    "hint": "Use <span class="error-parameter">needKeypadBeyondCm</span> instead.",
+    "kind": "error",
+    "message": "",
+    "name": "Parameter is obsolete",
+    "parameters": [
+      "needEasyEyesKeypadBeyondCm",
+    ],
+  },
+]
+`;
 
 exports[`Part A: example tables letter-sim.csv — error output is unchanged 1`] = `[]`;
 
@@ -129,7 +181,20 @@ exports[`Part A: example tables letter-tracking-thrash-static-sim.csv — error 
 
 exports[`Part A: example tables likert-sim.csv — error output is unchanged 1`] = `[]`;
 
-exports[`Part A: example tables manual-recalibrate-test.csv — error output is unchanged 1`] = `[]`;
+exports[`Part A: example tables manual-recalibrate-test.csv — error output is unchanged 1`] = `
+[
+  {
+    "context": "preprocessor",
+    "hint": "Use <span class="error-parameter">needKeypadBeyondCm</span> instead.",
+    "kind": "error",
+    "message": "",
+    "name": "Parameter is obsolete",
+    "parameters": [
+      "needEasyEyesKeypadBeyondCm",
+    ],
+  },
+]
+`;
 
 exports[`Part A: example tables mark-flies-sim.csv — error output is unchanged 1`] = `[]`;
 
@@ -203,7 +268,20 @@ exports[`Part A: example tables rsvpReading-tracking-sim.csv — error output is
 
 exports[`Part A: example tables short.csv — error output is unchanged 1`] = `[]`;
 
-exports[`Part A: example tables showimage-recalibrate-sim.csv — error output is unchanged 1`] = `[]`;
+exports[`Part A: example tables showimage-recalibrate-sim.csv — error output is unchanged 1`] = `
+[
+  {
+    "context": "preprocessor",
+    "hint": "Use <span class="error-parameter">needKeypadBeyondCm</span> instead.",
+    "kind": "error",
+    "message": "",
+    "name": "Parameter is obsolete",
+    "parameters": [
+      "needEasyEyesKeypadBeyondCm",
+    ],
+  },
+]
+`;
 
 exports[`Part A: example tables test-disabled-condition-skipping.csv — error output is unchanged 1`] = `[]`;
 
@@ -242,9 +320,9 @@ exports[`Part A: example tables test-many-errors.csv — error output is unchang
   },
   {
     "context": "preprocessor",
-    "hint": "The other closest supported parameters found were <span class="error-parameter">readingPages</span> and <span class="error-parameter">readingCorpusFoils</span>. All parameters are case-sensitive.",
+    "hint": "All parameters are case-sensitive.",
     "kind": "error",
-    "message": "The closest supported parameter is <span class="error-parameter">readingCorpus</span> (readingCorpu<span style="color: #147133; font-weight: bold;">s</span>) &#8212 is that what you meant?",
+    "message": "This parameter is not defined in the Parameter Glossary. The closest supported parameter is <span class="error-parameter">readingCorpus</span> (readingCorpu<span style="color: #147133; font-weight: bold;">s</span>) &#8212 is that what you meant?",
     "name": "Parameter is unrecognized",
     "parameters": [
       "readingCorpu",
@@ -1245,9 +1323,9 @@ exports[`Part B: per-check trigger scenarios recognized — fires its check, out
   },
   {
     "context": "preprocessor",
-    "hint": "The other closest supported parameters found were <span class="error-parameter">_needRulerCm</span> and <span class="error-parameter">_dateCreated</span>. All parameters are case-sensitive.",
+    "hint": "No similarly spelled supported parameters were found. Check the parameter name in the Parameter Glossary. All parameters are case-sensitive.",
     "kind": "error",
-    "message": "The closest supported parameter is <span class="error-parameter">_consentForm</span> &#8212 is that what you meant?",
+    "message": "This parameter is not defined in the Parameter Glossary.",
     "name": "Parameter is unrecognized",
     "parameters": [
       "zzzNotARealParam",
@@ -1929,9 +2007,9 @@ exports[`Part C: aggregation contract messy table — full error output pinned 1
   },
   {
     "context": "preprocessor",
-    "hint": "The other closest supported parameters found were <span class="error-parameter">_needRulerCm</span> and <span class="error-parameter">_dateCreated</span>. All parameters are case-sensitive.",
+    "hint": "No similarly spelled supported parameters were found. Check the parameter name in the Parameter Glossary. All parameters are case-sensitive.",
     "kind": "error",
-    "message": "The closest supported parameter is <span class="error-parameter">_consentForm</span> &#8212 is that what you meant?",
+    "message": "This parameter is not defined in the Parameter Glossary.",
     "name": "Parameter is unrecognized",
     "parameters": [
       "zzzNotARealParam",

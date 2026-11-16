@@ -9,7 +9,7 @@ import {
   GLOSSARY_SHEET_URL,
 } from "../parameters/glossaryLink";
 import { getEasyEyesBaseUrl } from "../components/easyeyesBaseUrl";
-import type { EasyEyesError } from "./errorMessages";
+import { OBSOLETE_PARAMETER, type EasyEyesError } from "./errorMessages";
 
 export type GlossaryReference = { parameter: string; key: string };
 export type GlossaryCompilerAudit = {
@@ -98,30 +98,21 @@ export function validateGlossaryAudit(
     );
 
   return refs
-    .filter((ref) => unused.has(ref.key))
+    .filter(
+      (ref) =>
+        getGlossary()[ref.key]?.type === "obsolete" || unused.has(ref.key),
+    )
     .map((ref) => {
-      const evidence =
-        audit.findings?.find((item) => item.key === ref.key)?.removals ?? [];
+      if (getGlossary()[ref.key]?.type === "obsolete")
+        return OBSOLETE_PARAMETER(ref.parameter, ref.key);
       return {
         name: "Glossary parameter not audited as used",
         message: `Parameter <a href="${
           glossaryParameterUrl(ref.key) ?? GLOSSARY_SHEET_URL
         }" target="_blank" rel="noopener noreferrer"><strong>${escape(
           ref.parameter,
-        )}</strong></a> is classified as unused in glossary audit ${escape(
-          audit.id,
-        )} (${escape(audit.generatedAt)}).`,
-        hint: evidence.length
-          ? evidence
-              .map((item) =>
-                escape(
-                  `Removed from ${item.repository} at ${
-                    item.removedAt ?? "an unknown date"
-                  }.`,
-                ),
-              )
-              .join("<br/>")
-          : "No source usage was detected in the completed glossary audit. Check the parameter and the latest audit. This classification is not a proof of every runtime path.",
+        )}</strong></a> is defined in the Parameter Glossary, but no source usage was detected.`,
+        hint: "No source usage was detected in the completed glossary audit. Check the Glossary entry and remove this parameter if it is not needed. If it is required, report it to the EasyEyes team. This finding does not establish that the parameter is obsolete.",
         context: "preprocessor",
         kind: "error",
         parameters: [ref.parameter],

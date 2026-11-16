@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { getGlossary } from "../parameters/glossaryRegistry";
 import {
   conditionIndexToColumnName,
   getNumericalSuffix,
@@ -17,6 +18,47 @@ export interface EasyEyesError {
 }
 const parameter = (paramName: string): string =>
   `<span class="error-parameter">${paramName}</span>`;
+
+const escapeHtml = (text: string): string =>
+  text.replace(
+    /[&<>"']/g,
+    (c) =>
+      ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#39;",
+      })[c]!,
+  );
+
+/** Both table validation and the usage audit use the Glossary's migration advice. */
+export const OBSOLETE_PARAMETER = (
+  name: string,
+  glossaryKey = name,
+): EasyEyesError => {
+  const glossary = getGlossary();
+  const explanation = glossary[glossaryKey]?.explanation?.trim();
+  const hint = explanation
+    ? explanation
+        .split(/([A-Za-z_][A-Za-z0-9_@]*)/g)
+        .map((text) =>
+          Object.prototype.hasOwnProperty.call(glossary, text)
+            ? parameter(escapeHtml(text))
+            : escapeHtml(text),
+        )
+        .join("")
+        .replace(/\r?\n/g, "<br/>")
+    : "Remove this obsolete parameter. No replacement is specified in the Parameter Glossary.";
+  return {
+    name: "Parameter is obsolete",
+    message: "",
+    hint,
+    context: "preprocessor",
+    kind: "error",
+    parameters: [name],
+  };
+};
 
 // Convert a 1-based condition number (0 means the underscore column, B) to the
 // spreadsheet column label, accounting for any disabled conditions that were
