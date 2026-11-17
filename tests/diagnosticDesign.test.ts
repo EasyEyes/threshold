@@ -15,3 +15,16 @@ it.each([
   expect(error.hint).not.toContain("The EasyEyes compiler uses");
   expect(error.hint).not.toContain("Unsupported characters may appear");
 });
+
+import {
+  TYPEKIT_FONT_ONLY_AVAILABLE_WITH_SUBSCRIPTION,
+  TYPEKIT_FONTS_MISSING,
+} from "../preprocess/errorMessages";
+it.each([
+  TYPEKIT_FONT_ONLY_AVAILABLE_WITH_SUBSCRIPTION("font", {}),
+  TYPEKIT_FONTS_MISSING("font", {}),
+])("uses sections rather than literal newlines for Adobe guidance", (error) => {
+  expect(error.message).toContain('class="diagnostic-section"');
+  expect(error.message + error.hint).not.toContain("\n");
+  expect(error.hint).not.toContain("Copy the");
+});
