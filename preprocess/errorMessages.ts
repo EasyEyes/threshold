@@ -38,7 +38,11 @@ export const OBSOLETE_PARAMETER = (
   glossaryKey = name,
 ): EasyEyesError => {
   const glossary = getGlossary();
-  const explanation = glossary[glossaryKey]?.explanation?.trim();
+  // The card already communicates error status. Keep the Glossary's advice
+  // without its leading obsolete-status marker.
+  const explanation = glossary[glossaryKey]?.explanation
+    ?.trim()
+    .replace(/^(?:❌\uFE0F?\s*)+/, "");
   const hint = explanation
     ? explanation
         .split(/([A-Za-z_][A-Za-z0-9_@]*)/g)
@@ -52,7 +56,7 @@ export const OBSOLETE_PARAMETER = (
     : "Remove this obsolete parameter. No replacement is specified in the Parameter Glossary.";
   return {
     name: "Parameter is obsolete",
-    message: "",
+    message: "This parameter is obsolete and must be replaced or removed.",
     hint,
     context: "preprocessor",
     kind: "error",

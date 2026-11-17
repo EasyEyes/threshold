@@ -82,7 +82,7 @@ exports[`Part A: example tables image-adjust-recalibrate-sim.csv — error outpu
     "context": "preprocessor",
     "hint": "Use <span class="error-parameter">needKeypadBeyondCm</span> instead.",
     "kind": "error",
-    "message": "",
+    "message": "This parameter is obsolete and must be replaced or removed.",
     "name": "Parameter is obsolete",
     "parameters": [
       "needEasyEyesKeypadBeyondCm",
@@ -111,7 +111,7 @@ exports[`Part A: example tables letter-recalibrate-5trial-sim.csv — error outp
     "context": "preprocessor",
     "hint": "Use <span class="error-parameter">needKeypadBeyondCm</span> instead.",
     "kind": "error",
-    "message": "",
+    "message": "This parameter is obsolete and must be replaced or removed.",
     "name": "Parameter is obsolete",
     "parameters": [
       "needEasyEyesKeypadBeyondCm",
@@ -126,7 +126,7 @@ exports[`Part A: example tables letter-recalibrate-multiblock-sim.csv — error 
     "context": "preprocessor",
     "hint": "Use <span class="error-parameter">needKeypadBeyondCm</span> instead.",
     "kind": "error",
-    "message": "",
+    "message": "This parameter is obsolete and must be replaced or removed.",
     "name": "Parameter is obsolete",
     "parameters": [
       "needEasyEyesKeypadBeyondCm",
@@ -141,7 +141,7 @@ exports[`Part A: example tables letter-recalibrate-sim.csv — error output is u
     "context": "preprocessor",
     "hint": "Use <span class="error-parameter">needKeypadBeyondCm</span> instead.",
     "kind": "error",
-    "message": "",
+    "message": "This parameter is obsolete and must be replaced or removed.",
     "name": "Parameter is obsolete",
     "parameters": [
       "needEasyEyesKeypadBeyondCm",
@@ -187,7 +187,7 @@ exports[`Part A: example tables manual-recalibrate-test.csv — error output is 
     "context": "preprocessor",
     "hint": "Use <span class="error-parameter">needKeypadBeyondCm</span> instead.",
     "kind": "error",
-    "message": "",
+    "message": "This parameter is obsolete and must be replaced or removed.",
     "name": "Parameter is obsolete",
     "parameters": [
       "needEasyEyesKeypadBeyondCm",
@@ -274,7 +274,7 @@ exports[`Part A: example tables showimage-recalibrate-sim.csv — error output i
     "context": "preprocessor",
     "hint": "Use <span class="error-parameter">needKeypadBeyondCm</span> instead.",
     "kind": "error",
-    "message": "",
+    "message": "This parameter is obsolete and must be replaced or removed.",
     "name": "Parameter is obsolete",
     "parameters": [
       "needEasyEyesKeypadBeyondCm",

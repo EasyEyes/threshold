@@ -58,9 +58,13 @@ it.each([
     expect(errors).toHaveLength(1);
     expect(errors[0]).toMatchObject({
       name: "Parameter is obsolete",
+      message: "This parameter is obsolete and must be replaced or removed.",
       kind: "error",
       parameters: [name],
     });
+    expect(errors[0].hint).toBe(
+      `Use <span class="error-parameter">${replacement}</span> instead.`,
+    );
     expect(errors[0].hint).toContain(
       `<span class="error-parameter">${replacement}</span>`,
     );
