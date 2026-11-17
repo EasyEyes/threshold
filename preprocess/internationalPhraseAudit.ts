@@ -111,10 +111,12 @@ export function validateInternationalPhraseAudit(
           ref.column + 1
         }) is absent from the used keys in audit ${escape(audit.id)} (${escape(
           audit.generatedAt,
-        )}).`,
-        hint: evidence.length
-          ? evidence.map(escape).join("<br/>")
-          : "No source or removal evidence is available for this key. Check the phrase name and the latest International Phrases audit.",
+        )}).<span class="diagnostic-section"><strong>Can I run the study?</strong> Compilation is blocked until this phrase reference passes the audit.</span><span class="diagnostic-section"><strong>Audit evidence.</strong> ${
+          evidence.length
+            ? evidence.map(escape).join("<br/>")
+            : "No source or removal evidence is available for this key."
+        }</span>`,
+        hint: "Check the phrase name and the latest International Phrases audit.",
         context: "preprocessor",
         kind: "error",
         parameters: [ref.parameter],
