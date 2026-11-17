@@ -223,7 +223,7 @@ const endsLikeSentence = (html: string): boolean => {
   const t = html.replace(/\s+$/g, "");
   if (t === "") return true;
   if (/<\/(ul|ol)>$/.test(t)) return true;
-  return /[.?!)]$/.test(t);
+  return /[.?!)]$/.test(t.replace(/(?:<\/(?:span|div)>\s*)+$/, ""));
 };
 
 describe("factory registry completeness", () => {
