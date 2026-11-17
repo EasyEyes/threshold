@@ -8,6 +8,7 @@
  */
 
 import { FONT_READING_CORPUS_CHARACTERS_MISSING } from "../preprocess/errorMessages";
+import { diagnosticValue } from "../preprocess/diagnosticHtml";
 
 const error = (offendingConditions: number[]) =>
   FONT_READING_CORPUS_CHARACTERS_MISSING(
@@ -21,7 +22,11 @@ const error = (offendingConditions: number[]) =>
 describe("message", () => {
   it("states font, count, corpus, and a sample", () => {
     expect(error([2]).message).toBe(
-      `The font "SomeFont.ttf" is missing 3 characters required by <span class="error-parameter">readingCorpus</span> "corpus.txt" (for example: 你好).`,
+      `The font ${diagnosticValue(
+        "SomeFont.ttf",
+      )} is missing 3 characters required by <span class="error-parameter">readingCorpus</span> ${diagnosticValue(
+        "corpus.txt",
+      )} (for example: ${diagnosticValue("你好")}).`,
     );
   });
 
@@ -29,7 +34,11 @@ describe("message", () => {
     expect(
       FONT_READING_CORPUS_CHARACTERS_MISSING("F", "c", "x", 1, [0]).message,
     ).toBe(
-      `The font "F" is missing 1 character required by <span class="error-parameter">readingCorpus</span> "c" (for example: x).`,
+      `The font ${diagnosticValue(
+        "F",
+      )} is missing 1 character required by <span class="error-parameter">readingCorpus</span> ${diagnosticValue(
+        "c",
+      )} (for example: ${diagnosticValue("x")}).`,
     );
   });
 });
@@ -49,7 +58,9 @@ describe("hint", () => {
 
   it("documents the tolerate escape hatch with the empty-box consequence", () => {
     expect(error([0]).hint).toContain(
-      `To use the font despite missing characters, add "missingCharacters" to <span class="error-parameter">fontTolerateFaults</span> for the affected condition. Unsupported characters may appear as empty boxes, e.g. □.`,
+      `To use the font despite missing characters, add ${diagnosticValue(
+        "missingCharacters",
+      )} to <span class="error-parameter">fontTolerateFaults</span> for the affected condition. Unsupported characters may appear as empty boxes, e.g. □.`,
     );
   });
 

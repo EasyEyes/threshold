@@ -14,6 +14,10 @@
  *
  * The error NAME is not scanned: names render through .error-name, where
  * links are not applied and nested emphasis is invisible.
+ *
+ * The same audit also requires VALUES to use code.error-value, without
+ * delimiter quotes or ad-hoc strong/em/b styling; quotes inside an
+ * already-marked value are data and remain allowed.
  */
 import * as fs from "fs";
 import * as path from "path";
@@ -226,7 +230,29 @@ const endsLikeSentence = (html: string): boolean => {
   return /[.?!)]$/.test(t);
 };
 
+/** Values use code.error-value. Quotes inside an already-marked value are
+ * data, not delimiters; everywhere else, straight quotes and ad-hoc emphasis
+ * indicate an unstandardized value. */
+const hasUnstandardizedValuePresentation = (html: string): boolean => {
+  if (/<(?:strong|b|em)(?:\s|>)/.test(html)) return true;
+  const withoutMarkedValues = html.replace(
+    /<code class="error-value">[\s\S]*?<\/code>/g,
+    " ",
+  );
+  const text = withoutMarkedValues.replace(/<[^>]+>/g, " ");
+  return /"|&quot;/.test(text);
+};
+
 describe("factory registry completeness", () => {
+  it("NO_BLOCK_PARAMETER follows the same conventions", () => {
+    const error = ErrorMessages.NO_BLOCK_PARAMETER;
+    expect(error.hint).not.toContain("blockblock");
+    for (const field of ["message", "hint"] as const) {
+      expect(endsLikeSentence(error[field])).toBe(true);
+      expect(hasUnstandardizedValuePresentation(error[field])).toBe(false);
+    }
+  });
+
   it("every exported error factory has registered args (and none are stale)", () => {
     const modules = [
       [ErrorMessages, FACTORY_ARGS],
@@ -273,6 +299,9 @@ describe("parameter references in error text are param-spanned", () => {
     expect(error.name).not.toMatch(/<[a-zA-Z]/);
     for (const field of ["message", "hint"] as const) {
       expect(endsLikeSentence(error[field] ?? "")).toBe(true);
+      expect(hasUnstandardizedValuePresentation(error[field] ?? "")).toBe(
+        false,
+      );
       const bare = bareParameterMentions(error[field] ?? "").filter(
         (found) => !allowed.includes(found),
       );
@@ -306,6 +335,14 @@ describe("parameter references in error text are param-spanned", () => {
         const skipFields = CORPUS_EXCEPTIONS[error.name] ?? [];
         for (const field of ["message", "hint"] as const) {
           if (skipFields.includes(field)) continue;
+          if (
+            hasUnstandardizedValuePresentation(
+              (error as unknown as Record<string, string>)[field] ?? "",
+            )
+          )
+            violations.push(
+              `${file} · ${error.name} · ${field} · unstandardized value presentation`,
+            );
           for (const bare of bareParameterMentions(
             (error as unknown as Record<string, string>)[field] ?? "",
           )) {

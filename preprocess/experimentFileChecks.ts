@@ -61,6 +61,7 @@ import { fetchAdobeFontBytes, fetchGoogleFontBytes } from "./fontFetch";
 import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
 import { ExperimentTable } from "./experimentTable";
 import { makeError } from "./validateExperimentTable";
+import { diagnosticValue } from "./diagnosticHtml";
 
 import {
   folderStructureCheckImage,
@@ -691,6 +692,7 @@ export const isImpulseResponseMissing = (
         IMPULSE_RESPONSE_FILE_INVALID_FORMAT(
           requestedFile,
           "Filename must end with .gainVTime.xlsx or .gainVTime.csv",
+          parameter,
         ),
       );
       continue;
@@ -742,8 +744,14 @@ export const validateImpulseResponseFile = async (
       if (fileSamplingRate < lowerBound || fileSamplingRate > upperBound) {
         return makeError({
           name: "Sampling rate mismatch",
-          message: `The impulse response file ${file.name} has a sampling rate of ${fileSamplingRate} Hz, but _calibrateSoundSamplingDesiredHz specifies ${desiredSamplingRate} Hz.`,
-          hint: "Please provide a file with the correct sampling rate or adjust the _calibrateSoundSamplingDesiredHz parameter.",
+          message: `The impulse response file ${diagnosticValue(
+            file.name,
+          )} has a sampling rate of ${diagnosticValue(
+            fileSamplingRate,
+          )} Hz, but <span class="error-parameter">_calibrateSoundSamplingDesiredHz</span> specifies ${diagnosticValue(
+            desiredSamplingRate,
+          )} Hz.`,
+          hint: `Please provide a file with the correct sampling rate or adjust the <span class="error-parameter">_calibrateSoundSamplingDesiredHz</span> parameter.`,
           parameters: ["_calibrateSoundSamplingDesiredHz"],
         });
       }

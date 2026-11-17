@@ -48,6 +48,18 @@ describe("htmlToTerminal", () => {
     );
   });
 
+  it("distinguishes error-value code from parameter names", () => {
+    expect(
+      htmlToTerminal('Use <code class="error-value">Chrome Mobile</code>.', C),
+    ).toBe(`Use ${color.boldCyan("Chrome Mobile", C)}.`);
+    expect(
+      htmlToTerminal(
+        'Use <code class="error-value">Chrome Mobile</code>.',
+        false,
+      ),
+    ).toBe("Use Chrome Mobile.");
+  });
+
   it("converts red styled spans to red text, marking empty ones", () => {
     expect(htmlToTerminal('<span style="color: #bb2c22;">bad</span>', C)).toBe(
       color.red("bad", C),

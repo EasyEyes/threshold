@@ -5,6 +5,7 @@ import { loadGlossaryForTests } from "./helpers/glossary";
 import { getGlossary } from "../parameters/glossaryRegistry";
 import { ExperimentTable } from "../preprocess/experimentTable";
 import { validateExperimentTable } from "../preprocess/validateExperimentTable";
+import { diagnosticValue } from "../preprocess/diagnosticHtml";
 
 const ERROR_NAME = "ColorRGBA component out of range";
 const STANDALONE = [
@@ -105,7 +106,7 @@ describe("ColorRGBA compiler range validation", () => {
     (name) => {
       const errors = rangeErrors(one(name, "2,0,0"));
       expect(errors).toHaveLength(1);
-      expect(errors[0].hint).toContain("R=2");
+      expect(errors[0].hint).toContain(`R=${diagnosticValue(2)}`);
     },
   );
 
@@ -125,8 +126,8 @@ describe("ColorRGBA compiler range validation", () => {
   test("a non-numeric component does not hide another component's range error", () => {
     const errors = rangeErrors(one("fontColorRGBA", "0,2,banana,1"));
     expect(errors).toHaveLength(1);
-    expect(errors[0].hint).toContain("G=2");
-    expect(errors[0].hint).not.toContain("banana (column");
+    expect(errors[0].hint).toContain(`G=${diagnosticValue(2)}`);
+    expect(errors[0].hint).not.toContain(diagnosticValue("banana"));
   });
 
   test("legacy count and range errors are both reported in one pass", () => {
@@ -139,7 +140,7 @@ describe("ColorRGBA compiler range validation", () => {
     ).toBe(true);
     const colorErrors = rangeErrors(t);
     expect(colorErrors).toHaveLength(1);
-    expect(colorErrors[0].hint).toContain("B=2");
+    expect(colorErrors[0].hint).toContain(`B=${diagnosticValue(2)}`);
   });
 
   test.each([

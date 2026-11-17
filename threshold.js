@@ -4,21 +4,21 @@ import {
   buildRuntimeErrorMessage,
   formatErrorContextAsText,
 } from "./components/runtimeErrorMessage.js";
-import { onStudyTermination } from "./components/interaction/termination"; /**********************
+import { onStudyTermination } from "./components/interaction/termination";
+import { loadCSS } from "./components/cssOverlay.js";
+import {
+  chaosFireIfDue,
+  chaosSeedFromLocation,
+  createChaosState,
+} from "./components/chaos.js";
+import {
+  parseWindowQuery,
+  daisyChainRedirectURL,
+} from "./components/windowUrl.js";
+import { applyReturnedParticipantInfo } from "./components/participantInfo.js";
+/**********************
  * EasyEyes Threshold *
  **********************/
-// Load CSS asynchronously before any UI renders
-const loadCSS = (href) => {
-  return new Promise((resolve, reject) => {
-    const link = document.createElement("link");
-    link.rel = "stylesheet";
-    link.href = href;
-    link.onload = resolve;
-    link.onerror = reject;
-    document.head.appendChild(link);
-  });
-};
-
 // Load CSS files (production) and external SweetAlert2 CSS
 const cssPromises = [];
 if (!process.env.debug) {
@@ -54,6 +54,10 @@ import {
   clearFullscreenWasLost,
   requireFullscreenForTrialInitiation,
   requestFullscreenSafe,
+  totalEnabledTrialsThisBlock,
+  maxViewingDistanceCmForScreenWidthDeg,
+  lastConditionNamed,
+  currentViewingDistanceCm,
 } from "./components/utils.js";
 import { easyEyesVersion } from "./components/easyEyesVersion.js";
 import {
@@ -74,6 +78,7 @@ import { HTMLTextStim } from "./psychojs/src/visual/HTMLTextStim.js";
 import {
   renderInstructionMarkdown,
   renderMarkdown,
+  plainTextOfInstruction,
 } from "./components/markdownInline.js";
 import { dynamicSetSize } from "./components/dynamicSetSize.js";
 import { recordHeapUsed, textureStats } from "./components/heapTelemetry";
@@ -713,35 +718,18 @@ if (import.meta.hot) import.meta.hot.dispose(stopInteractionObservation);
 // routine name), so e2e can verify every failure path ends in a specific
 // recorded reason. Inert without the seed. Skips the very first stamp —
 // errors before buildWindowErrorHandling cannot be recorded yet.
-const strHash = (s) => {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
-  return h;
-};
-const chaosSeed =
-  (window.__SIM_OPTIONS__ && window.__SIM_OPTIONS__.chaos) ||
-  new URLSearchParams(window.location.search).get("chaos") ||
-  null;
-const chaosState = chaosSeed
-  ? {
-      targetDistinct: (strHash(String(chaosSeed)) % 22) + 2,
-      seen: new Set(),
-      fired: false,
-    }
-  : null;
+const chaosSeed = chaosSeedFromLocation(
+  window.__SIM_OPTIONS__,
+  window.location.search,
+);
+const chaosState = createChaosState(chaosSeed);
 
 const setCurrentFn = (fnName) => {
   status.currentFunction = fnName;
   observeRoutine(fnName);
   logNotice(`In ${fnName}.`);
   if (simulateActive) setEEState({ currentFunction: fnName });
-  if (chaosState && !chaosState.fired && !chaosState.seen.has(fnName)) {
-    chaosState.seen.add(fnName);
-    if (chaosState.seen.size >= chaosState.targetDistinct) {
-      chaosState.fired = true;
-      throw new Error(`CHAOS injected at ${fnName}`);
-    }
-  }
+  if (chaosState) chaosFireIfDue(chaosState, fnName);
 };
 
 var videoblob = [];
@@ -760,48 +748,13 @@ window.jsQUEST = jsQUEST;
 const fontsRequired = {};
 /* -------------------------------------------------------------------------- */
 
-const parseWindowURL = () => {
-  //check if the URL has a query string: participant, session, study_id, redirectToDaisyChainBefore
-  const urlSearchParams = new URLSearchParams(window.location.search);
-  const participant = urlSearchParams.get("participant");
-  const session = urlSearchParams.get("session");
-  const study_id = urlSearchParams.get("study_id");
-  const completedDaisyChainBefore = urlSearchParams.get(
-    "completedDaisyChainBefore",
-  );
-
-  return { participant, session, study_id, completedDaisyChainBefore };
-};
-
 //_daisyChainURLBefore
 const daisyChainURLBefore = (url) => {
-  if (!url) return;
-  const { participant, session, study_id, completedDaisyChainBefore } =
-    parseWindowURL();
-  if (completedDaisyChainBefore) return;
-
-  const newURL = `${url}?external_id=${participant}&participant=${participant}&session=${session}&study_id=${study_id}&completedDaisyChainBefore=${true}`;
-  window.location = newURL;
-};
-
-const updateCSSAfterContentOfRoot = (newContent) => {
-  // Create a style element
-  const style = document.createElement("style");
-  document.head.appendChild(style);
-
-  // Add a rule for the #root::after with the new content
-  style.sheet.insertRule(
-    `
-    #root::after {
-      content: "${newContent}";
-      position: fixed;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-    }
-  `,
-    style.sheet.cssRules.length,
+  const newURL = daisyChainRedirectURL(
+    url,
+    parseWindowQuery(window.location.search),
   );
+  if (newURL) window.location = newURL;
 };
 
 const paramReaderInitialized = async (reader) => {
@@ -870,19 +823,12 @@ const paramReaderInitialized = async (reader) => {
 
   if (reader.read("_participantIDGetBool")[0]) {
     const gotParticipantId = (participant, session = null, storedId) => {
-      if (participant) {
-        thisExperimentInfo.participant = participant;
-        if (storedId !== undefined && participant === storedId) {
-          thisExperimentInfo.setSession(
-            session && isNaN(Number(session)) ? session : Number(session) + 1,
-          );
-        } else {
-          thisExperimentInfo.setSession(1);
-        }
-
-        thisExperimentInfo.EasyEyesID = participant;
-        thisExperimentInfo.PavloviaSessionID = participant;
-      }
+      applyReturnedParticipantInfo(
+        thisExperimentInfo,
+        participant,
+        session,
+        storedId,
+      );
     };
 
     const result = await checkCrossSessionId(
@@ -2019,9 +1965,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         }
       },
       updateDistanceState: () => {
-        viewingDistanceCm.current = rc.viewingDistanceCm
-          ? rc.viewingDistanceCm.value
-          : Math.min(viewingDistanceCm.desired, viewingDistanceCm.max);
+        viewingDistanceCm.current = currentViewingDistanceCm(
+          rc.viewingDistanceCm,
+          viewingDistanceCm.desired,
+          viewingDistanceCm.max,
+        );
         Screens[0].viewingDistanceCm = viewingDistanceCm.current;
         updateNearestPointFromRc(0, rc);
       },
@@ -2738,9 +2686,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       (p) => getGlossary()[p].type !== "obsolete",
     );
 
-    viewingDistanceCm.current = rc.viewingDistanceCm
-      ? rc.viewingDistanceCm.value
-      : Math.min(viewingDistanceCm.desired, viewingDistanceCm.max);
+    viewingDistanceCm.current = currentViewingDistanceCm(
+      rc.viewingDistanceCm,
+      viewingDistanceCm.desired,
+      viewingDistanceCm.max,
+    );
     Screens[0].viewingDistanceCm = viewingDistanceCm.current;
     updateNearestPointFromRc(0, rc);
     addApparatusInfoToData(Screens[0], rc, psychoJS);
@@ -3187,16 +3137,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   // Visible text of an instruction phrase: render any markdown/HTML to HTML
   // (as the DOM instruction overlays do), then extract the plain text,
   // preserving line breaks. Needed by canvas TextStims, which draw raw text.
-  function plainTextOfInstruction(text) {
-    const html = renderInstructionMarkdown(text ?? "").replace(
-      /<br\s*\/?>/gi,
-      "\n",
-    );
-    const el = document.createElement("div");
-    el.innerHTML = html;
-    return el.textContent ?? "";
-  }
-
   // Instruction setup for targetKind=image with targetTask=adjust. Unlike
   // _instructionSetup (DOM overlay, always above the canvas), this draws the
   // text on the canvas via imageAdjustInstructions, added to the draw list
@@ -4701,35 +4641,24 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         status.block,
       )[0];
 
-      const tand = (x) => Math.tan((x * Math.PI) / 180);
       const screenWidthPx = Screens[0].window._size[0];
       const pxPerCm = Screens[0].pxPerCm;
       const screenWidthCm = screenWidthPx / pxPerCm;
-      const needScreenWidthDeg = paramReader.read(
-        "needScreenWidthDeg",
-        status.block,
-      )[0];
-      viewingDistanceCm.max =
-        needScreenWidthDeg === 0
-          ? Infinity
-          : screenWidthCm / (2 * tand(needScreenWidthDeg / 2));
+      viewingDistanceCm.max = maxViewingDistanceCmForScreenWidthDeg(
+        screenWidthCm,
+        paramReader.read("needScreenWidthDeg", status.block)[0],
+      );
 
-      viewingDistanceCm.current = rc.viewingDistanceCm
-        ? rc.viewingDistanceCm.value
-        : Math.min(viewingDistanceCm.desired, viewingDistanceCm.max);
+      viewingDistanceCm.current = currentViewingDistanceCm(
+        rc.viewingDistanceCm,
+        viewingDistanceCm.desired,
+        viewingDistanceCm.max,
+      );
       Screens[0].viewingDistanceCm = viewingDistanceCm.current;
       updateNearestPointFromRc(0, rc);
       /* -------------------------------------------------------------------------- */
-      const getTotalTrialsThisBlock = () => {
-        const possibleTrials = paramReader
-          .read("conditionTrials", status.block)
-          .filter(
-            (c, i) =>
-              paramReader.read("conditionEnabledBool", status.block)[i] &&
-              c > 0,
-          );
-        return possibleTrials.reduce((a, b) => a + b, 0);
-      };
+      const getTotalTrialsThisBlock = () =>
+        totalEnabledTrialsThisBlock(paramReader, status.block);
       // Get total trials for this block
       switchTask(targetTask.current, {
         questionAndAnswer: () => {
@@ -5777,7 +5706,6 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         "viewingDistanceDesiredCm",
         status.block_condition,
       );
-      const tand = (x) => Math.tan((x * Math.PI) / 180);
       const screenWidthPx = Screens[0].window._size[0];
       const pxPerCm = Screens[0].pxPerCm;
       const screenWidthCm = screenWidthPx / pxPerCm;
@@ -5785,11 +5713,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         "needScreenWidthDeg",
         status.block,
       );
-      const maxNeedScreenWidthDeg = Math.max(...needScreenWidthDeg);
-      viewingDistanceCm.max =
-        maxNeedScreenWidthDeg === 0
-          ? Infinity
-          : screenWidthCm / (2 * tand(maxNeedScreenWidthDeg / 2));
+      viewingDistanceCm.max = maxViewingDistanceCmForScreenWidthDeg(
+        screenWidthCm,
+        Math.max(...needScreenWidthDeg),
+      );
       rc.setViewingDistanceAllowedPreciseBool(
         paramReader.read(
           "viewingDistanceAllowedPreciseBool",
@@ -5858,9 +5785,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           );
         }
 
-        viewingDistanceCm.current = rc.viewingDistanceCm
-          ? rc.viewingDistanceCm.value
-          : Math.min(viewingDistanceCm.desired, viewingDistanceCm.max);
+        viewingDistanceCm.current = currentViewingDistanceCm(
+          rc.viewingDistanceCm,
+          viewingDistanceCm.desired,
+          viewingDistanceCm.max,
+        );
         Screens[0].viewingDistanceCm = viewingDistanceCm.current;
 
         updateNearestPointFromRc(0, rc);
@@ -5937,23 +5866,25 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           showCursor();
       };
 
+      // MultiStair path shared by every staircase-driven kind: resolve the
+      // current condition from the active staircase's name.
+      const adoptStaircaseCondition = () => {
+        const c = lastConditionNamed(
+          snapshot.handler.getConditions(),
+          trials._currentStaircase._name,
+        );
+        if (c) {
+          status.condition = c;
+          status.block_condition = c["block_condition"];
+        }
+      };
       switchKind(targetKind.current, {
         vocoderPhrase: () => {
-          for (let c of snapshot.handler.getConditions()) {
-            if (c.block_condition === trials._currentStaircase._name) {
-              status.condition = c;
-              status.block_condition = status.condition["block_condition"];
-            }
-          }
+          adoptStaircaseCondition();
         },
         image: () => {
           if (trials instanceof MultiStairHandler) {
-            for (let c of snapshot.handler.getConditions()) {
-              if (c.block_condition === trials._currentStaircase._name) {
-                status.condition = c;
-                status.block_condition = status.condition["block_condition"];
-              }
-            }
+            adoptStaircaseCondition();
           } else {
             // TrialHandler path (e.g. targetTask=adjust): use current trial.
             status.condition = snapshot.getCurrentTrial();
@@ -5962,61 +5893,31 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           letterSetResponseType();
         },
         sound: () => {
-          for (let c of snapshot.handler.getConditions()) {
-            if (c.block_condition === trials._currentStaircase._name) {
-              status.condition = c;
-              status.block_condition = status.condition["block_condition"];
-            }
-          }
+          adoptStaircaseCondition();
         },
         reading: () => {
           status.condition = snapshot.getCurrentTrial();
           status.block_condition = trials.thisTrial.block_condition;
         },
         letter: () => {
-          for (let c of snapshot.handler.getConditions()) {
-            if (c.block_condition === trials._currentStaircase._name) {
-              status.condition = c;
-              status.block_condition = status.condition["block_condition"];
-            }
-          }
+          adoptStaircaseCondition();
           letterSetResponseType();
         },
         rsvpReading: () => {
           t;
-          for (let c of snapshot.handler.getConditions()) {
-            if (c.block_condition === trials._currentStaircase._name) {
-              status.condition = c;
-              status.block_condition = status.condition["block_condition"];
-            }
-          }
+          adoptStaircaseCondition();
           letterSetResponseType(true);
         },
         repeatedLetters: () => {
-          for (let c of snapshot.handler.getConditions()) {
-            if (c.block_condition === trials._currentStaircase._name) {
-              status.condition = c;
-              status.block_condition = status.condition["block_condition"];
-            }
-          }
+          adoptStaircaseCondition();
           letterSetResponseType();
         },
         movie: () => {
-          for (let c of snapshot.handler.getConditions()) {
-            if (c.block_condition === trials._currentStaircase._name) {
-              status.condition = c;
-              status.block_condition = status.condition["block_condition"];
-            }
-          }
+          adoptStaircaseCondition();
           letterSetResponseType();
         },
         vernier: () => {
-          for (let c of snapshot.handler.getConditions()) {
-            if (c.block_condition === trials._currentStaircase._name) {
-              status.condition = c;
-              status.block_condition = status.condition["block_condition"];
-            }
-          }
+          adoptStaircaseCondition();
           letterSetResponseType();
         },
       });
@@ -8543,9 +8444,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       /* -------------------------------------------------------------------------- */
       // ! distance
       if (ifTrue(paramReader.read("calibrateDistanceBool", status.block))) {
-        viewingDistanceCm.current = rc.viewingDistanceCm
-          ? rc.viewingDistanceCm.value
-          : Math.min(viewingDistanceCm.desired, viewingDistanceCm.max);
+        viewingDistanceCm.current = currentViewingDistanceCm(
+          rc.viewingDistanceCm,
+          viewingDistanceCm.desired,
+          viewingDistanceCm.max,
+        );
         Screens[0].viewingDistanceCm = viewingDistanceCm.current;
         updateNearestPointFromRc(0, rc);
       }
@@ -10376,9 +10279,11 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             );
           }
 
-          viewingDistanceCm.current = rc.viewingDistanceCm
-            ? rc.viewingDistanceCm.value
-            : Math.min(viewingDistanceCm.desired, viewingDistanceCm.max);
+          viewingDistanceCm.current = currentViewingDistanceCm(
+            rc.viewingDistanceCm,
+            viewingDistanceCm.desired,
+            viewingDistanceCm.max,
+          );
           Screens[0].viewingDistanceCm = viewingDistanceCm.current;
           updateNearestPointFromRc(0, rc);
 

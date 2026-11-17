@@ -4,6 +4,7 @@ import {
 } from "./internationalPhraseLink";
 import type { EasyEyesError } from "./errorMessages";
 import { getEasyEyesBaseUrl } from "../components/easyeyesBaseUrl";
+import { diagnosticValue, diagnosticValueHtml } from "./diagnosticHtml";
 
 type Reference = { key: string; parameter: string; column: number };
 type Audit = {
@@ -102,16 +103,18 @@ export function validateInternationalPhraseAudit(
       ];
       return {
         name: "International phrase not audited as used",
-        message: `Phrase <a href="${internationalPhraseUrl(
-          ref.key,
-          phraseRows,
-        )}" target="_blank" rel="noopener noreferrer"><strong>${escape(
-          ref.key,
-        )}</strong></a> in ${escape(ref.parameter)} (column ${
+        message: `Phrase ${diagnosticValueHtml(
+          `<a href="${internationalPhraseUrl(
+            ref.key,
+            phraseRows,
+          )}" target="_blank" rel="noopener noreferrer">${escape(ref.key)}</a>`,
+        )} in <span class="error-parameter">${escape(
+          ref.parameter,
+        )}</span> (column ${
           ref.column + 1
-        }) is absent from the used keys in audit ${escape(audit.id)} (${escape(
-          audit.generatedAt,
-        )}).`,
+        }) is absent from the used keys in audit ${diagnosticValue(
+          audit.id,
+        )} (${diagnosticValue(audit.generatedAt)}).`,
         hint: evidence.length
           ? evidence.map(escape).join("<br/>")
           : "No source or removal evidence is available for this key. Check the phrase name and the latest International Phrases audit.",

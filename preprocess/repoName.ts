@@ -1,4 +1,5 @@
 import type { EasyEyesError } from "./errorMessages";
+import { diagnosticValue } from "./diagnosticHtml";
 
 /** GitLab/Pavlovia project path limit is 255; leave room for a version suffix. */
 export const MAX_REPO_BASE_NAME_LENGTH = 245;
@@ -11,7 +12,9 @@ export const REPO_NAME_RULES_HTML = [
   "Pavlovia repository names (GitLab project slugs) must:",
   "• contain only letters, digits, underscores (_), dots (.), and dashes (-)",
   "• start with a letter or digit (not a dash, underscore, or dot)",
-  "• not contain consecutive special characters (for example <code>--</code> or <code>..</code>)",
+  `• not contain consecutive special characters (for example ${diagnosticValue(
+    "--",
+  )} or ${diagnosticValue("..")})`,
   `• be at most ${MAX_REPO_BASE_NAME_LENGTH} characters, so the appended version number still fits GitLab's 255-character limit`,
   "Rename the spreadsheet to follow these rules, then compile again. The compiler copies the spreadsheet name as-is; it will not change the name for you.",
 ].join("<br/>");
@@ -119,9 +122,9 @@ export const illegalRepoNameToEasyEyesError = (
   error: IllegalRepoNameError,
 ): EasyEyesError => ({
   name: "Illegal Pavlovia repository name",
-  message: `The compiler names the Pavlovia repository after your spreadsheet, then appends a version number. It does not change the name. <strong>${escapeHtml(
+  message: `The compiler names the Pavlovia repository after your spreadsheet, then appends a version number. It does not change the name. ${diagnosticValue(
     error.baseName,
-  )}</strong> is not a legal repository name: ${escapeHtml(error.reason)}`,
+  )} is not a legal repository name: ${escapeHtml(error.reason)}`,
   hint: REPO_NAME_RULES_HTML,
   context: "preprocessor",
   kind: "error",

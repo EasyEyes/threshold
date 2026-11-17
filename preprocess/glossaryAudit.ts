@@ -109,9 +109,9 @@ export function validateGlossaryAudit(
         name: "Glossary parameter not audited as used",
         message: `Parameter <a href="${
           glossaryParameterUrl(ref.key) ?? GLOSSARY_SHEET_URL
-        }" target="_blank" rel="noopener noreferrer"><strong>${escape(
+        }" target="_blank" rel="noopener noreferrer"><span class="error-parameter">${escape(
           ref.parameter,
-        )}</strong></a> is defined in the Parameter Glossary, but no source usage was detected.`,
+        )}</span></a> is defined in the Parameter Glossary, but no source usage was detected.`,
         hint: "No source usage was detected in the completed glossary audit. Check the Glossary entry and remove this parameter if it is not needed. If it is required, report it to the EasyEyes team. This finding does not establish that the parameter is obsolete.",
         context: "preprocessor",
         kind: "error",

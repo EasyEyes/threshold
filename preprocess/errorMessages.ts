@@ -1,10 +1,31 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/**
+ * AUTHORING DIAGNOSTICS
+ * - `name`: plain text, no HTML or severity icon. `kind` selects presentation.
+ * - `message`/`hint`: HTML sentences; end with punctuation. External error
+ *   strings may pass through verbatim rather than being parsed for markup.
+ * - `parameters`: involved parameter NAMES, never values; deduplicate.
+ * - Parameter names: `.error-parameter` via param()/parameter(). A parameter
+ *   name used AS A VALUE nests inside diagnosticValueHtml(param(name)).
+ * - Literal values: diagnosticValue()/diagnosticValues(), never delimiter
+ *   quotes or ad-hoc emphasis. One table cell is one highlighted value, even
+ *   when multicategorical. Helpers escape supplied text.
+ * - Offending labels: diagnosticOffendingValuesLabel(); singular/plural
+ *   follows DISTINCT columns, not instances or values within a cell.
+ * - Renderer owns severity icons, HINT/PARAMETER labels, and dismissal.
+ */
 import { getGlossary } from "../parameters/glossaryRegistry";
 import {
   conditionIndexToColumnName,
   getNumericalSuffix,
   verballyEnumerate,
 } from "./utils";
+import {
+  diagnosticValue,
+  diagnosticValueHtml,
+  diagnosticValues,
+  escapeDiagnosticHtml,
+} from "./diagnosticHtml";
 
 export interface EasyEyesError {
   /** Stable identifier for programmatic recovery; display text may change. */
@@ -100,8 +121,14 @@ export const PROLIFIC_TITLE_TOO_LONG = (
 ): EasyEyesError => {
   return {
     name: `Prolific study title exceeds maximum length`,
-    message: `The value for <span class="error-parameter">_online1Title</span> is ${currentLength} characters long. Prolific restricts study titles to ${maxLength} characters or less.`,
-    hint: `Please shorten the title to ${maxLength} characters or less.`,
+    message: `The value for <span class="error-parameter">_online1Title</span> is ${diagnosticValue(
+      currentLength,
+    )} characters long. Prolific restricts study titles to ${diagnosticValue(
+      maxLength,
+    )} characters or less.`,
+    hint: `Please shorten the title to ${diagnosticValue(
+      maxLength,
+    )} characters or less.`,
     context: "preprocessor",
     kind: "error",
     parameters: ["_online1Title"],
@@ -114,12 +141,16 @@ export const PROLIFIC_CURRENCY_NOT_SUPPORTED = (
 ): EasyEyesError => {
   return {
     name: `Currency not supported by Prolific`,
-    message: `<span class="error-parameter">_online2PayCurrencyCode</span> is set to <strong>${currencyCode}</strong>, but Prolific only supports ${verballyEnumerate(
-      supportedCurrencies,
+    message: `<span class="error-parameter">_online2PayCurrencyCode</span> is set to ${diagnosticValue(
+      currencyCode,
+    )}, but Prolific only supports ${verballyEnumerate(
+      supportedCurrencies.map(diagnosticValue),
     )}. Prolific has no API to change your account's currency.`,
-    hint: `Set <span class="error-parameter">_online2PayCurrencyCode</span> to match your Prolific account's currency (${supportedCurrencies.join(
-      " or ",
-    )}), and adjust <span class="error-parameter">_online2Pay</span> or <span class="error-parameter">_online2PayPerHour</span> to provide the desired compensation. Your Prolific account currency can only be changed by sending a written request to Prolific.`,
+    hint: `Set <span class="error-parameter">_online2PayCurrencyCode</span> to match your Prolific account's currency (${supportedCurrencies
+      .map(diagnosticValue)
+      .join(
+        " or ",
+      )}), and adjust <span class="error-parameter">_online2Pay</span> or <span class="error-parameter">_online2PayPerHour</span> to provide the desired compensation. Your Prolific account currency can only be changed by sending a written request to Prolific.`,
     context: "preprocessor",
     kind: "error",
     parameters: ["_online2PayCurrencyCode"],
@@ -132,7 +163,9 @@ export const PROLIFIC_PARTICIPANT_GROUP_NOT_FOUND = (
 ): EasyEyesError => {
   return {
     name: `Prolific participant group not found`,
-    message: `The participant group "<strong>${groupName}</strong>" specified in <span class="error-parameter">${parameter}</span> was not found in your Prolific workspace.`,
+    message: `The participant group ${diagnosticValue(
+      groupName,
+    )} specified in <span class="error-parameter">${parameter}</span> was not found in your Prolific workspace.`,
     hint: `Please create the participant group in Prolific first, or correct the group name in your experiment file. Group names are case-sensitive.`,
     context: "preprocessor",
     kind: "error",
@@ -147,7 +180,9 @@ export const PROLIFIC_API_ERROR = (
 ): EasyEyesError => {
   return {
     name: `Failed to verify Prolific participant group`,
-    message: `Unable to verify the participant group "<strong>${groupName}</strong>" for <span class="error-parameter">${parameter}</span>.`,
+    message: `Unable to verify the participant group ${diagnosticValue(
+      groupName,
+    )} for <span class="error-parameter">${parameter}</span>.`,
     hint: `Error: Please check your Prolific token and internet connection. ${errorMessage}.`,
     context: "preprocessor",
     kind: "error",
@@ -186,7 +221,11 @@ export const LOGGING_CAUTION = (
     quota.limit > 0
   ) {
     const percent = Math.round((quota.used / quota.limit) * 100);
-    quotaSentence = ` So far this month we have used <strong>${quota.used.toLocaleString()}</strong> of our <strong>${quota.limit.toLocaleString()}</strong> Formspree submissions (<strong>${percent}%</strong>).`;
+    quotaSentence = ` So far this month we have used ${diagnosticValue(
+      quota.used.toLocaleString(),
+    )} of our ${diagnosticValue(
+      quota.limit.toLocaleString(),
+    )} Formspree submissions (${diagnosticValue(`${percent}%`)}).`;
   }
   return {
     name: `Logging caution`,
@@ -208,7 +247,9 @@ export const INVALID_FOLDER_STRUCTURE = (
 ): EasyEyesError => {
   return {
     name: "Invalid folder structure",
-    message: `The zip file "${folderName}" specified by <span class="error-parameter">${parameter}</span> has the wrong structure.`,
+    message: `The zip file ${diagnosticValue(
+      folderName,
+    )} specified by <span class="error-parameter">${parameter}</span> has the wrong structure.`,
     hint: 'Just zip the files, with no folder. For more help see <span class="error-parameter">targetSoundFolder</span> in the Input Parameter Glossary.',
     context: "preprocessor",
     kind: "error",
@@ -223,11 +264,13 @@ export const FONT_FILES_MISSING = (
 ): EasyEyesError => {
   let htmlList = "";
   missingFileNameList.map((fileName: string) => {
-    htmlList += `<li>${fileName}</li>`;
+    htmlList += `<li>${diagnosticValue(fileName)}</li>`;
   });
   return {
     name: "Font file not found",
-    message: `<span class="error-parameter">${parameter}</span> not found in <span class="error-parameter">fontSource</span> "file": <ul>${htmlList}</ul>`,
+    message: `<span class="error-parameter">${parameter}</span> not found in <span class="error-parameter">fontSource</span> ${diagnosticValue(
+      "file",
+    )}: <ul>${htmlList}</ul>`,
     hint: `Are both font source and name correct?`,
     context: "preprocessor",
     kind: "error",
@@ -241,7 +284,7 @@ export const IMAGE_FILES_MISSING = (
 ): EasyEyesError => {
   let htmlList = "";
   missingFileNameList.map((fileName: string) => {
-    htmlList += `<li>${fileName}</li>`;
+    htmlList += `<li>${diagnosticValue(fileName)}</li>`;
   });
   return {
     name: "Image file not found",
@@ -259,11 +302,13 @@ export const FONT_FILES_MISSING_WEB = (
 ): EasyEyesError => {
   let htmlList = "";
   missingFileNameList.map((fileName: string) => {
-    htmlList += `<li>${fileName}</li>`;
+    htmlList += `<li>${diagnosticValue(fileName)}</li>`;
   });
   return {
     name: "Font file not found",
-    message: `<span class="error-parameter">${parameter}</span> not found in <span class="error-parameter">fontSource</span> "google": <ul>${htmlList}</ul>`,
+    message: `<span class="error-parameter">${parameter}</span> not found in <span class="error-parameter">fontSource</span> ${diagnosticValue(
+      "google",
+    )}: <ul>${htmlList}</ul>`,
     hint: `Are both font source and name correct? You can browse through Google Fonts (fonts.google.com) to make sure.`,
     context: "preprocessor",
     kind: "error",
@@ -293,11 +338,15 @@ export const TYPEKIT_FONT_ONLY_AVAILABLE_WITH_SUBSCRIPTION = (
       (column, index) => `block ${fontInfo.blocks[index]} in column ${column}`,
     );
 
-    htmlList += `<li><b>${font}</b> (${columnBlockPairs.join(", ")})</li>`;
+    htmlList += `<li>${diagnosticValue(font)} (${columnBlockPairs.join(
+      ", ",
+    )})</li>`;
   });
   return {
     name: "Adobe font only available with subscription",
-    message: `The following font(s) with <span class="error-parameter">fontSource</span>=adobe are in Adobe Fonts, but only available to paid Creative Cloud subscribers, and you only have a free account. \n<br/><ul>${htmlList}</ul>`,
+    message: `The following font(s) with <span class="error-parameter">fontSource</span>=${diagnosticValue(
+      "adobe",
+    )} are in Adobe Fonts, but only available to paid Creative Cloud subscribers, and you only have a free account. \n<br/><ul>${htmlList}</ul>`,
     hint: `Please subscribe to Creative Cloud to use this font. Adobe offers subscriptions here <a href="https://www.adobe.com/creativecloud/plans.html" target="_blank">https://www.adobe.com/creativecloud/plans.html</a>. \nThey offer educational discounts. \n`,
     context: "preprocessor",
     kind: "error",
@@ -316,13 +365,23 @@ export const TYPEKIT_FONTS_MISSING = (
       (column, index) => `block ${fontInfo.blocks[index]} in column ${column}`,
     );
 
-    htmlList += `<li><b>${font}</b> (${columnBlockPairs.join(", ")})</li>`;
+    htmlList += `<li>${diagnosticValue(font)} (${columnBlockPairs.join(
+      ", ",
+    )})</li>`;
   });
 
   return {
     name: "Adobe font not found",
-    message: `We could not find the following font(s) specified by "<span class="error-parameter">${parameter}</span>" with <span class="error-parameter">fontSource</span>=adobe: <br/><ul>${htmlList}</ul>`,
-    hint: `To discover an Adobe font's exact web name, find the font's page in <a href="https://fonts.adobe.com/" target="_blank">https://fonts.adobe.com/</a>. \n In that page's lower right corner, find "To use this font on your website". Copy the "font-family" up to the first comma. E.g. if you see font-family: proxima-nova, sans-serif; copy just "proxima-nova".`,
+    message: `We could not find the following font(s) specified by <span class="error-parameter">${parameter}</span> with <span class="error-parameter">fontSource</span>=${diagnosticValue(
+      "adobe",
+    )}: <br/><ul>${htmlList}</ul>`,
+    hint: `To discover an Adobe font's exact web name, find the font's page in <a href="https://fonts.adobe.com/" target="_blank">https://fonts.adobe.com/</a>. \n In that page's lower right corner, find the ${diagnosticValue(
+      "To use this font on your website",
+    )} section. Copy the ${diagnosticValue(
+      "font-family",
+    )} value up to the first comma. E.g. if you see ${diagnosticValue(
+      "font-family: proxima-nova, sans-serif;",
+    )} copy just ${diagnosticValue("proxima-nova")}.`,
     context: "preprocessor",
     kind: "error",
     parameters: [parameter],
@@ -337,8 +396,12 @@ export const IMAGE_FOLDER_INVALID_NUMBER_OF_FILES = (
 ): EasyEyesError => {
   return {
     name: "Image folder contains invalid number of files",
-    message: `The folder "${folderName}" in column ${columnLetter} does not contain enough files to match the number of trials.`,
-    hint: `When <span class="error-parameter">targetImageReplacementBool</span> is "FALSE", the folder must contain at least as many files as the number of trials.`,
+    message: `The folder ${diagnosticValue(
+      folderName,
+    )} in column ${columnLetter} does not contain enough files to match the number of trials.`,
+    hint: `When <span class="error-parameter">targetImageReplacementBool</span> is ${diagnosticValue(
+      "FALSE",
+    )}, the folder must contain at least as many files as the number of trials.`,
     context: "preprocessor",
     kind: "error",
     parameters: [parameter],
@@ -353,7 +416,9 @@ export const IMAGE_FOLDER_INVALID_NUMBER_OF_OPTIONS = (
 ): EasyEyesError => {
   return {
     name: "Image folder contains invalid number of files",
-    message: `The folder "${folderName}" in column ${columnLetter} does not contain enough files to match the number of options.`,
+    message: `The folder ${diagnosticValue(
+      folderName,
+    )} in column ${columnLetter} does not contain enough files to match the number of options.`,
     hint: `Make sure the folder contains enough files to match the <span class="error-parameter">targetImageExclude</span> and <span class="error-parameter">targetImageFoilsExclude</span> settings.`,
     context: "preprocessor",
     kind: "error",
@@ -370,7 +435,11 @@ export const IMAGE_FOLDER_INVALID_EXTENSION_FILES = (
   // accepted extensions: .png, .jpg,
   return {
     name: "Image folder contains invalid files",
-    message: `The folder "${folderName}" in column ${columnLetter} does not contain any files with the accepted image extensions. Accepted extensions are: .png, .jpg. `,
+    message: `The folder ${diagnosticValue(
+      folderName,
+    )} in column ${columnLetter} does not contain any files with the accepted image extensions. Accepted extensions are: ${diagnosticValues(
+      [".png", ".jpg"],
+    )}. `,
     hint: `Please check the files and make sure they have the correct extension.`,
     context: "preprocessor",
     kind: "error",
@@ -384,7 +453,9 @@ export const IMAGE_FOLDER_MISSING = (
 ): EasyEyesError => {
   return {
     name: "Image folder is missing",
-    message: `We could not find the following folder specified by <span class="error-parameter">${parameter}</span>: ${requestedFolder}.`,
+    message: `We could not find the following folder specified by <span class="error-parameter">${parameter}</span>: ${diagnosticValue(
+      requestedFolder,
+    )}.`,
     hint: `Submit the folder to the drop box above ↑.`,
     context: "preprocessor",
     kind: "error",
@@ -397,7 +468,7 @@ export const SOUND_FOLDER_MISSING = (
 ): EasyEyesError => {
   let htmlList = "";
   missingFileNameList.map((fileName: string) => {
-    htmlList += `<li>${fileName}</li>`;
+    htmlList += `<li>${diagnosticValue(fileName)}</li>`;
   });
   ``;
   return {
@@ -416,7 +487,7 @@ export const FORM_FILES_MISSING = (
 ): EasyEyesError => {
   let htmlList = "";
   missingFileNameList.map((fileName: string) => {
-    htmlList += `<li><b>${fileName}</b></li>`;
+    htmlList += `<li>${diagnosticValue(fileName)}</li>`;
   });
   return {
     name: "Form file is missing",
@@ -434,12 +505,12 @@ export const TEXT_FILES_MISSING = (
 ): EasyEyesError => {
   let htmlList = "";
   missingFileNameList.map((fileName: string) => {
-    htmlList += `<li>${fileName}</li>`;
+    htmlList += `<li>${diagnosticValue(fileName)}</li>`;
   });
   return {
     name: "Text file is missing",
     message: `We could not find the following file(s) specified by <span class="error-parameter">${parameter}</span>: <br/><ul>${htmlList}</ul>`,
-    hint: `Use the <b>Select file</b> button above to add the missing file(s). One way to do this is to drop the file(s) onto the button.`,
+    hint: `Use the Select file button above to add the missing file(s). One way to do this is to drop the file(s) onto the button.`,
     context: "preprocessor",
     kind: "error",
     parameters: [parameter],
@@ -453,7 +524,7 @@ export const CODE_FILES_MISSING = (
   let htmlList = "";
   missingFileNameList
     .map((fileName: string) => {
-      htmlList += `<li>${fileName}</li>`;
+      htmlList += `<li>${diagnosticValue(fileName)}</li>`;
     })
     .join("");
   return {
@@ -471,7 +542,13 @@ export const CODE_FILES_MISSING = (
 export const NO_BLOCK_PARAMETER: EasyEyesError = {
   name: "Parameter is not present",
   message: `We weren't able to find a parameter named <span class="error-parameter">block</span>. This parameter is required, as it tells us how to organize your study.`,
-  hint: `Be sure to include a <span class="error-parameter">block</span>block parameter in your experiment file. The values should be increasing from 1 (or 0, if <span class="error-parameter">zeroBasedNumberingBool</span> is set to true). Each condition, ie column, needs one block number, but a block can have any number of conditions.`,
+  hint: `Be sure to include a <span class="error-parameter">block</span> parameter in your experiment file. The values should be increasing from ${diagnosticValue(
+    1,
+  )} (or ${diagnosticValue(
+    0,
+  )}, if <span class="error-parameter">zeroBasedNumberingBool</span> is set to ${diagnosticValue(
+    "true",
+  )}). Each condition, ie column, needs one block number, but a block can have any number of conditions.`,
   context: "preprocessor",
   kind: "error",
   parameters: ["block"],
@@ -482,8 +559,12 @@ export const INVALID_STARTING_BLOCK = (
 ): EasyEyesError => {
   return {
     name: "Invalid initial value",
-    message: `The first value in your <span class="error-parameter">block</span> row isn't correct; it is <em>${actualStartingValue}</em>, when it ought to be <em>1</em>.`,
-    hint: `Change your <span class="error-parameter">block</span> row to start with 1, with each subsequent value either the same &#8212 or one larger &#8212 than the previous.`,
+    message: `The first value in your <span class="error-parameter">block</span> row isn't correct; it is ${diagnosticValue(
+      actualStartingValue,
+    )}, when it ought to be ${diagnosticValue(1)}.`,
+    hint: `Change your <span class="error-parameter">block</span> row to start with ${diagnosticValue(
+      1,
+    )}, with each subsequent value either the same &#8212 or one larger &#8212 than the previous.`,
     context: "preprocessor",
     kind: "error",
     parameters: ["block"],
@@ -516,18 +597,20 @@ export const NONSEQUENTIAL_BLOCK_VALUE = (
   blockValues: string[],
 ): EasyEyesError => {
   // let problemStatement: string;
-  const illustratedValues =
-    '<span class="error-parameter">' +
-    blockValues
-      .map((value, i) => {
-        const improperValue: boolean = nonsequentials.some(
-          (nonsequential) => nonsequential.index === i,
-        );
-        if (!improperValue) return String(value);
-        return `<span style="color: #bb2c22;">${String(value)}</span>`;
-      })
-      .join(",") +
-    "</span>";
+  const illustratedValues = blockValues
+    .map((value, i) => {
+      const improperValue: boolean = nonsequentials.some(
+        (nonsequential) => nonsequential.index === i,
+      );
+      return improperValue
+        ? diagnosticValueHtml(
+            `<span style="color: #bb2c22;">${escapeDiagnosticHtml(
+              String(value),
+            )}</span>`,
+          )
+        : diagnosticValue(value);
+    })
+    .join(",");
   const nonsequentialIndicies: string[] = nonsequentials.map(
     (nonsequential) => {
       const suffix = getNumericalSuffix(nonsequential.index + 1);
@@ -535,7 +618,7 @@ export const NONSEQUENTIAL_BLOCK_VALUE = (
     },
   );
   const plural = nonsequentials.length > 1;
-  const hintBlob = `<span class="error-parameter">block,${illustratedValues}</span><br/>
+  const hintBlob = `${_param("block")},${illustratedValues}<br/>
                     The ${verballyEnumerate(nonsequentialIndicies)} value${
                       plural ? "s are" : " is"
                     } nonsequential.`;
@@ -561,18 +644,20 @@ export const IMPROPER_GLOSSARY_FONT_PIXI_METRICS_STRING_DEFAULT = (
   if (unrecognizedLanguages.length) {
     const plural = unrecognizedLanguages.length > 1;
     faults.push(
-      `${verballyEnumerate(
-        unrecognizedLanguages.map((language) => `'${language}'`),
-      )} ${
+      `${verballyEnumerate(unrecognizedLanguages.map(diagnosticValue))} ${
         plural ? "are not languages" : "is not a language"
       } that <span class="error-parameter">fontLanguage</span> accepts`,
     );
   }
   if (unpairedLanguage !== null)
-    faults.push(`'${unpairedLanguage}' has no metrics string after it`);
+    faults.push(
+      `${diagnosticValue(unpairedLanguage)} has no metrics string after it`,
+    );
   return {
     name: `Default of fontPixiMetricsString in glossary is improper`,
-    message: `The glossary's <span class="error-parameter">fontPixiMetricsString</span> default must be a comma-separated list of language and metrics-string pairs, e.g. "ar, ٱغ, ja, 高黒", naming the default metrics string for each <span class="error-parameter">fontLanguage</span>. ${verballyEnumerate(
+    message: `The glossary's <span class="error-parameter">fontPixiMetricsString</span> default must be a comma-separated list of language and metrics-string pairs, e.g. ${diagnosticValue(
+      "ar, ٱغ, ja, 高黒",
+    )}, naming the default metrics string for each <span class="error-parameter">fontLanguage</span>. ${verballyEnumerate(
       faults,
     )}. Please contact the EasyEyes team.`,
     hint: "",
@@ -609,9 +694,11 @@ export const READING_CORPUS_TOO_SHORT = (o: {
       o.linesPerPage
     } = ${charsNeeded} characters, but there are only ${
       o.corpusCharacters
-    } characters in corpus ${
-      o.corpusFile
-    }. Set <span class="error-parameter">readingPages</span>=-1 to read the whole corpus, however many pages that takes. (column ${blockIndexToColumnLabel(
+    } characters in corpus ${diagnosticValue(
+      o.corpusFile,
+    )}. Set <span class="error-parameter">readingPages</span>=${diagnosticValue(
+      -1,
+    )} to read the whole corpus, however many pages that takes. (column ${blockIndexToColumnLabel(
       o.condition,
     )})`,
     context: "preprocessor",
@@ -642,13 +729,13 @@ export const READING_CORPUS_INSUFFICIENT_FOILS = (o: {
     message: `The reading corpus cannot supply enough foil words for the comprehension questions, which would crash the experiment after the reading.`,
     hint: `Foils must be unique words (2+ letters) that were NOT displayed in the passage. With ${_param(
       "readingNumberOfQuestions",
-    )} = ${o.numberOfQuestions} and ${_param(
+    )} = ${diagnosticValue(o.numberOfQuestions)} and ${_param(
       "readingNumberOfPossibleAnswers",
-    )} = ${o.numberOfAnswers}, that requires ${o.numberOfQuestions} × ${
-      o.numberOfAnswers - 1
-    } = ${o.foilsNeeded} foils, but corpus ${o.corpusFile} has only ${
-      o.uniqueWords
-    } unique words, of which about ${
+    )} = ${diagnosticValue(o.numberOfAnswers)}, that requires ${
+      o.numberOfQuestions
+    } × ${o.numberOfAnswers - 1} = ${o.foilsNeeded} foils, but corpus ${
+      o.corpusFile
+    } has only ${o.uniqueWords} unique words, of which about ${
       o.unavailableWords
     } are displayed, used as answers, or consumed by earlier conditions, leaving only ${supply}.${cumulativeClause} Use a larger corpus, or reduce ${_param(
       "readingNumberOfQuestions",
@@ -672,7 +759,7 @@ export const IMPULSE_RESPONSE_FILES_MISSING = (
 ): EasyEyesError => {
   let htmlList = "";
   missingFileNameList.map((fileName: string) => {
-    htmlList += `<li>${fileName}</li>`;
+    htmlList += `<li>${diagnosticValue(fileName)}</li>`;
   });
   return {
     name: "Impulse response file is missing",
@@ -687,14 +774,19 @@ export const IMPULSE_RESPONSE_FILES_MISSING = (
 export const IMPULSE_RESPONSE_FILE_INVALID_FORMAT = (
   fileName: string,
   reason: string,
+  parameter?: string,
 ): EasyEyesError => {
   return {
     name: "Invalid impulse response file format",
-    message: `The impulse response file "${fileName}" has an invalid format: ${reason}.`,
-    hint: `Make sure the file includes two columns named "time" and "amplitude" with values in all rows.`,
+    message: `The impulse response file ${diagnosticValue(
+      fileName,
+    )} has an invalid format: ${reason}.`,
+    hint: `Make sure the file includes two columns named ${diagnosticValue(
+      "time",
+    )} and ${diagnosticValue("amplitude")} with values in all rows.`,
     context: "preprocessor",
     kind: "error",
-    parameters: [fileName],
+    parameters: parameter ? [parameter] : [],
   };
 };
 
@@ -704,7 +796,7 @@ export const FREQUENCY_RESPONSE_FILES_MISSING = (
 ): EasyEyesError => {
   let htmlList = "";
   missingFileNameList.map((fileName: string) => {
-    htmlList += `<li>${fileName}</li>`;
+    htmlList += `<li>${diagnosticValue(fileName)}</li>`;
   });
   return {
     name: "Frequency response file is missing",
@@ -722,8 +814,14 @@ export const FREQUENCY_RESPONSE_FILE_INVALID_FORMAT = (
 ): EasyEyesError => {
   return {
     name: "Invalid frequency response file format",
-    message: `The frequency response file "${fileName}" has an invalid format: ${reason}.`,
-    hint: "Frequency response files must end with .gainVFreq.xlsx or .gainVFreq.csv and contain 'frequency' and 'gain' columns.",
+    message: `The frequency response file ${diagnosticValue(
+      fileName,
+    )} has an invalid format: ${reason}.`,
+    hint: `Frequency response files must end with ${diagnosticValue(
+      ".gainVFreq.xlsx",
+    )} or ${diagnosticValue(".gainVFreq.csv")} and contain ${diagnosticValue(
+      "frequency",
+    )} and ${diagnosticValue("gain")} columns.`,
     context: "preprocessor",
     kind: "error",
     parameters: [
@@ -740,7 +838,9 @@ export const TARGET_SOUND_LIST_FILES_MISSING = (
 ): EasyEyesError => {
   let htmlList = "";
   missingFileNameList.map((fileName: string, index: number) => {
-    htmlList += `<li>${fileName} in column ${columns[index]}</li>`;
+    htmlList += `<li>${diagnosticValue(fileName)} in column ${
+      columns[index]
+    }</li>`;
   });
   return {
     name: "Target sound list file is missing",
@@ -758,8 +858,16 @@ export const TARGET_SOUND_LIST_FILE_INVALID_FORMAT = (
 ): EasyEyesError => {
   return {
     name: "Invalid target sound list file format",
-    message: `The target sound list file "${fileName}" has an invalid format: ${reason}.`,
-    hint: `Target sound list files must end with .targetSoundList.xlsx or .targetSoundList.csv and contain 'targetSound' and '<span class="error-parameter">targetSoundList</span>' columns.`,
+    message: `The target sound list file ${diagnosticValue(
+      fileName,
+    )} has an invalid format: ${reason}.`,
+    hint: `Target sound list files must end with ${diagnosticValue(
+      ".targetSoundList.xlsx",
+    )} or ${diagnosticValue(
+      ".targetSoundList.csv",
+    )} and contain ${diagnosticValue(
+      "targetSound",
+    )} and '<span class="error-parameter">targetSoundList</span>' columns.`,
     context: "preprocessor",
     kind: "error",
     parameters: ["targetSoundList"],
@@ -782,11 +890,20 @@ export const GOOGLE_FONT_VARIABLE_SETTINGS_INVALID = (
     offendingConditions.map((i) => conditionIndexToColumnName(i)),
   )}`;
   const customAxisHint = hasLowercaseCustomAxis
-    ? ' Note: Custom axes (non-standard axes like YEAR, GRAD) must be uppercase in Google Fonts. If you used a lowercase custom axis name, try uppercase (e.g., "YEAR" instead of "year").'
+    ? ` Note: Custom axes (non-standard axes like ${diagnosticValues([
+        "YEAR",
+        "GRAD",
+      ])}) must be uppercase in Google Fonts. If you used a lowercase custom axis name, try uppercase (e.g., ${diagnosticValue(
+        "YEAR",
+      )} instead of ${diagnosticValue("year")}).`
     : "";
   return {
     name: "Invalid fontVariableSettings for Google Font",
-    message: `Invalid <span class="error-parameter">fontVariableSettings</span> "${settings}" for Google Font "${fontName}". The axis value may be out of range.${customAxisHint}`,
+    message: `Invalid <span class="error-parameter">fontVariableSettings</span> ${diagnosticValue(
+      settings,
+    )} for Google Font ${diagnosticValue(
+      fontName,
+    )}. The axis value may be out of range.${customAxisHint}`,
     hint: `${offendingString}. ${FONT_GAUNTLET_HINT}`,
     context: "preprocessor",
     kind: "error",
@@ -811,7 +928,9 @@ export const FONT_NOT_VARIABLE = (
   )}`;
   return {
     name: `Font is not variable`,
-    message: `The font "${fontName}" is not a variable font, but ${_param(
+    message: `The font ${diagnosticValue(
+      fontName,
+    )} is not a variable font, but ${_param(
       "fontVariableSettings",
     )} was specified.`,
     hint: `${offendingString}. ${FONT_GAUNTLET_HINT}`,
@@ -821,7 +940,14 @@ export const FONT_NOT_VARIABLE = (
   };
 };
 
-const SHAPERGLOT_HINT = `The EasyEyes compiler uses Google's ShaperGlot to evaluate your font's language support. To read about ShaperGlot, see the readme here: <a href="https://github.com/googlefonts/shaperglot" target="_blank" rel="noopener">https://github.com/googlefonts/shaperglot</a><br>We recommend asking ShaperGlot directly to get a full report of your font's language support. Just drop your font on SuperGlot's home page: <a href="https://googlefonts.github.io/shaperglot/" target="_blank" rel="noopener">https://googlefonts.github.io/shaperglot/</a><br>The online ShaperGlot only accepts desktop fonts (.TTF or .OTF). If your font license allows it, you can use any of several free online services (Convertio, CloudConvert, or FreeConvert) to convert your web-format font (.WOFF or WOFF2) to a desktop format (.TTF or .OTF) that ShaperGlot will accept.`;
+const SHAPERGLOT_HINT = `The EasyEyes compiler uses Google's ShaperGlot to evaluate your font's language support. To read about ShaperGlot, see the readme here: <a href="https://github.com/googlefonts/shaperglot" target="_blank" rel="noopener">https://github.com/googlefonts/shaperglot</a><br>We recommend asking ShaperGlot directly to get a full report of your font's language support. Just drop your font on SuperGlot's home page: <a href="https://googlefonts.github.io/shaperglot/" target="_blank" rel="noopener">https://googlefonts.github.io/shaperglot/</a><br>The online ShaperGlot only accepts desktop fonts (${diagnosticValues(
+  [".TTF", ".OTF"],
+)}). If your font license allows it, you can use any of several free online services (Convertio, CloudConvert, or FreeConvert) to convert your web-format font (${diagnosticValues(
+  [".WOFF", ".WOFF2"],
+)}) to a desktop format (${diagnosticValues([
+  ".TTF",
+  ".OTF",
+])}) that ShaperGlot will accept.`;
 
 export const FONT_SHAPING_TABLE_REJECTED = (
   fontName: string,
@@ -849,7 +975,7 @@ export const FONT_SHAPING_TABLE_REJECTED = (
   );
   return {
     name: `Font has malformed OpenType layout table${tablesPlural ? "s" : ""}`,
-    message: `The font "${fontName}" contains ${
+    message: `The font ${diagnosticValue(fontName)} contains ${
       tablesPlural ? "" : "a "
     }malformed OpenType ${tables} table${
       tablesPlural ? "s" : ""
@@ -860,11 +986,13 @@ export const FONT_SHAPING_TABLE_REJECTED = (
     )}. In connected scripts such as Arabic this can misspell words on screen. Safari uses CoreText rather than HarfBuzz, so the failure may not appear there or in macOS apps like Notes — visual checks there won't reliably reveal the problem.`,
     hint: `${offendingString}Repair the font (if your license allows it) or use a different one. A font editor (or the fontTools Python library) can locate the offending rules; deleting or rebuilding them usually fixes the font without changing its design. To tolerate ${
       tablesPlural ? "these faults" : "this fault"
-    }, add "${toleranceValues.join(
-      ", ",
-    )}" to <span class="error-parameter">fontTolerateFaults</span> for the affected condition${
+    }, add ${diagnosticValues(
+      toleranceValues,
+    )} to <span class="error-parameter">fontTolerateFaults</span> for the affected condition${
       plural ? "s" : ""
-    }. Add "all" to tolerate every font fault.<br><br>${SHAPERGLOT_HINT}`,
+    }. Add ${diagnosticValue(
+      "all",
+    )} to tolerate every font fault.<br><br>${SHAPERGLOT_HINT}`,
     context: "preprocessor",
     kind: "error",
     parameters: ["font", "fontTolerateFaults", "_needBrowser"],
@@ -894,8 +1022,16 @@ export const FONT_WRONG_LANGUAGE = (
       : "";
   return {
     name: "Font lacks support for its fontLanguage",
-    message: `The font "${fontName}" does not support the language <span class="error-parameter">fontLanguage</span>="${fontLanguage}" (${shaperglotLanguageId}).${problemDetail}`,
-    hint: `${offendingString}Choose a font that supports <span class="error-parameter">fontLanguage</span>="${fontLanguage}", or add "wrongLanguage" to <span class="error-parameter">fontTolerateFaults</span> for the affected condition${
+    message: `The font ${diagnosticValue(
+      fontName,
+    )} does not support the language <span class="error-parameter">fontLanguage</span>=${diagnosticValue(
+      fontLanguage,
+    )} (${diagnosticValue(shaperglotLanguageId)}).${problemDetail}`,
+    hint: `${offendingString}Choose a font that supports <span class="error-parameter">fontLanguage</span>=${diagnosticValue(
+      fontLanguage,
+    )}, or add ${diagnosticValue(
+      "wrongLanguage",
+    )} to <span class="error-parameter">fontTolerateFaults</span> for the affected condition${
       plural ? "s" : ""
     } to tolerate the font's incomplete language support.<br><br>${SHAPERGLOT_HINT}`,
     context: "preprocessor",
@@ -920,12 +1056,20 @@ export const FONT_READING_CORPUS_CHARACTERS_MISSING = (
       : "";
   return {
     name: "Font missing readingCorpus characters",
-    message: `The font "${fontName}" is missing ${missingCount} character${
+    message: `The font ${diagnosticValue(
+      fontName,
+    )} is missing ${missingCount} character${
       missingCount === 1 ? "" : "s"
-    } required by <span class="error-parameter">readingCorpus</span> "${corpusName}" (for example: ${missingSample}).`,
-    hint: `${offendingString}Fix this either by choosing a font that supports every character in <span class="error-parameter">readingCorpus</span>, or by removing unsupported characters from <span class="error-parameter">readingCorpus</span>. To use the font despite missing characters, add "missingCharacters" to <span class="error-parameter">fontTolerateFaults</span> for the affected condition${
+    } required by <span class="error-parameter">readingCorpus</span> ${diagnosticValue(
+      corpusName,
+    )} (for example: ${diagnosticValue(missingSample)}).`,
+    hint: `${offendingString}Fix this either by choosing a font that supports every character in <span class="error-parameter">readingCorpus</span>, or by removing unsupported characters from <span class="error-parameter">readingCorpus</span>. To use the font despite missing characters, add ${diagnosticValue(
+      "missingCharacters",
+    )} to <span class="error-parameter">fontTolerateFaults</span> for the affected condition${
       plural ? "s" : ""
-    }. Unsupported characters may appear as empty boxes, e.g. □.<br><br>The "wrongLanguage" setting does not suppress this error; it only tolerates incomplete support for <span class="error-parameter">fontLanguage</span> character shapes.`,
+    }. Unsupported characters may appear as empty boxes, e.g. □.<br><br>The ${diagnosticValue(
+      "wrongLanguage",
+    )} setting does not suppress this error; it only tolerates incomplete support for <span class="error-parameter">fontLanguage</span> character shapes.`,
     context: "preprocessor",
     kind: "error",
     parameters: ["font", "readingCorpus", "fontTolerateFaults"],
@@ -938,7 +1082,14 @@ export const FONT_READING_CORPUS_CHARACTERS_MISSING = (
 const formatAvailableAxesString = (availableAxes: FontAxisInfo[]): string => {
   return availableAxes.length > 0
     ? availableAxes
-        .map((a) => `"${a.tag}" (${a.min} to ${a.max}, default: ${a.default})`)
+        .map(
+          (a) =>
+            `${diagnosticValue(a.tag)} (${diagnosticValue(
+              a.min,
+            )} to ${diagnosticValue(a.max)}, default: ${diagnosticValue(
+              a.default,
+            )})`,
+        )
         .join(", ")
     : "none";
 };
@@ -957,10 +1108,12 @@ export const FONT_AXIS_NOT_FOUND = (
   const availableAxesString = formatAvailableAxesString(availableAxes);
   return {
     name: `Font axis not found`,
-    message: `The font "${fontName}" does not have the requested ax${
+    message: `The font ${diagnosticValue(
+      fontName,
+    )} does not have the requested ax${
       axesPlural ? "es" : "is"
     }: ${verballyEnumerate(
-      missingAxes.map((a) => `"${a}"`),
+      missingAxes.map(diagnosticValue),
     )}. Available axes: ${availableAxesString}.`,
     hint: `${offendingString}. ${FONT_GAUNTLET_HINT}`,
     context: "preprocessor",
@@ -990,13 +1143,21 @@ export const FONT_AXIS_VALUE_OUT_OF_RANGE = (
   const errorDetails = axisErrors
     .map(
       (e) =>
-        `"${e.axis}" value ${e.value} is outside allowed range ${e.min} to ${e.max} (default: ${e.default})`,
+        `${diagnosticValue(e.axis)} value ${diagnosticValue(
+          e.value,
+        )} is outside allowed range ${diagnosticValue(
+          e.min,
+        )} to ${diagnosticValue(e.max)} (default: ${diagnosticValue(
+          e.default,
+        )})`,
     )
     .join("; ");
   const availableAxesString = formatAvailableAxesString(availableAxes);
   return {
     name: `Font axis value out of range`,
-    message: `The font "${fontName}" has axis values out of range: ${errorDetails}. Available axes: ${availableAxesString}.`,
+    message: `The font ${diagnosticValue(
+      fontName,
+    )} has axis values out of range: ${errorDetails}. Available axes: ${availableAxesString}.`,
     hint: `${offendingString}. ${FONT_GAUNTLET_HINT}`,
     context: "preprocessor",
     kind: "error",
@@ -1014,9 +1175,9 @@ export const FONT_WEIGHT_NOT_VARIABLE = (
   )}`;
   return {
     name: `Font is not variable`,
-    message: `The font "${fontName}" is not a variable font, but ${_param(
-      "fontWeight",
-    )} was specified.`,
+    message: `The font ${diagnosticValue(
+      fontName,
+    )} is not a variable font, but ${_param("fontWeight")} was specified.`,
     hint: `${offendingString}. ${FONT_GAUNTLET_HINT}`,
     context: "preprocessor",
     kind: "error",
@@ -1037,13 +1198,20 @@ export const FONT_WEIGHT_MISSING_WGHT_AXIS = (
     availableAxes.length > 0
       ? availableAxes
           .map(
-            (a) => `"${a.tag}" (${a.min} to ${a.max}, default: ${a.default})`,
+            (a) =>
+              `${diagnosticValue(a.tag)} (${diagnosticValue(
+                a.min,
+              )} to ${diagnosticValue(a.max)}, default: ${diagnosticValue(
+                a.default,
+              )})`,
           )
           .join(", ")
       : "none";
   return {
     name: `Font missing wght axis`,
-    message: `The font "${fontName}" does not have a "wght" axis, but ${_param(
+    message: `The font ${diagnosticValue(
+      fontName,
+    )} does not have a ${diagnosticValue("wght")} axis, but ${_param(
       "fontWeight",
     )} was specified. Available axes: ${availableAxesString}.`,
     hint: `${offendingString}. ${FONT_GAUNTLET_HINT}`,
@@ -1067,9 +1235,13 @@ export const FONT_WEIGHT_OUT_OF_RANGE = (
   )}`;
   return {
     name: `fontWeight value out of range`,
-    message: `The font "${fontName}" has ${_param(
+    message: `The font ${diagnosticValue(fontName)} has ${_param(
       "fontWeight",
-    )} value ${value} outside the allowed range ${min} to ${max} (default: ${defaultValue}).`,
+    )} value ${diagnosticValue(
+      value,
+    )} outside the allowed range ${diagnosticValue(min)} to ${diagnosticValue(
+      max,
+    )} (default: ${diagnosticValue(defaultValue)}).`,
     hint: `${offendingString}. ${FONT_GAUNTLET_HINT}`,
     context: "preprocessor",
     kind: "error",
@@ -1083,7 +1255,9 @@ export const PHRASE_FILE_MISSING = (
 ): EasyEyesError => {
   return {
     name: "Phrase file is missing",
-    message: `We could not find the phrase file <b>${filename}</b> specified by <span class="error-parameter">${parameter}</span>. Submit the file to the drop box above ↑.`,
+    message: `We could not find the phrase file ${diagnosticValue(
+      filename,
+    )} specified by <span class="error-parameter">${parameter}</span>. Submit the file to the drop box above ↑.`,
     hint: `Make sure the filename in <span class="error-parameter">${parameter}</span> matches the uploaded file exactly.`,
     context: "preprocessor",
     kind: "error",
@@ -1098,7 +1272,9 @@ export const TILDE_WITHOUT_PHRASE_TABLE = (
 ): EasyEyesError => {
   return {
     name: "Symbolic value requires phrase table",
-    message: `The value <strong>${cell}</strong> in parameter <span class="error-parameter">${paramName}</span> uses a phrase symbol, but <span class="error-parameter">${spreadsheetParameter}</span> is not set.`,
+    message: `The value ${diagnosticValue(
+      cell,
+    )} in parameter <span class="error-parameter">${paramName}</span> uses a phrase symbol, but <span class="error-parameter">${spreadsheetParameter}</span> is not set.`,
     hint: `Set <span class="error-parameter">${spreadsheetParameter}</span> to the name of a phrase file and upload that file.`,
     context: "preprocessor",
     kind: "error",
@@ -1112,8 +1288,12 @@ export const TILDE_SYMBOL_NOT_FOUND = (
 ): EasyEyesError => {
   return {
     name: "Symbol not found in phrase table",
-    message: `The symbol <strong>${cell}</strong> in parameter <span class="error-parameter">${paramName}</span> was not found in the phrase table.`,
-    hint: `Make sure the phrase file contains a row whose first column matches <strong>${cell}</strong> (case-insensitive).`,
+    message: `The symbol ${diagnosticValue(
+      cell,
+    )} in parameter <span class="error-parameter">${paramName}</span> was not found in the phrase table.`,
+    hint: `Make sure the phrase file contains a row whose first column matches ${diagnosticValue(
+      cell,
+    )} (case-insensitive).`,
     context: "preprocessor",
     kind: "error",
     parameters: [paramName],
@@ -1128,8 +1308,14 @@ export const TILDE_LANGUAGE_NOT_IN_TABLE = (
 ): EasyEyesError => {
   return {
     name: "Phrase column not found",
-    message: `The value <strong>${languageCode}</strong> from <span class="error-parameter">${selectorParameter}</span> has no column in the phrase table. Encountered while resolving <strong>${cell}</strong> in parameter <span class="error-parameter">${paramName}</span>.`,
-    hint: `Make sure the phrase file includes a column named <strong>${languageCode}</strong>.`,
+    message: `The value ${diagnosticValue(
+      languageCode,
+    )} from <span class="error-parameter">${selectorParameter}</span> has no column in the phrase table. Encountered while resolving ${diagnosticValue(
+      cell,
+    )} in parameter <span class="error-parameter">${paramName}</span>.`,
+    hint: `Make sure the phrase file includes a column named ${diagnosticValue(
+      languageCode,
+    )}.`,
     context: "preprocessor",
     kind: "error",
     parameters: [paramName, selectorParameter],
@@ -1159,16 +1345,26 @@ export const FONT_FEATURE_ANALYSIS_ERROR = (
       const col = blockIndexToColumnLabel(Number(w.block));
       // Ligature-keyword warnings show the keyword the experimenter typed
       // (they never wrote the raw tag).
-      const subject = w.keyword ? `${w.keyword} ("${w.tag}")` : `"${w.tag}"`;
+      const subject = w.keyword
+        ? `${diagnosticValue(w.keyword)} (${diagnosticValue(w.tag)})`
+        : diagnosticValue(w.tag);
       switch (w.kind) {
         case "not-in-font":
-          return `• ${subject} not found in font "${w.fontName}" [column ${col}].`;
+          return `• ${subject} not found in font ${diagnosticValue(
+            w.fontName,
+          )} [column ${col}].`;
         case "empty-lookups":
-          return `• ${subject} exists in "${w.fontName}" but has no lookups [column ${col}].`;
+          return `• ${subject} exists in ${diagnosticValue(
+            w.fontName,
+          )} but has no lookups [column ${col}].`;
         case "empty-subtables":
-          return `• ${subject} in "${w.fontName}" references an empty lookup [column ${col}].`;
+          return `• ${subject} in ${diagnosticValue(
+            w.fontName,
+          )} references an empty lookup [column ${col}].`;
         case "has-alternate":
-          return `• ${subject} in "${w.fontName}" uses alternate substitution — the first alternate will be used [column ${col}].`;
+          return `• ${subject} in ${diagnosticValue(
+            w.fontName,
+          )} uses alternate substitution — the first alternate will be used [column ${col}].`;
         default:
           return `• ${subject} [column ${col}].`;
       }

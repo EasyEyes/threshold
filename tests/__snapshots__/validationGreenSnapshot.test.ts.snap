@@ -1,12 +1,47 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Part A: example tables bad.csv — error output is unchanged 1`] = `
+[
+  {
+    "context": "preprocessor",
+    "hint": "The erroneous value is:  <code class="error-value">Cgrome,Firefox,Edge</code> [column B]. ",
+    "kind": "error",
+    "message": "All values for the parameter <span class="error-parameter">_needBrowser</span> must be <code class="error-value">multicategorical</code>. Valid categories are: <code class="error-value">all</code>, <code class="error-value">Chrome</code>, <code class="error-value">Chrome Mobile</code>, <code class="error-value">Safari</code>, <code class="error-value">Firefox</code>, <code class="error-value">Opera</code>, <code class="error-value">Edge</code>, <code class="error-value">Chromium</code>, <code class="error-value">Arc</code>, <code class="error-value">Tor</code>, <code class="error-value">Duckduckgo</code>, <code class="error-value">Brave</code>, <code class="error-value">Vivaldi</code>, <code class="error-value">Midori</code>, <code class="error-value">SamsungInternet</code>, <code class="error-value">UCBrowser</code>, <code class="error-value">Android</code>, <code class="error-value">QQBrowser</code>, <code class="error-value">Instabridge</code>, <code class="error-value">WhaleBrowser</code>, <code class="error-value">Puffin</code>, <code class="error-value">YandexBrowser</code>, <code class="error-value">EdgeLegacy</code>, <code class="error-value">CocCoc</code>, <code class="error-value">notChrome</code>, <code class="error-value">notSafari</code>, <code class="error-value">notFirefox</code>, <code class="error-value">notOpera</code>, <code class="error-value">notEdge</code>, <code class="error-value">notChromium</code>, <code class="error-value">notTor</code>, <code class="error-value">notDuckduckgo</code>, <code class="error-value">notBrave</code>, <code class="error-value">notVivaldi</code>, <code class="error-value">notMidori</code>, <code class="error-value">notSamsungInternet</code>, <code class="error-value">notUCBrowser</code>, <code class="error-value">notAndroid</code>, <code class="error-value">notFirefox</code>, <code class="error-value">notQQBrowser</code>, <code class="error-value">notInstabridge</code>, <code class="error-value">notWhaleBrowser</code>, <code class="error-value">notPuffin</code>, <code class="error-value">notYandexBrowser</code>, <code class="error-value">notEdgeLegacy</code>, <code class="error-value">notEdge</code>, <code class="error-value">notCocCoc</code>.",
+    "name": "Parameter contains values of the wrong type",
+    "parameters": [
+      "_needBrowser",
+    ],
+  },
+  {
+    "context": "preprocessor",
+    "hint": "The erroneous value is:  <code class="error-value">a</code> [column C]. ",
+    "kind": "error",
+    "message": "All values for the parameter <span class="error-parameter">conditionTrials</span> must be <code class="error-value">integer</code>.",
+    "name": "Parameter contains values of the wrong type",
+    "parameters": [
+      "conditionTrials",
+    ],
+  },
+  {
+    "context": "preprocessor",
+    "hint": "The erroneous value is:  <code class="error-value">yes</code> [column C]. ",
+    "kind": "error",
+    "message": "All values for the parameter <span class="error-parameter">showGrid</span> must be <code class="error-value">categorical</code>. Valid categories are: <code class="error-value">px</code>, <code class="error-value">pt</code>, <code class="error-value">cm</code>, <code class="error-value">in</code>, <code class="error-value">deg</code>, <code class="error-value">degDynamic</code>, <code class="error-value">mmV4</code>, <code class="error-value">none</code>, <code class="error-value">disabled</code>.",
+    "name": "Parameter contains values of the wrong type",
+    "parameters": [
+      "showGrid",
+    ],
+  },
+]
+`;
+
 exports[`Part A: example tables blackout-detection-black-screen.csv — error output is unchanged 1`] = `
 [
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">screenColorRGBA</span> to a dark gray (e.g. 0.004, 0.004, 0.004, 1, i.e. about 1/256) to enable blackout detection, or set <span class="error-parameter">thresholdAllowedBlackoutBool</span> to TRUE to skip it. Check column C.",
+    "hint": "Set <span class="error-parameter">screenColorRGBA</span> to a dark gray (e.g. <code class="error-value">0.004, 0.004, 0.004, 1</code>, i.e. about 1/256) to enable blackout detection, or set <span class="error-parameter">thresholdAllowedBlackoutBool</span> to <code class="error-value">TRUE</code> to skip it. Check column C.",
     "kind": "error",
-    "message": "Blackout detection is on (<span class="error-parameter">thresholdAllowedBlackoutBool</span> is FALSE) but <span class="error-parameter">screenColorRGBA</span> is pure black (0,0,0,1) in the same condition. On a black screen every trial looks like a blackout, so every trial would be discarded.",
+    "message": "Blackout detection is on (<span class="error-parameter">thresholdAllowedBlackoutBool</span> is <code class="error-value">FALSE</code>) but <span class="error-parameter">screenColorRGBA</span> is pure black <code class="error-value">0,0,0,1</code> in the same condition. On a black screen every trial looks like a blackout, so every trial would be discarded.",
     "name": "Background color conflicts with blackout detection",
     "parameters": [
       "thresholdAllowedBlackoutBool",
@@ -162,9 +197,9 @@ exports[`Part A: example tables letter-tracking-thrash-auto-sim.csv — error ou
 [
   {
     "context": "preprocessor",
-    "hint": "The erroneous values are:  "auto" [column C]. ",
+    "hint": "The erroneous value is:  <code class="error-value">auto</code> [column C]. ",
     "kind": "error",
-    "message": "All values for the parameter <span class="error-parameter">fontPreRender</span> must be categorical. Valid categories are: none, cache, buffer.",
+    "message": "All values for the parameter <span class="error-parameter">fontPreRender</span> must be <code class="error-value">categorical</code>. Valid categories are: <code class="error-value">none</code>, <code class="error-value">cache</code>, <code class="error-value">buffer</code>.",
     "name": "Parameter contains values of the wrong type",
     "parameters": [
       "fontPreRender",
@@ -289,9 +324,9 @@ exports[`Part A: example tables test-many-errors.csv — error output is unchang
 [
   {
     "context": "preprocessor",
-    "hint": "The erroneous values are:  "many" [column C]. ",
+    "hint": "The erroneous value is:  <code class="error-value">many</code> [column C]. ",
     "kind": "error",
-    "message": "All values for the parameter <span class="error-parameter">conditionTrials</span> must be integer.",
+    "message": "All values for the parameter <span class="error-parameter">conditionTrials</span> must be <code class="error-value">integer</code>.",
     "name": "Parameter contains values of the wrong type",
     "parameters": [
       "conditionTrials",
@@ -350,7 +385,7 @@ exports[`Part A: example tables test-many-errors.csv — error output is unchang
   },
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column G.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check column G.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -360,9 +395,9 @@ exports[`Part A: example tables test-many-errors.csv — error output is unchang
   },
   {
     "context": "preprocessor",
-    "hint": "The erroneous values are:  "read" [column E]. ",
+    "hint": "The erroneous value is:  <code class="error-value">read</code> [column E]. ",
     "kind": "error",
-    "message": "All values for the parameter <span class="error-parameter">targetTask</span> must be categorical. Valid categories are: identify, detect, adjust, questionAndAnswer, questionAnswer.",
+    "message": "All values for the parameter <span class="error-parameter">targetTask</span> must be <code class="error-value">categorical</code>. Valid categories are: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">adjust</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">questionAnswer</code>.",
     "name": "Parameter contains values of the wrong type",
     "parameters": [
       "targetTask",
@@ -372,7 +407,7 @@ exports[`Part A: example tables test-many-errors.csv — error output is unchang
     "context": "preprocessor",
     "hint": "Check columns C, D, and F.",
     "kind": "error",
-    "message": "When <span class="error-parameter">targetTask</span> is "detect" or "identify", <span class="error-parameter">thresholdParameter</span> must specify a target metric: <span class="error-parameter">targetSizeDeg</span>, <span class="error-parameter">spacingDeg</span>, <span class="error-parameter">targetSoundDBSPL</span>, etc.",
+    "message": "When <span class="error-parameter">targetTask</span> is <code class="error-value">detect</code> or <code class="error-value">identify</code>, <span class="error-parameter">thresholdParameter</span> must specify a target metric: <code class="error-value"><span class="error-parameter">targetSizeDeg</span></code>, <code class="error-value"><span class="error-parameter">spacingDeg</span></code>, <code class="error-value"><span class="error-parameter">targetSoundDBSPL</span></code>, etc.",
     "name": "No thresholdParameter provided for detect or identify task",
     "parameters": [
       "thresholdParameter",
@@ -414,7 +449,7 @@ exports[`Part B: per-check trigger scenarios alphabetical — fires its check, o
   },
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check columns C and D.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check columns C and D.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of these <span class="error-parameter">block</span>s. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -429,17 +464,17 @@ exports[`Part B: per-check trigger scenarios authorEmails — fires its check, o
 [
   {
     "context": "preprocessor",
-    "hint": "Include parameter _authorEmails with a valid email (or several separated by semicolon).",
+    "hint": "Include parameter <span class="error-parameter">_authorEmails</span> with a valid email (or several separated by semicolon).",
     "kind": "error",
-    "message": "Each microphone calibration is stamped with _authorEmails.",
+    "message": "Each microphone calibration is stamped with <span class="error-parameter">_authorEmails</span>.",
     "name": "The author email is invalid",
     "parameters": [
-      "not-an-email",
+      "_authorEmails",
     ],
   },
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check columns C and D.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check columns C and D.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of these <span class="error-parameter">block</span>s. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -454,7 +489,7 @@ exports[`Part B: per-check trigger scenarios blackoutOnBlackScreen — fires its
 [
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check column C.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -464,9 +499,9 @@ exports[`Part B: per-check trigger scenarios blackoutOnBlackScreen — fires its
   },
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">screenColorRGBA</span> to a dark gray (e.g. 0.004, 0.004, 0.004, 1, i.e. about 1/256) to enable blackout detection, or set <span class="error-parameter">thresholdAllowedBlackoutBool</span> to TRUE to skip it. Check column C.",
+    "hint": "Set <span class="error-parameter">screenColorRGBA</span> to a dark gray (e.g. <code class="error-value">0.004, 0.004, 0.004, 1</code>, i.e. about 1/256) to enable blackout detection, or set <span class="error-parameter">thresholdAllowedBlackoutBool</span> to <code class="error-value">TRUE</code> to skip it. Check column C.",
     "kind": "error",
-    "message": "Blackout detection is on (<span class="error-parameter">thresholdAllowedBlackoutBool</span> is FALSE) but <span class="error-parameter">screenColorRGBA</span> is pure black (0,0,0,1) in the same condition. On a black screen every trial looks like a blackout, so every trial would be discarded.",
+    "message": "Blackout detection is on (<span class="error-parameter">thresholdAllowedBlackoutBool</span> is <code class="error-value">FALSE</code>) but <span class="error-parameter">screenColorRGBA</span> is pure black <code class="error-value">0,0,0,1</code> in the same condition. On a black screen every trial looks like a blackout, so every trial would be discarded.",
     "name": "Background color conflicts with blackout detection",
     "parameters": [
       "thresholdAllowedBlackoutBool",
@@ -495,7 +530,7 @@ exports[`Part B: per-check trigger scenarios calibrateDistanceCheckRequiresDista
 [
   {
     "context": "preprocessor",
-    "hint": "_calibrateDistanceCheckBool requires calibrateDistanceBool",
+    "hint": "<span class="error-parameter">_calibrateDistanceCheckBool</span> requires <span class="error-parameter">calibrateDistanceBool</span>.",
     "kind": "error",
     "message": "To check distance tracking you must enable it.",
     "name": "Invalid combination of parameters",
@@ -516,7 +551,7 @@ exports[`Part B: per-check trigger scenarios calibrateDistanceCheckRequiresDista
   },
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check column C.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -533,7 +568,7 @@ exports[`Part B: per-check trigger scenarios calibrationTimes — fires its chec
     "context": "preprocessor",
     "hint": "Check column C",
     "kind": "error",
-    "message": "calibrateScreenSizeTimes cannot be zero. Please set it to a positive integer value.",
+    "message": "<span class="error-parameter">calibrateScreenSizeTimes</span> cannot be <code class="error-value">0</code>. Please set it to a positive integer value.",
     "name": "Calibration times cannot be zero",
     "parameters": [
       "calibrateScreenSizeTimes",
@@ -541,9 +576,9 @@ exports[`Part B: per-check trigger scenarios calibrationTimes — fires its chec
   },
   {
     "context": "preprocessor",
-    "hint": "The erroneous values are:  "0" [column C]. ",
+    "hint": "The erroneous value is:  <code class="error-value">0</code> [column C]. ",
     "kind": "error",
-    "message": "All values for the parameter <span class="error-parameter">calibrateScreenSizeTimes</span> must be categorical. Valid categories are: 1, 2.",
+    "message": "All values for the parameter <span class="error-parameter">calibrateScreenSizeTimes</span> must be <code class="error-value">categorical</code>. Valid categories are: <code class="error-value">1</code>, <code class="error-value">2</code>.",
     "name": "Parameter contains values of the wrong type",
     "parameters": [
       "calibrateScreenSizeTimes",
@@ -561,7 +596,7 @@ exports[`Part B: per-check trigger scenarios calibrationTimes — fires its chec
   },
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check column C.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -576,7 +611,7 @@ exports[`Part B: per-check trigger scenarios colBPlacement — fires its check, 
 [
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check columns C and D.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check columns C and D.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of these <span class="error-parameter">block</span>s. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -601,7 +636,7 @@ exports[`Part B: per-check trigger scenarios colorRGBAOutOfRange — fires its c
 [
   {
     "context": "preprocessor",
-    "hint": "Out-of-range components: A=1.2 (column C).",
+    "hint": "Out-of-range components: A=<code class="error-value">1.2</code> (column C).",
     "kind": "error",
     "message": "<span class="error-parameter">markDotColorRGBA</span> requires four numbers from 0 to 1, inclusive.",
     "name": "ColorRGBA component out of range",
@@ -611,7 +646,7 @@ exports[`Part B: per-check trigger scenarios colorRGBAOutOfRange — fires its c
   },
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check column C.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -636,7 +671,7 @@ exports[`Part B: per-check trigger scenarios commaLength — fires its check, ou
   },
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check columns C, D, and E.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check columns C, D, and E.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of these <span class="error-parameter">block</span>s. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -653,7 +688,7 @@ exports[`Part B: per-check trigger scenarios corpusForReading: corpus missing �
     "context": "preprocessor",
     "hint": "Check column C",
     "kind": "error",
-    "message": "A source text file, or corpus, must be provided when <span class="error-parameter">targetKind == reading</span> or <span class="error-parameter">targetKind == rsvpReading</span>.",
+    "message": "A source text file, or corpus, must be provided when <span class="error-parameter">targetKind</span> is <code class="error-value">reading</code> or <code class="error-value">rsvpReading</code>.",
     "name": "No corpus specified for reading task",
     "parameters": [
       "readingCorpus",
@@ -669,7 +704,7 @@ exports[`Part B: per-check trigger scenarios corpusForReading: foils without rsv
     "context": "preprocessor",
     "hint": "Check column C",
     "kind": "error",
-    "message": "At the moment, readingCorpusFoils is only allowed when <span class="error-parameter">targetKind == rsvpReading</span>.",
+    "message": "At the moment, <span class="error-parameter">readingCorpusFoils</span> is only allowed when <span class="error-parameter">targetKind</span> is <code class="error-value">rsvpReading</code>.",
     "name": "Invalid reading corpus foils",
     "parameters": [
       "readingCorpusFoils",
@@ -694,7 +729,7 @@ exports[`Part B: per-check trigger scenarios crosshair: ill-defined tracking int
   },
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check column C.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -711,7 +746,7 @@ exports[`Part B: per-check trigger scenarios crosshair: negative stroke thickeni
     "context": "preprocessor",
     "hint": "",
     "kind": "error",
-    "message": "Values for markingFixationStrokeThickening must be non-negative multipliers. -1 (column C) is negative",
+    "message": "Values for <span class="error-parameter">markingFixationStrokeThickening</span> must be non-negative multipliers. <code class="error-value">-1</code> (column C) is negative.",
     "name": "Negative marking fixation stroke thickening value",
     "parameters": [
       "markingFixationStrokeThickening",
@@ -719,7 +754,7 @@ exports[`Part B: per-check trigger scenarios crosshair: negative stroke thickeni
   },
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check column C.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -736,7 +771,7 @@ exports[`Part B: per-check trigger scenarios detectIdentifyThreshold — fires i
     "context": "preprocessor",
     "hint": "Check column C.",
     "kind": "error",
-    "message": "When <span class="error-parameter">targetTask</span> is "detect" or "identify", <span class="error-parameter">thresholdParameter</span> must specify a target metric: <span class="error-parameter">targetSizeDeg</span>, <span class="error-parameter">spacingDeg</span>, <span class="error-parameter">targetSoundDBSPL</span>, etc.",
+    "message": "When <span class="error-parameter">targetTask</span> is <code class="error-value">detect</code> or <code class="error-value">identify</code>, <span class="error-parameter">thresholdParameter</span> must specify a target metric: <code class="error-value"><span class="error-parameter">targetSizeDeg</span></code>, <code class="error-value"><span class="error-parameter">spacingDeg</span></code>, <code class="error-value"><span class="error-parameter">targetSoundDBSPL</span></code>, etc.",
     "name": "No thresholdParameter provided for detect or identify task",
     "parameters": [
       "thresholdParameter",
@@ -760,7 +795,7 @@ exports[`Part B: per-check trigger scenarios duplicates — fires its check, out
   },
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check column C.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -777,7 +812,7 @@ exports[`Part B: per-check trigger scenarios easyEyesLettersVersion: spacingDire
     "context": "preprocessor",
     "hint": "",
     "kind": "error",
-    "message": "Using EasyEyesLettersVersion=2 and spacingRelationToSize=ratio, currently spacingDirection direction cannot be "horizontalAndVertical" or "radialAndTangential". Use "horizontal", "vertical", "radial", or "tangential".",
+    "message": "Using <span class="error-parameter">EasyEyesLettersVersion</span>=<code class="error-value">2</code> and <span class="error-parameter">spacingRelationToSize</span>=<code class="error-value">ratio</code>, currently <span class="error-parameter">spacingDirection</span> cannot be <code class="error-value">horizontalAndVertical</code> or <code class="error-value">radialAndTangential</code>. Use <code class="error-value">horizontal</code>, <code class="error-value">vertical</code>, <code class="error-value">radial</code>, <code class="error-value">tangential</code>.",
     "name": "Unsupported combination of parameters",
     "parameters": [
       "spacingDirection",
@@ -813,7 +848,7 @@ exports[`Part B: per-check trigger scenarios fixationLoc — fires its check, ou
   },
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check columns C and D.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check columns C and D.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of these <span class="error-parameter">block</span>s. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -847,9 +882,9 @@ exports[`Part B: per-check trigger scenarios fontDirectionVertical — fires its
 [
   {
     "context": "preprocessor",
-    "hint": "The unimplemented value(s):  "vertical-rl" [column C]. Write to denis.pelli@nyu.edu to ask about vertical support.",
+    "hint": "The unimplemented value is:  <code class="error-value">vertical-rl</code> [column C]. Write to denis.pelli@nyu.edu to ask about vertical support.",
     "kind": "error",
-    "message": "fontDirection "vertical-rl" is not yet implemented. Vertical text layout (writing-mode) is planned, primarily to support Japanese, but is not available yet. Please use "ltr" or "rtl".",
+    "message": "<span class="error-parameter">fontDirection</span> <code class="error-value">vertical-rl</code> is not yet implemented. Vertical text layout (writing-mode) is planned, primarily to support Japanese, but is not available yet. Please use <code class="error-value">ltr</code> or <code class="error-value">rtl</code>.",
     "name": "fontDirection vertical not yet implemented",
     "parameters": [
       "fontDirection",
@@ -857,7 +892,7 @@ exports[`Part B: per-check trigger scenarios fontDirectionVertical — fires its
   },
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check column C.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -874,7 +909,7 @@ exports[`Part B: per-check trigger scenarios fontFeatureBrowserGate — fires it
     "context": "preprocessor",
     "hint": "• fontFeatureSettings [column C]",
     "kind": "error",
-    "message": "Font features cannot be baked into browser fonts. Use fontSource file, google, or adobe.",
+    "message": "Font features cannot be baked into browser fonts. Use <span class="error-parameter">fontSource</span> <code class="error-value">file</code>, <code class="error-value">google</code>, <code class="error-value">adobe</code>.",
     "name": "fontSource=browser does not support font features",
     "parameters": [
       "fontFeatureSettings",
@@ -882,7 +917,7 @@ exports[`Part B: per-check trigger scenarios fontFeatureBrowserGate — fires it
   },
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check column C.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -897,9 +932,9 @@ exports[`Part B: per-check trigger scenarios fontFeatureSettings — fires its c
 [
   {
     "context": "preprocessor",
-    "hint": "• "zzzz" [column C]: unknown tag.",
+    "hint": "• <code class="error-value">zzzz</code> [column C]: unknown tag.",
     "kind": "error",
-    "message": "fontFeatureSettings has invalid entries. Each is a 1–4 letter/digit OpenType tag, optionally followed by a value ("on", "off", or integer), e.g. "calt" 1.",
+    "message": "<span class="error-parameter">fontFeatureSettings</span> has invalid entries. Each is a 1–4 letter/digit OpenType tag, optionally followed by a value (<code class="error-value">on</code>, <code class="error-value">off</code>, or integer), e.g. <code class="error-value">calt</code> <code class="error-value">1</code>.",
     "name": "Invalid fontFeatureSettings",
     "parameters": [
       "fontFeatureSettings",
@@ -907,7 +942,7 @@ exports[`Part B: per-check trigger scenarios fontFeatureSettings — fires its c
   },
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check column C.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -922,9 +957,9 @@ exports[`Part B: per-check trigger scenarios fontPreRenderCache — fires its ch
 [
   {
     "context": "preprocessor",
-    "hint": "The unimplemented value(s):  "cache" [column C].",
+    "hint": "The unimplemented value is:  <code class="error-value">cache</code> [column C].",
     "kind": "error",
-    "message": "fontPreRender "cache" is not yet implemented. Use "buffer" to render the text stimulus once and copy it thereafter (faster under a moving fixation), or "none" (the default) to render freshly every time.",
+    "message": "<span class="error-parameter">fontPreRender</span> <code class="error-value">cache</code> is not yet implemented. Use <code class="error-value">buffer</code> to render the text stimulus once and copy it thereafter (faster under a moving fixation), or <code class="error-value">none</code> (the default) to render freshly every time.",
     "name": "fontPreRender cache not yet implemented",
     "parameters": [
       "fontPreRender",
@@ -932,7 +967,7 @@ exports[`Part B: per-check trigger scenarios fontPreRenderCache — fires its ch
   },
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check column C.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -947,9 +982,9 @@ exports[`Part B: per-check trigger scenarios fontVariantLigatures — fires its 
 [
   {
     "context": "preprocessor",
-    "hint": "• "normal,common-ligatures" [column C]",
+    "hint": "• <code class="error-value">normal,common-ligatures</code> [column C]",
     "kind": "error",
-    "message": "fontVariantLigatures has contradictory keywords: "normal" and "none" must appear alone, and each keyword conflicts with its "no-" form.",
+    "message": "<span class="error-parameter">fontVariantLigatures</span> has contradictory keywords: <code class="error-value">normal</code> and <code class="error-value">none</code> must appear alone, and each keyword conflicts with its <code class="error-value">no-</code> form.",
     "name": "Contradictory fontVariantLigatures",
     "parameters": [
       "fontVariantLigatures",
@@ -957,7 +992,7 @@ exports[`Part B: per-check trigger scenarios fontVariantLigatures — fires its 
   },
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check column C.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -984,7 +1019,7 @@ exports[`Part B: per-check trigger scenarios fontWeightWghtConflict — fires it
     "context": "preprocessor",
     "hint": "Check column C. <a href="https://fontgauntlet.com/" target="_blank" rel="noopener">Dinamo Font Gauntlet</a> reports and demonstrates your variable font's axes of variation, and the range and default of each axis.",
     "kind": "error",
-    "message": "Cannot use both <span class="error-parameter">fontWeight</span> and <span class="error-parameter">fontVariableSettings</span> "wght" in the same condition.",
+    "message": "Cannot use both <span class="error-parameter">fontWeight</span> and <span class="error-parameter">fontVariableSettings</span> <code class="error-value">wght</code> in the same condition.",
     "name": "fontWeight and fontVariableSettings "wght" conflict",
     "parameters": [
       "fontWeight",
@@ -993,7 +1028,7 @@ exports[`Part B: per-check trigger scenarios fontWeightWghtConflict — fires it
   },
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check column C.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -1010,7 +1045,7 @@ exports[`Part B: per-check trigger scenarios imageTargetKind: folder unspecified
     "context": "preprocessor",
     "hint": "Please check the targetKind and targetImageFolder parameters.",
     "kind": "error",
-    "message": "When targetKind is "image", then targetImageFolder must be present.",
+    "message": "When <span class="error-parameter">targetKind</span> is <code class="error-value">image</code>, then <span class="error-parameter">targetImageFolder</span> must be present.",
     "name": "Image folder is not specified",
     "parameters": [
       "targetImageFolder",
@@ -1025,7 +1060,7 @@ exports[`Part B: per-check trigger scenarios imageTargetKind: invalid target tas
     "context": "preprocessor",
     "hint": "Please check the targetKind and targetTask parameters.",
     "kind": "error",
-    "message": "When targetKind is "image", then targetTask should either be "identify" or "questionAndAnswer".",
+    "message": "When <span class="error-parameter">targetKind</span> is <code class="error-value">image</code>, then <span class="error-parameter">targetTask</span> should either be <code class="error-value">identify</code> or <code class="error-value">questionAndAnswer</code>.",
     "name": "Invalid target task",
     "parameters": [
       "targetTask",
@@ -1038,9 +1073,9 @@ exports[`Part B: per-check trigger scenarios impulseResponsePairs — fires its 
 [
   {
     "context": "preprocessor",
-    "hint": "You must provide values for both _calibrateSoundSimulateLoudspeaker and _calibrateSoundSimulateMicrophone, or neither. Sound simulation requires both to function correctly.",
+    "hint": "You must provide values for both <span class="error-parameter">_calibrateSoundSimulateLoudspeaker</span> and <span class="error-parameter">_calibrateSoundSimulateMicrophone</span>, or neither. Sound simulation requires both to function correctly.",
     "kind": "error",
-    "message": "Sound simulation requires both loudspeaker and microphone impulse/frequency response files",
+    "message": "Sound simulation requires both loudspeaker and microphone impulse/frequency response files.",
     "name": "Missing paired impulse response file",
     "parameters": [
       "_calibrateSoundSimulateLoudspeaker",
@@ -1059,7 +1094,7 @@ exports[`Part B: per-check trigger scenarios impulseResponsePairs — fires its 
   },
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check column C.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -1085,7 +1120,7 @@ exports[`Part B: per-check trigger scenarios markingOffsetPeripheral — fires i
   },
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check column C.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -1111,7 +1146,7 @@ exports[`Part B: per-check trigger scenarios markingOffsetPeripheralY — fires 
   },
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check column C.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -1128,7 +1163,7 @@ exports[`Part B: per-check trigger scenarios mutuallyExclusive — fires its che
     "context": "preprocessor",
     "hint": "",
     "kind": "error",
-    "message": "Certain groups of parameters can't have multiple set to TRUE. responseMustTrackContinuouslyBool and responseMustClickCrosshairBool (column C) are mutually exclusive.",
+    "message": "Certain groups of parameters can't have multiple set to <code class="error-value">TRUE</code>. responseMustTrackContinuouslyBool and responseMustClickCrosshairBool (column C) are mutually exclusive.",
     "name": "Multiple mutually exclusive parameters are true in the same condition",
     "parameters": [
       "responseMustTrackContinuouslyBool",
@@ -1137,7 +1172,7 @@ exports[`Part B: per-check trigger scenarios mutuallyExclusive — fires its che
   },
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check column C.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -1152,9 +1187,9 @@ exports[`Part B: per-check trigger scenarios needWebGL — fires its check, outp
 [
   {
     "context": "preprocessor",
-    "hint": "The value "2, eight, 16384" is not a comma-separated list of three numbers ("eight" (element 2) is not a legal number).",
+    "hint": "The value <code class="error-value">2, eight, 16384</code> is not a comma-separated list of three numbers (<code class="error-value">eight</code> (element 2) is not a legal number).",
     "kind": "error",
-    "message": "<span class="error-parameter">_needWebGL</span> expects three numbers — WebGL version, textureSize, portSize — ie "2, 8192, 16384".",
+    "message": "<span class="error-parameter">_needWebGL</span> expects three numbers — WebGL version, textureSize, portSize — ie <code class="error-value">2, 8192, 16384</code>.",
     "name": "_needWebGL is not three numbers",
     "parameters": [
       "_needWebGL",
@@ -1162,7 +1197,7 @@ exports[`Part B: per-check trigger scenarios needWebGL — fires its check, outp
   },
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check columns C and D.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check columns C and D.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of these <span class="error-parameter">block</span>s. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -1177,9 +1212,9 @@ exports[`Part B: per-check trigger scenarios questionAndAnswerNicknameMissing �
 [
   {
     "context": "preprocessor",
-    "hint": "An empty nickname means the cell begins with a separator (a leading vertical bar |), which shifts every field (nickname, correctAnswer, question, answers) out of place. Remove the leading separator so the nickname comes first.<br/>Check column C.",
+    "hint": "An empty nickname means the cell begins with a separator (a leading vertical bar <code class="error-value">|</code>), which shifts every field (nickname, correctAnswer, question, answers) out of place. Remove the leading separator so the nickname comes first.<br/>Check column C.",
     "kind": "error",
-    "message": "Every <span class="error-parameter">questionAndAnswer</span> (and <span class="error-parameter">questionAnswer</span>) must begin with a nonempty nickname. The nickname (with the conditionName) names the responses in the saved data, so without it EasyEyes cannot name the results column.",
+    "message": "Every <span class="error-parameter">questionAndAnswer</span> (and <span class="error-parameter">questionAnswer</span>) must begin with a nonempty nickname. The nickname (with <span class="error-parameter">conditionName</span>) names the responses in the saved data, so without it EasyEyes cannot name the results column.",
     "name": "questionAndAnswer nickname missing",
     "parameters": [
       "questionAndAnswer01",
@@ -1207,9 +1242,9 @@ exports[`Part B: per-check trigger scenarios questionAnswerTaskHasQuestions — 
 [
   {
     "context": "preprocessor",
-    "hint": "Provide at least one question, or change <span class="error-parameter">targetTask</span>. For a plain reading block use <span class="error-parameter">targetTask</span> = "identify" with <span class="error-parameter">targetKind</span> = "reading".<br/>Check column C.",
+    "hint": "Provide at least one question, or change <span class="error-parameter">targetTask</span>. For a plain reading block use <span class="error-parameter">targetTask</span> = <code class="error-value">identify</code> with <span class="error-parameter">targetKind</span> = <code class="error-value">reading</code>.<br/>Check column C.",
     "kind": "error",
-    "message": "When <span class="error-parameter">targetTask</span> is "questionAnswer" (or "questionAndAnswer"), the condition must provide at least one question, e.g. <span class="error-parameter">questionAnswer01</span>. A question-and-answer condition runs one trial per question, so without questions the block would show nothing.",
+    "message": "When <span class="error-parameter">targetTask</span> is <code class="error-value">questionAnswer</code> (or <code class="error-value">questionAndAnswer</code>), the condition must provide at least one question, e.g. <span class="error-parameter">questionAnswer01</span>. A question-and-answer condition runs one trial per question, so without questions the block would show nothing.",
     "name": "questionAnswer condition without questions",
     "parameters": [
       "targetTask",
@@ -1239,7 +1274,7 @@ exports[`Part B: per-check trigger scenarios questionsProvidedForQA — fires it
     "context": "preprocessor",
     "hint": "The erroneous column is: C",
     "kind": "error",
-    "message": "questionAndAnswer parameters are only allowed when <span class="error-parameter">targetTask</span> is empty (""), when <span class="error-parameter">targetTask</span> = "questionAndAnswer", or when <span class="error-parameter">targetTask</span> = "identify" AND <span class="error-parameter">targetKind</span> ="image".",
+    "message": "questionAndAnswer parameters are only allowed when <span class="error-parameter">targetTask</span> is empty, when <span class="error-parameter">targetTask</span> = <code class="error-value">questionAndAnswer</code>, or when <span class="error-parameter">targetTask</span> = <code class="error-value">identify</code> AND <span class="error-parameter">targetKind</span> = <code class="error-value">image</code>.",
     "name": "questionAndAnswer parameters not allowed",
     "parameters": [
       "questionAndAnswer",
@@ -1254,9 +1289,9 @@ exports[`Part B: per-check trigger scenarios readingPages: -1 with an endless co
 [
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">readingCorpusEndlessBool</span> to FALSE, or ask for a specific number of pages by setting <span class="error-parameter">readingPages</span> to 0 or more. <span class="error-parameter">readingPages</span> is -1 unless you say otherwise, so you may see this even with an empty <span class="error-parameter">readingPages</span> row. Check column C.",
+    "hint": "Set <span class="error-parameter">readingCorpusEndlessBool</span> to <code class="error-value">FALSE</code>, or ask for a specific number of pages by setting <span class="error-parameter">readingPages</span> to <code class="error-value">0</code> or more. <span class="error-parameter">readingPages</span> is <code class="error-value">-1</code> unless you say otherwise, so you may see this even with an empty <span class="error-parameter">readingPages</span> row. Check column C.",
     "kind": "error",
-    "message": "Setting <span class="error-parameter">readingCorpusEndlessBool</span>=TRUE is incompatible with setting <span class="error-parameter">readingPages</span>=-1; the compiler will throw a fatal error.",
+    "message": "Setting <span class="error-parameter">readingCorpusEndlessBool</span>=<code class="error-value">TRUE</code> is incompatible with setting <span class="error-parameter">readingPages</span>=<code class="error-value">-1</code>; the compiler will throw a fatal error.",
     "name": "readingPages=-1 conflicts with readingCorpusEndlessBool",
     "parameters": [
       "readingPages",
@@ -1270,7 +1305,7 @@ exports[`Part B: per-check trigger scenarios readingPages: not a whole number of
 [
   {
     "context": "preprocessor",
-    "hint": "Found 2.5 (column C).",
+    "hint": "Found <code class="error-value">2.5</code> (column C).",
     "kind": "error",
     "message": "<span class="error-parameter">readingPages</span> must be a whole number of pages (0 or more), or -1 to read to the end of <span class="error-parameter">readingCorpus</span>.",
     "name": "Invalid readingPages",
@@ -1285,9 +1320,9 @@ exports[`Part B: per-check trigger scenarios readingQuestionsClickOnly — fires
 [
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">responseClickedBool</span> TRUE for this reading condition, or enable the keypad, or remove the reading questions. The offending column is: C",
+    "hint": "Set <span class="error-parameter">responseClickedBool</span> <code class="error-value">TRUE</code> for this reading condition, or enable the keypad, or remove the reading questions. The offending column is: C",
     "kind": "error",
-    "message": "Reading questions (<span class="error-parameter">readingNumberOfQuestions</span>) are answered only by clicking the answer words on screen or by the EasyEyes keypad (when <span class="error-parameter">viewingDistanceDesiredCm</span> exceeds <span class="error-parameter">needKeypadBeyondCm</span>). Typing cannot answer them, so with <span class="error-parameter">responseClickedBool</span> FALSE and no keypad in use the participant could never answer and the experiment would wait forever.",
+    "message": "Reading questions (<span class="error-parameter">readingNumberOfQuestions</span>) are answered only by clicking the answer words on screen or by the EasyEyes keypad (when <span class="error-parameter">viewingDistanceDesiredCm</span> exceeds <span class="error-parameter">needKeypadBeyondCm</span>). Typing cannot answer them, so with <span class="error-parameter">responseClickedBool</span> <code class="error-value">FALSE</code> and no keypad in use the participant could never answer and the experiment would wait forever.",
     "name": "Reading questions cannot be answered",
     "parameters": [
       "readingNumberOfQuestions",
@@ -1298,7 +1333,7 @@ exports[`Part B: per-check trigger scenarios readingQuestionsClickOnly — fires
   },
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check column C.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -1313,7 +1348,7 @@ exports[`Part B: per-check trigger scenarios recognized — fires its check, out
 [
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check column C.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -1351,7 +1386,7 @@ exports[`Part B: per-check trigger scenarios responsePossible — fires its chec
   },
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check column C.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -1382,9 +1417,9 @@ exports[`Part B: per-check trigger scenarios rsvpSpeechResponseModes — fires i
 [
   {
     "context": "preprocessor",
-    "hint": "Check column C. Set one of the two response parameters to FALSE.",
+    "hint": "Check column C. Set one of the two response parameters to <code class="error-value">FALSE</code>.",
     "kind": "error",
-    "message": "When <span class="error-parameter">targetKind</span> is "rsvpReading", <span class="error-parameter">responseSpokenBool</span> (automatic speech recognition) and <span class="error-parameter">responseSpokenToExperimenterBool</span> (human experimenter scoring) cannot both be TRUE in the same condition.",
+    "message": "When <span class="error-parameter">targetKind</span> is <code class="error-value">rsvpReading</code>, <span class="error-parameter">responseSpokenBool</span> (automatic speech recognition) and <span class="error-parameter">responseSpokenToExperimenterBool</span> (human experimenter scoring) cannot both be <code class="error-value">TRUE</code> in the same condition.",
     "name": "Incompatible RSVP speech response modes",
     "parameters": [
       "responseSpokenBool",
@@ -1401,7 +1436,7 @@ exports[`Part B: per-check trigger scenarios rsvpThreshold — fires its check, 
     "context": "preprocessor",
     "hint": "Check column C",
     "kind": "error",
-    "message": "A source text file, or corpus, must be provided when <span class="error-parameter">targetKind == reading</span> or <span class="error-parameter">targetKind == rsvpReading</span>.",
+    "message": "A source text file, or corpus, must be provided when <span class="error-parameter">targetKind</span> is <code class="error-value">reading</code> or <code class="error-value">rsvpReading</code>.",
     "name": "No corpus specified for reading task",
     "parameters": [
       "readingCorpus",
@@ -1410,7 +1445,7 @@ exports[`Part B: per-check trigger scenarios rsvpThreshold — fires its check, 
   },
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check column C.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -1422,7 +1457,7 @@ exports[`Part B: per-check trigger scenarios rsvpThreshold — fires its check, 
     "context": "preprocessor",
     "hint": "Check column C.",
     "kind": "error",
-    "message": "A non-empty <span class="error-parameter">thresholdParameter</span> must be provided when <span class="error-parameter">targetKind</span> == "rsvpReading".",
+    "message": "A non-empty <span class="error-parameter">thresholdParameter</span> must be provided when <span class="error-parameter">targetKind</span> = <code class="error-value">rsvpReading</code>.",
     "name": "No thresholdParameter provided for rsvpReading task",
     "parameters": [
       "thresholdParameter",
@@ -1436,7 +1471,7 @@ exports[`Part B: per-check trigger scenarios screenDitherRequiresFloat16 — fir
 [
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">_screenFloat16Bool</span> to TRUE (needs Chrome or Edge version 122 or later), or set <span class="error-parameter">_screenDitherBool</span> to FALSE.",
+    "hint": "Set <span class="error-parameter">_screenFloat16Bool</span> to <code class="error-value">TRUE</code> (needs Chrome or Edge version 122 or later), or set <span class="error-parameter">_screenDitherBool</span> to <code class="error-value">FALSE</code>.",
     "kind": "error",
     "message": "Noisy-bit dithering needs the full-precision (float16) drawing path. Dithering an image that has already been rounded to 8 bits adds visible noise without adding any precision, which is worse than not dithering at all.",
     "name": "_screenDitherBool=TRUE requires _screenFloat16Bool=TRUE",
@@ -1447,7 +1482,7 @@ exports[`Part B: per-check trigger scenarios screenDitherRequiresFloat16 — fir
   },
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check column C.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -1462,9 +1497,9 @@ exports[`Part B: per-check trigger scenarios screenMeasurePrecisionBackground �
 [
   {
     "context": "preprocessor",
-    "hint": "Use the default 0.3333 (one third), or 0 or 0.6667 — the values on the code grid of every display bit depth.",
+    "hint": "Use the default <code class="error-value">0.3333</code> (one third), or <code class="error-value">0</code>, <code class="error-value">0.6667</code> — the values on the code grid of every display bit depth.",
     "kind": "error",
-    "message": "<span class="error-parameter">_screenMeasurePrecisionBackground</span> must be a number from 0 (black) to 0.992, so that the brightest digit (background + 1/127) stays within white. Got "1.5".",
+    "message": "<span class="error-parameter">_screenMeasurePrecisionBackground</span> must be a number from <code class="error-value">0</code> (black) to <code class="error-value">0.992</code>, so that the brightest digit (background + 1/127) stays within white. Got <code class="error-value">1.5</code>.",
     "name": "Invalid _screenMeasurePrecisionBackground",
     "parameters": [
       "_screenMeasurePrecisionBackground",
@@ -1472,7 +1507,7 @@ exports[`Part B: per-check trigger scenarios screenMeasurePrecisionBackground �
   },
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check column C.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -1487,9 +1522,9 @@ exports[`Part B: per-check trigger scenarios screenMeasurePrecisionFlicker — f
 [
   {
     "context": "preprocessor",
-    "hint": "Use the default 8, or any rate up to 30 Hz.",
+    "hint": "Use the default <code class="error-value">8</code>, or any rate up to <code class="error-value">30</code> Hz.",
     "kind": "error",
-    "message": "<span class="error-parameter">_screenMeasurePrecisionFlickerHz</span> must be a number greater than 0 and at most 30: a complete flicker cycle is two color swaps, and a display refreshing at 60 Hz can swap at most once per frame. Got "45".",
+    "message": "<span class="error-parameter">_screenMeasurePrecisionFlickerHz</span> must be a number greater than <code class="error-value">0</code> and at most <code class="error-value">30</code>: a complete flicker cycle is two color swaps, and a display refreshing at 60 Hz can swap at most once per frame. Got <code class="error-value">45</code>.",
     "name": "Invalid _screenMeasurePrecisionFlickerHz",
     "parameters": [
       "_screenMeasurePrecisionFlickerHz",
@@ -1497,7 +1532,7 @@ exports[`Part B: per-check trigger scenarios screenMeasurePrecisionFlicker — f
   },
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check column C.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -1512,7 +1547,7 @@ exports[`Part B: per-check trigger scenarios screenMeasurePrecisionRequiresFloat
 [
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">_screenFloat16Bool</span> to TRUE (needs Chrome or Edge version 122 or later), or set <span class="error-parameter">_screenMeasurePrecision</span> to assume8Bit.",
+    "hint": "Set <span class="error-parameter">_screenFloat16Bool</span> to <code class="error-value">TRUE</code> (needs Chrome or Edge version 122 or later), or set <span class="error-parameter">_screenMeasurePrecision</span> to <code class="error-value">assume8Bit</code>.",
     "kind": "error",
     "message": "The display-precision test presents digits at increments smaller than one 8-bit step and asks whether the display can show them. That needs the full-precision (float16) drawing path; on an 8-bit buffer the digits are rounded off before they reach the display, so the test would measure the browser's own buffer, not the display.",
     "name": "_screenMeasurePrecision test requires _screenFloat16Bool=TRUE",
@@ -1523,7 +1558,7 @@ exports[`Part B: per-check trigger scenarios screenMeasurePrecisionRequiresFloat
   },
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check column C.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -1548,7 +1583,7 @@ exports[`Part B: per-check trigger scenarios screenSize — fires its check, out
   },
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check column C.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -1582,7 +1617,7 @@ exports[`Part B: per-check trigger scenarios shuffleContiguous — fires its che
     "context": "preprocessor",
     "hint": "",
     "kind": "error",
-    "message": "The group <I>A</I> (<span class="error-parameter">blockShuffleGroups1</span>) was found to be non-contiguous.",
+    "message": "The group <code class="error-value">A</code> (<span class="error-parameter">blockShuffleGroups1</span>) was found to be non-contiguous.",
     "name": "Block shuffle groups aren't contiguous",
     "parameters": [
       "blockShuffleGroups1",
@@ -1590,7 +1625,7 @@ exports[`Part B: per-check trigger scenarios shuffleContiguous — fires its che
   },
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check columns C, D, and E.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check columns C, D, and E.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of these <span class="error-parameter">block</span>s. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -1607,7 +1642,7 @@ exports[`Part B: per-check trigger scenarios shuffleSubsets — fires its check,
     "context": "preprocessor",
     "hint": "",
     "kind": "error",
-    "message": "Every <span class="error-parameter">blockShuffleGroupN</span> group must belong to some <span class="error-parameter">blockShuffleGroupN-1</span> group. The group <I>X</I> (<span class="error-parameter">blockShuffleGroups2</span>) was found to not be a subset of a containing group.",
+    "message": "Every <span class="error-parameter">blockShuffleGroupN</span> group must belong to some <span class="error-parameter">blockShuffleGroupN-1</span> group. The group <code class="error-value">X</code> (<span class="error-parameter">blockShuffleGroups2</span>) was found to not be a subset of a containing group.",
     "name": "Block shuffle groups not a subset of containing groups",
     "parameters": [
       "blockShuffleGroups2",
@@ -1615,7 +1650,7 @@ exports[`Part B: per-check trigger scenarios shuffleSubsets — fires its check,
   },
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check column C.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -1640,7 +1675,7 @@ exports[`Part B: per-check trigger scenarios targetImageSpareFraction: out of ra
   },
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check column C.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -1657,7 +1692,7 @@ exports[`Part B: per-check trigger scenarios targetImageSpareFractionTooSmall �
     "context": "preprocessor",
     "hint": "The offending column is: C",
     "kind": "warning",
-    "message": "When an image (targetKind=image) or a page of text (targetKind=reading) is shown together with a questionAndAnswer, <span class="error-parameter">targetImageSpareFraction</span> is the fraction of the screen reserved for the question. A value at or below 0.2 (including the default 0) leaves little or no room, so the question may overlap the target. We suggest about 0.3.",
+    "message": "When an image (<span class="error-parameter">targetKind</span>=<code class="error-value">image</code>) or a page of text (<span class="error-parameter">targetKind</span>=<code class="error-value">reading</code>) is shown together with a <span class="error-parameter">questionAndAnswer</span>, <span class="error-parameter">targetImageSpareFraction</span> is the fraction of the screen reserved for the question. A value at or below <code class="error-value">0.2</code> (including the default <code class="error-value">0</code>) leaves little or no room, so the question may overlap the target. We suggest about <code class="error-value">0.3</code>.",
     "name": "targetImageSpareFraction caution",
     "parameters": [
       "targetImageSpareFraction",
@@ -1682,7 +1717,7 @@ exports[`Part B: per-check trigger scenarios targetKindRequired — fires its ch
     "context": "preprocessor",
     "hint": "Check column C.",
     "kind": "error",
-    "message": "When <span class="error-parameter">targetTask</span> is "detect" or "identify", <span class="error-parameter">thresholdParameter</span> must specify a target metric: <span class="error-parameter">targetSizeDeg</span>, <span class="error-parameter">spacingDeg</span>, <span class="error-parameter">targetSoundDBSPL</span>, etc.",
+    "message": "When <span class="error-parameter">targetTask</span> is <code class="error-value">detect</code> or <code class="error-value">identify</code>, <span class="error-parameter">thresholdParameter</span> must specify a target metric: <code class="error-value"><span class="error-parameter">targetSizeDeg</span></code>, <code class="error-value"><span class="error-parameter">spacingDeg</span></code>, <code class="error-value"><span class="error-parameter">targetSoundDBSPL</span></code>, etc.",
     "name": "No thresholdParameter provided for detect or identify task",
     "parameters": [
       "thresholdParameter",
@@ -1696,7 +1731,7 @@ exports[`Part B: per-check trigger scenarios targetTaskPresent — fires its che
 [
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check column C.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -1711,7 +1746,7 @@ exports[`Part B: per-check trigger scenarios thresholdRatio — fires its check,
 [
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check column C.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -1723,7 +1758,7 @@ exports[`Part B: per-check trigger scenarios thresholdRatio — fires its check,
     "context": "preprocessor",
     "hint": "Check column C",
     "kind": "error",
-    "message": "thresholdAllowedTrialRatio must be greater than or equal to one.",
+    "message": "<span class="error-parameter">thresholdAllowedTrialRatio</span> must be greater than or equal to <code class="error-value">1</code>.",
     "name": "thresholdAllowedTrialRatio is less than one",
     "parameters": [
       "thresholdAllowedTrialRatio",
@@ -1738,7 +1773,7 @@ exports[`Part B: per-check trigger scenarios trackingFixation — fires its chec
     "context": "preprocessor",
     "hint": "Check column C",
     "kind": "error",
-    "message": "When the fixation is moving, the final location is indeterminate. Set responseMustTrackContinuouslyBool to TRUE to enable tracking, during which the stimulus can be pre-computed in a known location.",
+    "message": "When the fixation is moving, the final location is indeterminate. Set <span class="error-parameter">responseMustTrackContinuouslyBool</span> to <code class="error-value">TRUE</code> to enable tracking, during which the stimulus can be pre-computed in a known location.",
     "name": "Tracking required for moving fixation",
     "parameters": [
       "responseMustTrackContinuouslyBool",
@@ -1747,7 +1782,7 @@ exports[`Part B: per-check trigger scenarios trackingFixation — fires its chec
   },
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check column C.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -1762,9 +1797,9 @@ exports[`Part B: per-check trigger scenarios typeSquareGate — fires its check,
 [
   {
     "context": "preprocessor",
-    "hint": "Change fontSource=typeSquare to fontSource=file, or contact the EasyEyes team to enable typeSquare support.",
+    "hint": "Change <span class="error-parameter">fontSource</span>=<code class="error-value">typeSquare</code> to <span class="error-parameter">fontSource</span>=<code class="error-value">file</code>, or contact the EasyEyes team to enable typeSquare support.",
     "kind": "error",
-    "message": "fontSource=typeSquare is not yet supported — the experimenter must add the <span class="error-parameter">_typeSquareDistributionKey</span> underscore param to enable typeSquare. Until then, please use <span class="error-parameter">fontSource=file</span> instead. (Affected blocks: 1.)",
+    "message": "<span class="error-parameter">fontSource</span>=<code class="error-value">typeSquare</code> is not yet supported — the experimenter must add the <span class="error-parameter">_typeSquareDistributionKey</span> underscore param to enable typeSquare. Until then, please use <span class="error-parameter">fontSource</span>=<code class="error-value">file</code> instead. (Affected blocks: 1.)",
     "name": "typeSquare support is in progress",
     "parameters": [
       "fontSource",
@@ -1772,9 +1807,9 @@ exports[`Part B: per-check trigger scenarios typeSquareGate — fires its check,
   },
   {
     "context": "preprocessor",
-    "hint": "The erroneous values are:  "typesquare" [column C]. ",
+    "hint": "The erroneous value is:  <code class="error-value">typesquare</code> [column C]. ",
     "kind": "error",
-    "message": "All values for the parameter <span class="error-parameter">fontSource</span> must be categorical. Valid categories are: file, google, adobe, morisawa, browser.",
+    "message": "All values for the parameter <span class="error-parameter">fontSource</span> must be <code class="error-value">categorical</code>. Valid categories are: <code class="error-value">file</code>, <code class="error-value">google</code>, <code class="error-value">adobe</code>, <code class="error-value">morisawa</code>, <code class="error-value">browser</code>.",
     "name": "Parameter contains values of the wrong type",
     "parameters": [
       "fontSource",
@@ -1782,7 +1817,7 @@ exports[`Part B: per-check trigger scenarios typeSquareGate — fires its check,
   },
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check column C.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -1797,7 +1832,7 @@ exports[`Part B: per-check trigger scenarios types — fires its check, output u
 [
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check column C.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -1807,9 +1842,9 @@ exports[`Part B: per-check trigger scenarios types — fires its check, output u
   },
   {
     "context": "preprocessor",
-    "hint": "The erroneous values are:  "abc" [column C]. ",
+    "hint": "The erroneous value is:  <code class="error-value">abc</code> [column C]. ",
     "kind": "error",
-    "message": "All values for the parameter <span class="error-parameter">viewingDistanceDesiredCm</span> must be numerical.",
+    "message": "All values for the parameter <span class="error-parameter">viewingDistanceDesiredCm</span> must be <code class="error-value">numerical</code>.",
     "name": "Parameter contains values of the wrong type",
     "parameters": [
       "viewingDistanceDesiredCm",
@@ -1822,9 +1857,9 @@ exports[`Part B: per-check trigger scenarios underscoreFormat — fires its chec
 [
   {
     "context": "preprocessor",
-    "hint": "The erroneous values are:  "English" [column B]. <br><br>This may not be your fault, as the definition of “_language” changed on July 19, 2026. It used to accept only a language name, like “English”, and now it only accepts a BCP-47 language code, like “en”.<br><br>• If you provided a language name, please change it to a language code. Some popular ones are: Arabic ar, Chinese (Simplified) zh-Hans, Chinese (Traditional) zh-Hant, English en, French fr, Hebrew he, Hindi hi, Italian it, Japanese ja, Persian fa, Russian, ru, Spanish es. Look up “_language” in the Glossary to see the 42 language codes currently supported.<br><br>• If you provided a legal BCP-47 code not yet supported by EasyEyes, ask us to add it: denis.pelli@nyu.edu SUBJECT:EasyEyes.<br>",
+    "hint": "The erroneous value is:  <code class="error-value">English</code> [column B]. <br><br>This may not be your fault, as the definition of “_language” changed on July 19, 2026. It used to accept only a language name, like “English”, and now it only accepts a BCP-47 language code, like “en”.<br><br>• If you provided a language name, please change it to a language code. Some popular ones are: Arabic ar, Chinese (Simplified) zh-Hans, Chinese (Traditional) zh-Hant, English en, French fr, Hebrew he, Hindi hi, Italian it, Japanese ja, Persian fa, Russian, ru, Spanish es. Look up “_language” in the Glossary to see the 42 language codes currently supported.<br><br>• If you provided a legal BCP-47 code not yet supported by EasyEyes, ask us to add it: denis.pelli@nyu.edu SUBJECT:EasyEyes.<br>",
     "kind": "error",
-    "message": "All values for the parameter <span class="error-parameter">_language</span> must be categorical. Valid categories are: en, ar, bn, zh-CN, zh-TW, cs, da, nl, fil, fi, fr, de, el, ha, he, hi, hu, id, it, ja, jv, ko, ms, mr, pcm, no, fa, pl, pt-pt, pa, ro, ru, es, sw, sv, ta, te, th, tr, uk, ur, vi.",
+    "message": "All values for the parameter <span class="error-parameter">_language</span> must be <code class="error-value">categorical</code>. Valid categories are: <code class="error-value">en</code>, <code class="error-value">ar</code>, <code class="error-value">bn</code>, <code class="error-value">zh-CN</code>, <code class="error-value">zh-TW</code>, <code class="error-value">cs</code>, <code class="error-value">da</code>, <code class="error-value">nl</code>, <code class="error-value">fil</code>, <code class="error-value">fi</code>, <code class="error-value">fr</code>, <code class="error-value">de</code>, <code class="error-value">el</code>, <code class="error-value">ha</code>, <code class="error-value">he</code>, <code class="error-value">hi</code>, <code class="error-value">hu</code>, <code class="error-value">id</code>, <code class="error-value">it</code>, <code class="error-value">ja</code>, <code class="error-value">jv</code>, <code class="error-value">ko</code>, <code class="error-value">ms</code>, <code class="error-value">mr</code>, <code class="error-value">pcm</code>, <code class="error-value">no</code>, <code class="error-value">fa</code>, <code class="error-value">pl</code>, <code class="error-value">pt-pt</code>, <code class="error-value">pa</code>, <code class="error-value">ro</code>, <code class="error-value">ru</code>, <code class="error-value">es</code>, <code class="error-value">sw</code>, <code class="error-value">sv</code>, <code class="error-value">ta</code>, <code class="error-value">te</code>, <code class="error-value">th</code>, <code class="error-value">tr</code>, <code class="error-value">uk</code>, <code class="error-value">ur</code>, <code class="error-value">vi</code>.",
     "name": "Parameter contains values of the wrong type",
     "parameters": [
       "_language",
@@ -1842,7 +1877,7 @@ exports[`Part B: per-check trigger scenarios underscoreFormat — fires its chec
   },
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check columns C and D.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check columns C and D.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of these <span class="error-parameter">block</span>s. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -1857,9 +1892,9 @@ exports[`Part B: per-check trigger scenarios vernierThreshold: offset without ve
 [
   {
     "context": "preprocessor",
-    "hint": "The erroneous value is letter at column C",
+    "hint": "The erroneous value is <code class="error-value">letter</code> at column C",
     "kind": "error",
-    "message": "By setting thresholdParameter = targetOffsetDeg, you must set targetKind = vernier.",
+    "message": "By setting <span class="error-parameter">thresholdParameter</span> = <code class="error-value"><span class="error-parameter">targetOffsetDeg</span></code>, you must set <span class="error-parameter">targetKind</span> = <code class="error-value">vernier</code>.",
     "name": "thresholdParameter=targetOffsetDeg requires targetKind=vernier",
     "parameters": [
       "targetKind",
@@ -1872,9 +1907,9 @@ exports[`Part B: per-check trigger scenarios vernierThreshold: vernier without o
 [
   {
     "context": "preprocessor",
-    "hint": "The erroneous value is targetSizeDeg at column C",
+    "hint": "The erroneous value is <code class="error-value">targetSizeDeg</code> at column C",
     "kind": "error",
-    "message": "By setting targetKind = vernier, you must set thresholdParameter = targetOffsetDeg.",
+    "message": "By setting <span class="error-parameter">targetKind</span> = <code class="error-value">vernier</code>, you must set <span class="error-parameter">thresholdParameter</span> = <code class="error-value"><span class="error-parameter">targetOffsetDeg</span></code>.",
     "name": "vernier targetKind requires thresholdParameter=targetOffsetDeg",
     "parameters": [
       "thresholdParameter",
@@ -1887,7 +1922,7 @@ exports[`Part B: per-check trigger scenarios viewMonitorsXYDeg — fires its che
 [
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check columns C and D.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check columns C and D.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of these <span class="error-parameter">block</span>s. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -1922,7 +1957,7 @@ exports[`Part B: per-check trigger scenarios viewMonitorsXYDegInvalid — fires 
 [
   {
     "context": "preprocessor",
-    "hint": "Set <span class="error-parameter">targetTask</span> to one of: "identify", "detect", "questionAnswer", "questionAndAnswer", or "adjust". To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>="identify" with <span class="error-parameter">targetKind</span>="reading" and <span class="error-parameter">thresholdParameter</span>="<span class="error-parameter">targetDurationSec</span>".<br/>Note: "questionAnswer" is the newer version and will eventually replace "questionAndAnswer".<br/>Check column C.",
+    "hint": "Set <span class="error-parameter">targetTask</span> to one of: <code class="error-value">identify</code>, <code class="error-value">detect</code>, <code class="error-value">questionAnswer</code>, <code class="error-value">questionAndAnswer</code>, <code class="error-value">adjust</code>. To display a page of text (e.g. reading or a beauty rating), use <span class="error-parameter">targetTask</span>=<code class="error-value">identify</code> with <span class="error-parameter">targetKind</span>=<code class="error-value">reading</code> and <span class="error-parameter">thresholdParameter</span>=<code class="error-value"><span class="error-parameter">targetDurationSec</span></code>.<br/>Note: <code class="error-value">questionAnswer</code> is the newer version and will eventually replace <code class="error-value">questionAndAnswer</code>.<br/>Check column C.",
     "kind": "error",
     "message": "Lacking a <span class="error-parameter">targetTask</span>, EasyEyes cannot determine the purpose of this <span class="error-parameter">block</span>. Every <span class="error-parameter">block</span> needs a <span class="error-parameter">targetTask</span> so EasyEyes knows what to do: present a task, ask a question, or display text.",
     "name": "No targetTask provided",
@@ -1947,9 +1982,9 @@ exports[`Part C: aggregation contract messy table — full error output pinned 1
 [
   {
     "context": "preprocessor",
-    "hint": "The erroneous values are:  "English" [column B]. <br><br>This may not be your fault, as the definition of “_language” changed on July 19, 2026. It used to accept only a language name, like “English”, and now it only accepts a BCP-47 language code, like “en”.<br><br>• If you provided a language name, please change it to a language code. Some popular ones are: Arabic ar, Chinese (Simplified) zh-Hans, Chinese (Traditional) zh-Hant, English en, French fr, Hebrew he, Hindi hi, Italian it, Japanese ja, Persian fa, Russian, ru, Spanish es. Look up “_language” in the Glossary to see the 42 language codes currently supported.<br><br>• If you provided a legal BCP-47 code not yet supported by EasyEyes, ask us to add it: denis.pelli@nyu.edu SUBJECT:EasyEyes.<br>",
+    "hint": "The erroneous value is:  <code class="error-value">English</code> [column B]. <br><br>This may not be your fault, as the definition of “_language” changed on July 19, 2026. It used to accept only a language name, like “English”, and now it only accepts a BCP-47 language code, like “en”.<br><br>• If you provided a language name, please change it to a language code. Some popular ones are: Arabic ar, Chinese (Simplified) zh-Hans, Chinese (Traditional) zh-Hant, English en, French fr, Hebrew he, Hindi hi, Italian it, Japanese ja, Persian fa, Russian, ru, Spanish es. Look up “_language” in the Glossary to see the 42 language codes currently supported.<br><br>• If you provided a legal BCP-47 code not yet supported by EasyEyes, ask us to add it: denis.pelli@nyu.edu SUBJECT:EasyEyes.<br>",
     "kind": "error",
-    "message": "All values for the parameter <span class="error-parameter">_language</span> must be categorical. Valid categories are: en, ar, bn, zh-CN, zh-TW, cs, da, nl, fil, fi, fr, de, el, ha, he, hi, hu, id, it, ja, jv, ko, ms, mr, pcm, no, fa, pl, pt-pt, pa, ro, ru, es, sw, sv, ta, te, th, tr, uk, ur, vi.",
+    "message": "All values for the parameter <span class="error-parameter">_language</span> must be <code class="error-value">categorical</code>. Valid categories are: <code class="error-value">en</code>, <code class="error-value">ar</code>, <code class="error-value">bn</code>, <code class="error-value">zh-CN</code>, <code class="error-value">zh-TW</code>, <code class="error-value">cs</code>, <code class="error-value">da</code>, <code class="error-value">nl</code>, <code class="error-value">fil</code>, <code class="error-value">fi</code>, <code class="error-value">fr</code>, <code class="error-value">de</code>, <code class="error-value">el</code>, <code class="error-value">ha</code>, <code class="error-value">he</code>, <code class="error-value">hi</code>, <code class="error-value">hu</code>, <code class="error-value">id</code>, <code class="error-value">it</code>, <code class="error-value">ja</code>, <code class="error-value">jv</code>, <code class="error-value">ko</code>, <code class="error-value">ms</code>, <code class="error-value">mr</code>, <code class="error-value">pcm</code>, <code class="error-value">no</code>, <code class="error-value">fa</code>, <code class="error-value">pl</code>, <code class="error-value">pt-pt</code>, <code class="error-value">pa</code>, <code class="error-value">ro</code>, <code class="error-value">ru</code>, <code class="error-value">es</code>, <code class="error-value">sw</code>, <code class="error-value">sv</code>, <code class="error-value">ta</code>, <code class="error-value">te</code>, <code class="error-value">th</code>, <code class="error-value">tr</code>, <code class="error-value">uk</code>, <code class="error-value">ur</code>, <code class="error-value">vi</code>.",
     "name": "Parameter contains values of the wrong type",
     "parameters": [
       "_language",
@@ -1997,9 +2032,9 @@ exports[`Part C: aggregation contract messy table — full error output pinned 1
   },
   {
     "context": "preprocessor",
-    "hint": "The erroneous values are:  "abc" [column C]. ",
+    "hint": "The erroneous value is:  <code class="error-value">abc</code> [column C]. ",
     "kind": "error",
-    "message": "All values for the parameter <span class="error-parameter">viewingDistanceDesiredCm</span> must be numerical.",
+    "message": "All values for the parameter <span class="error-parameter">viewingDistanceDesiredCm</span> must be <code class="error-value">numerical</code>.",
     "name": "Parameter contains values of the wrong type",
     "parameters": [
       "viewingDistanceDesiredCm",

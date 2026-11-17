@@ -433,7 +433,7 @@ export const parseCalibrationFile = (file, type) => {
       ? parseFloat(values[1]) + sensFactor + base
       : parseFloat(values[1]) + base;
 
-    if (frequency && gain) {
+    if (Number.isFinite(frequency) && Number.isFinite(gain)) {
       frequencies.push(frequency);
       gains.push(gain);
     }
