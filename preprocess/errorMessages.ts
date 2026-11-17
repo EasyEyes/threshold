@@ -301,8 +301,8 @@ export const TYPEKIT_FONT_ONLY_AVAILABLE_WITH_SUBSCRIPTION = (
   });
   return {
     name: "Adobe font only available with subscription",
-    message: `The following font(s) with <span class="error-parameter">fontSource</span>=adobe are in Adobe Fonts, but only available to paid Creative Cloud subscribers, and you only have a free account. \n<br/><ul>${htmlList}</ul>`,
-    hint: `Please subscribe to Creative Cloud to use this font. Adobe offers subscriptions here <a href="https://www.adobe.com/creativecloud/plans.html" target="_blank">https://www.adobe.com/creativecloud/plans.html</a>. \nThey offer educational discounts. \n`,
+    message: `The following font(s) with <span class="error-parameter">fontSource</span>=adobe are in Adobe Fonts, but only available to paid Creative Cloud subscribers, and you only have a free account.<ul>${htmlList}</ul><span class="diagnostic-section"><strong>Subscription options.</strong> Adobe offers subscriptions at <a href="https://www.adobe.com/creativecloud/plans.html" target="_blank" rel="noopener noreferrer">Creative Cloud plans</a>, including educational discounts.</span>`,
+    hint: "Subscribe to Creative Cloud to use this font, or choose a font available to your account.",
     context: "preprocessor",
     kind: "error",
     parameters: [parameter],
@@ -325,8 +325,8 @@ export const TYPEKIT_FONTS_MISSING = (
 
   return {
     name: "Adobe font not found",
-    message: `We could not find the following font(s) specified by "<span class="error-parameter">${parameter}</span>" with <span class="error-parameter">fontSource</span>=adobe: <br/><ul>${htmlList}</ul>`,
-    hint: `To discover an Adobe font's exact web name, find the font's page in <a href="https://fonts.adobe.com/" target="_blank">https://fonts.adobe.com/</a>. \n In that page's lower right corner, find "To use this font on your website". Copy the "font-family" up to the first comma. E.g. if you see font-family: proxima-nova, sans-serif; copy just "proxima-nova".`,
+    message: `We could not find the following font(s) specified by "<span class="error-parameter">${parameter}</span>" with <span class="error-parameter">fontSource</span>=adobe:<ul>${htmlList}</ul><span class="diagnostic-section"><strong>Find the web font name.</strong> To discover an Adobe font's exact web name, find the font's page in <a href="https://fonts.adobe.com/" target="_blank">https://fonts.adobe.com/</a>. In that page's lower right corner, find "To use this font on your website". Copy the "font-family" up to the first comma. E.g. if you see font-family: proxima-nova, sans-serif; copy just "proxima-nova".</span>`,
+    hint: "Check the Adobe web font name and update the experiment file.",
     context: "preprocessor",
     kind: "error",
     parameters: [parameter],
