@@ -151,8 +151,12 @@ export const PROLIFIC_API_ERROR = (
 ): EasyEyesError => {
   return {
     name: `Failed to verify Prolific participant group`,
-    message: `Unable to verify the participant group "<strong>${groupName}</strong>" for <span class="error-parameter">${parameter}</span>.`,
-    hint: `Error: Please check your Prolific token and internet connection. ${errorMessage}.`,
+    message: `Unable to verify the participant group "<strong>${escapeHtml(
+      groupName,
+    )}</strong>" for <span class="error-parameter">${parameter}</span>.<span class="diagnostic-section"><strong>API details.</strong> ${escapeHtml(
+      errorMessage,
+    )}${/[.!?]$/.test(errorMessage) ? "" : "."}</span>`,
+    hint: "Check your Prolific token and internet connection, then try again.",
     context: "preprocessor",
     kind: "error",
     parameters: [parameter],
