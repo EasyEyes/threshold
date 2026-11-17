@@ -1,7 +1,16 @@
+import { readi18nPhrases } from "./readPhrases.js";
+
 // Session-owned media bytes: consumers never depend on HTTP cache retention.
 const entries = new Map();
 let sealed = false;
 const keyFor = (url) => new URL(url, document.baseURI).href;
+const phrase = (key, lang, english) => {
+  try {
+    return readi18nPhrases(key, lang) || english;
+  } catch {
+    return english;
+  }
+};
 export const collectStudyMedia = (reader) => {
   const urls = new Set();
   for (const c of reader.conditions) {
@@ -114,12 +123,20 @@ export async function preloadStudyMedia({
       ].map(keyFor),
     ),
   ];
+  const lang = rc?.language?.value || "en";
+  const t = (key, english) => phrase(key, lang, english);
   const panel = document.createElement("div");
   panel.setAttribute("role", "status");
   panel.style.cssText =
     "position:fixed;inset:0;background:#eee;z-index:10000000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:16px;text-align:center;font:20px system-ui;color:#222";
+  // Same fixed page-title convention as consent / compatibility (easyeyes-page-title).
+  const pageTitle = document.createElement("h1");
+  pageTitle.id = "download-resources-page-title";
+  pageTitle.textContent = t("EE_DownloadResources", "Download resources");
+  const isRTL =
+    phrase("EE_LanguageDirection", lang, "LTR").toLowerCase() === "rtl";
+  pageTitle.classList.add("easyeyes-page-title", isRTL ? "rtl" : "ltr");
   const title = document.createElement("div");
-  title.textContent = "Loading study files…";
   const progress = document.createElement("progress");
   progress.max = urls.length + (models ? 1 : 0) || 1;
   let modelsReady = !models;
@@ -139,7 +156,7 @@ export async function preloadStudyMedia({
   const retry = document.createElement("button");
   retry.textContent = "Try again";
   retry.hidden = true;
-  panel.append(title, progress, detail, failure, retry);
+  panel.append(pageTitle, title, progress, detail, failure, retry);
   document.body.append(panel);
   const stats = new Map();
   let started = performance.now();
@@ -166,24 +183,40 @@ export async function preloadStudyMedia({
       0,
     );
     const speed = bytes / Math.max(1, (performance.now() - started) / 1000);
-    fileCount.textContent = "[[DONE]] of [[TOTAL]] files downloaded"
+    title.textContent =
+      complete < urls.length
+        ? t("EE_LoadingStudyFiles", "Loading study files …")
+        : models && !modelsReady
+        ? t("EE_LoadingSoftware", "Loading software …")
+        : t("EE_LoadingStudyFiles", "Loading study files …");
+    fileCount.textContent = t(
+      "EE_StudyFileProgress",
+      "[[DONE]] of [[TOTAL]] files downloaded",
+    )
       .replace("[[DONE]]", complete)
       .replace("[[TOTAL]]", urls.length);
-    downloaded.textContent = "[[MB]] MB downloaded".replace(
-      "[[MB]]",
-      (bytes / 1048576).toFixed(1),
-    );
-    timeRemaining.hidden = complete === urls.length;
-    timeRemaining.textContent =
-      known && speed > 0
-        ? "About [[MINUTES]] min of downloading remaining".replace(
-            "[[MINUTES]]",
-            Math.max(1, Math.ceil(remaining / speed / 60)),
-          )
-        : "Estimating download time…";
-    modelStatus.textContent = modelsReady
-      ? "Tracking models ready"
-      : "Preparing tracking models…";
+    downloaded.textContent = t(
+      "EE_StudyMBDownloaded",
+      "[[MB]] MB downloaded",
+    ).replace("[[MB]]", (bytes / 1048576).toFixed(1));
+    const hasEstimate = known && speed > 0 && complete < urls.length;
+    timeRemaining.hidden = !hasEstimate;
+    if (hasEstimate) {
+      timeRemaining.textContent = t(
+        "EE_StudyMinutesMoreDownloading",
+        "[[MINUTES]] min more downloading",
+      ).replace(
+        "[[MINUTES]]",
+        String(Math.max(1, Math.ceil(remaining / speed / 60))),
+      );
+    }
+    modelStatus.hidden = !models || modelsReady;
+    if (models && !modelsReady) {
+      modelStatus.textContent = t(
+        "EE_PreparingTrackingModels",
+        "Preparing tracking models …",
+      );
+    }
   };
   try {
     while (true) {

@@ -16,7 +16,7 @@ Focused checks:
 
 Downloads use three workers, complete blobs retained in memory, and an inactivity timeout. Remaining time is an approximate estimate from observed bytes, transfer speed and known/observed file sizes. Retry preserves completed files. Media decoding still happens in the existing consumers. Refreshing the page starts a new cache.
 
-The new loading copy is currently English. A published build must also consume a release of RemoteCalibrator containing the new public preloading API; the Vite override is local only.
+Loading copy uses `EE_DownloadResources` (page title), `EE_LoadingStudyFiles`, `EE_LoadingSoftware`, `EE_StudyFileProgress`, `EE_StudyMBDownloaded`, `EE_StudyMinutesMoreDownloading`, and `EE_PreparingTrackingModels`. A published build must also consume a release of RemoteCalibrator containing the new public preloading API; the Vite override is local only.
 
 Calibration media is collected for the language selected during compatibility. Unused translations are excluded: malformed media links in another language cannot prevent an English study from starting. Select the language before loading; restart the study to change it afterward. A malformed URL in the selected instructions reports the phrase key and language for repair.
 

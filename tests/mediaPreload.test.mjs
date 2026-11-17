@@ -13,6 +13,7 @@ async function fresh(autoRetry = false) {
     createElement(tag) {
       return {
         style: {},
+        classList: { add() {} },
         setAttribute() {},
         append() {},
         remove() {},
@@ -23,8 +24,13 @@ async function fresh(autoRetry = false) {
       };
     },
   };
+  // data: modules can't resolve relative imports; fall back to English copy.
+  const moduleSource = source.replace(
+    /import \{ readi18nPhrases \} from "\.\/readPhrases\.js";\n?/,
+    "const readi18nPhrases = () => { throw new Error('unmocked phrase'); };\n",
+  );
   return import(
-    `data:text/javascript;base64,${Buffer.from(source).toString(
+    `data:text/javascript;base64,${Buffer.from(moduleSource).toString(
       "base64",
     )}#${sequence++}`
   );
