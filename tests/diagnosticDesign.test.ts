@@ -28,3 +28,17 @@ it.each([
   expect(error.message + error.hint).not.toContain("\n");
   expect(error.hint).not.toContain("Copy the");
 });
+
+import { PROLIFIC_API_ERROR } from "../preprocess/errorMessages";
+it("keeps Prolific API details out of the corrective hint and escapes them", () => {
+  const error = PROLIFIC_API_ERROR(
+    "_online2PayCurrencyCode",
+    "<img src=x> denied",
+    "group",
+  );
+  expect(error.message).toContain("&lt;img src=x&gt; denied");
+  expect(error.message).toContain("<strong>API details.</strong>");
+  expect(error.hint).toBe(
+    "Check your Prolific token and internet connection, then try again.",
+  );
+});
