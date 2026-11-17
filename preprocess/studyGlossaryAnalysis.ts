@@ -92,8 +92,8 @@ export async function checkStudyGlossaryAnalysis(
         {
           name: "Study glossary analysis unavailable",
           message:
-            "The study glossary analysis could not be completed with an index matching this compiler build. Compilation is blocked.",
-          hint: "Reload the compiler and try again. The deployment must include a complete glossary source index and its API.",
+            'The study glossary analysis could not be completed with an index matching this compiler build. Compilation is blocked.<span class="diagnostic-section"><strong>For developers.</strong> The deployment must include a complete glossary source index and its API.</span>',
+          hint: "Reload the compiler and try again.",
           context: "preprocessor",
           kind: "error",
           parameters: references.map((ref) => ref.parameter),
