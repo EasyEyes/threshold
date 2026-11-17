@@ -6,6 +6,7 @@ import { ElevenLabsRealtimeTranscriber } from "../components/speech/elevenLabsRe
 import type {
   SpeechSessionState,
   SpeechUtteranceResult,
+  SpeechSessionListener,
 } from "../components/speech/speechSession";
 import type {
   PcmAudioChunk,
@@ -58,7 +59,7 @@ const makeConfiguration = (
 });
 
 class FakeCapture implements RsvpSpeechCapturePort {
-  readonly initialize = jest.fn(async () => undefined);
+  readonly initialize = jest.fn(async (): Promise<void> => undefined);
   readonly startInput = jest.fn(() => undefined);
   readonly start = jest.fn(() => undefined);
   readonly stop = jest.fn(() => undefined);
@@ -78,9 +79,28 @@ class FakeCapture implements RsvpSpeechCapturePort {
 }
 
 class FakeSession implements RsvpSpeechSessionPort {
+  private listener?: SpeechSessionListener;
+  subscribe(listener: SpeechSessionListener): () => void {
+    this.listener = listener;
+    return () => {
+      this.listener = undefined;
+    };
+  }
+  readonly requestCommit = jest.fn(() => {
+    this.state = "finalizing";
+  });
+  emitText(text: string, settled = true): void {
+    this.listener?.({
+      type: "partial",
+      utteranceId: "1_1-1",
+      text,
+      settled,
+      receivedAtMs: performance.now(),
+    });
+  }
   state: SpeechSessionState = "idle";
   readonly events: string[];
-  readonly connect = jest.fn(async () => {
+  readonly connect = jest.fn(async (): Promise<unknown> => {
     this.events.push("session.connect");
     this.state = "ready";
     return {};
@@ -126,6 +146,13 @@ class FakeSession implements RsvpSpeechSessionPort {
 const makeMicrophone = () =>
   ({
     close: jest.fn(async () => undefined),
+    getHealth: jest.fn(() => ({
+      state: "ready",
+      readyState: "live",
+      enabled: true,
+      muted: false,
+    })),
+    subscribeToHealth: jest.fn(() => jest.fn()),
   }) as unknown as MicrophoneSession;
 
 const makeHarness = (
@@ -162,6 +189,185 @@ const makeHarness = (
 };
 
 describe("RsvpSpeechController", () => {
+  it("rejects unscorable normalized targets before opening the microphone", () => {
+    expect(
+      () =>
+        new RsvpSpeechController(makeConfiguration({ targetWords: ["..."] })),
+    ).toThrow(expect.objectContaining({ code: "invalidConfiguration" }));
+  });
+
+  it.each(["muted", "ended", "disabled"] as const)(
+    "does not score a %s microphone as a silent participant",
+    async (state) => {
+      const harness = makeHarness();
+      let reportHealth:
+        | Parameters<MicrophoneSession["subscribeToHealth"]>[0]
+        | undefined;
+      jest
+        .spyOn(harness.microphone, "subscribeToHealth")
+        .mockImplementation((listener) => {
+          reportHealth = listener;
+          return jest.fn();
+        });
+      const controller = new RsvpSpeechController(
+        makeConfiguration(),
+        harness.dependencies,
+      );
+      await controller.prepare();
+      controller.startCapture();
+      const failed = expect(controller.waitForResult()).rejects.toMatchObject({
+        code: "captureFailed",
+      });
+      reportHealth!({
+        state,
+        readyState: state === "ended" ? "ended" : "live",
+        enabled: state !== "disabled",
+        muted: state === "muted",
+      });
+      await failed;
+      expect(controller.state).toBe("failed");
+      expect(harness.session.requestCommit).not.toHaveBeenCalled();
+      await controller.close();
+    },
+  );
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  const quietChunk = (): PcmAudioChunk => ({
+    samples: new Int16Array(1600),
+    sampleRate: 16000,
+    capturedAtMs: performance.now(),
+  });
+
+  it("does not fabricate a response when capture produces no PCM", async () => {
+    const harness = makeHarness();
+    const controller = new RsvpSpeechController(
+      makeConfiguration(),
+      harness.dependencies,
+    );
+    await controller.prepare();
+    controller.startCapture();
+    controller.allowProviderFinalization();
+    const failed = expect(controller.waitForResult()).rejects.toMatchObject({
+      code: "transcriptionFailed",
+    });
+    controller.finishResponse();
+    await failed;
+    expect(harness.session.requestCommit).not.toHaveBeenCalled();
+    await controller.close();
+  });
+
+  it("keeps recording through presentation and starts both response limits at final-word offset", async () => {
+    jest.useFakeTimers();
+    const harness = makeHarness();
+    const controller = new RsvpSpeechController(
+      makeConfiguration({ maximumResponseDurationMs: 20000 }),
+      harness.dependencies,
+    );
+    await controller.prepare();
+    controller.startCapture();
+    harness.capture.emit(quietChunk());
+    harness.session.emitText("cat");
+    jest.advanceTimersByTime(30000);
+    expect(harness.session.requestCommit).not.toHaveBeenCalled();
+    controller.allowProviderFinalization();
+    jest.advanceTimersByTime(7950);
+    expect(harness.session.requestCommit).not.toHaveBeenCalled();
+    jest.advanceTimersByTime(50);
+    expect(harness.session.requestCommit).toHaveBeenCalledTimes(1);
+    expect(harness.capture.stop).toHaveBeenCalled();
+    await controller.close();
+  });
+
+  it("uses the same eight-second silence window for no response and restarts it for new speech", async () => {
+    jest.useFakeTimers();
+    const harness = makeHarness();
+    const controller = new RsvpSpeechController(
+      makeConfiguration({ maximumResponseDurationMs: 20000 }),
+      harness.dependencies,
+    );
+    await controller.prepare();
+    controller.startCapture();
+    harness.capture.emit(quietChunk());
+    controller.allowProviderFinalization();
+    jest.advanceTimersByTime(7000);
+    harness.capture.emit({
+      ...quietChunk(),
+      samples: Int16Array.from({ length: 1600 }, (_, i) =>
+        i % 2 ? 16000 : -16000,
+      ),
+    });
+    jest.advanceTimersByTime(7950);
+    expect(harness.session.requestCommit).not.toHaveBeenCalled();
+    jest.advanceTimersByTime(50);
+    expect(harness.session.requestCommit).toHaveBeenCalledTimes(1);
+    await controller.close();
+  });
+
+  it("ends continuous speech at the absolute cap", async () => {
+    jest.useFakeTimers();
+    const harness = makeHarness();
+    const controller = new RsvpSpeechController(
+      makeConfiguration({ maximumResponseDurationMs: 20000 }),
+      harness.dependencies,
+    );
+    await controller.prepare();
+    controller.startCapture();
+    controller.allowProviderFinalization();
+    for (let second = 0; second < 20; second++) {
+      harness.capture.emit({
+        ...quietChunk(),
+        samples: Int16Array.from({ length: 1600 }, (_, i) =>
+          i % 2 ? 16000 : -16000,
+        ),
+      });
+      jest.advanceTimersByTime(1000);
+    }
+    expect(harness.session.requestCommit).toHaveBeenCalledTimes(1);
+    await controller.close();
+  });
+
+  it("requires settled all-correct scoring and 800ms confirmation; completion is gated during presentation", async () => {
+    jest.useFakeTimers();
+    const harness = makeHarness();
+    const controller = new RsvpSpeechController(
+      makeConfiguration({ maximumResponseDurationMs: 20000 }),
+      harness.dependencies,
+    );
+    await controller.prepare();
+    controller.startCapture();
+    harness.capture.emit(quietChunk());
+    expect(controller.finishResponse()).toBe(false);
+    harness.session.emitText("cat dog fish", false);
+    controller.allowProviderFinalization();
+    jest.advanceTimersByTime(1000);
+    expect(harness.session.requestCommit).not.toHaveBeenCalled();
+    harness.session.emitText("cat dog fish");
+    jest.advanceTimersByTime(850);
+    expect(harness.session.requestCommit).toHaveBeenCalledTimes(1);
+    await controller.close();
+  });
+
+  it("finishes a partial answer on the spoken command and waits for provider output", async () => {
+    jest.useFakeTimers();
+    const harness = makeHarness();
+    const controller = new RsvpSpeechController(
+      makeConfiguration(),
+      harness.dependencies,
+    );
+    await controller.prepare();
+    controller.startCapture();
+    harness.capture.emit(quietChunk());
+    controller.allowProviderFinalization();
+    harness.session.emitText("cat I don't know");
+    jest.advanceTimersByTime(50);
+    expect(harness.session.requestCommit).toHaveBeenCalledTimes(1);
+    expect(controller.state).toBe("finalizing");
+    harness.session.complete({ ...makeResult(), text: "cat I don't know" });
+    await controller.waitForResult();
+    expect(controller.state).toBe("completed");
+  });
   it("prepares one trial while keeping the audio gate closed", async () => {
     const harness = makeHarness();
     const controller = new RsvpSpeechController(

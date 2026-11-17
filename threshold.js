@@ -535,6 +535,7 @@ import {
   closeActiveRsvpSpeechTrial,
   prepareRsvpSpeechTrial,
   prepareSimulatedRsvpSpeechTrial,
+  readRsvpSpeechFinishSettings,
 } from "./components/rsvpSpeech/rsvpSpeechRuntime.ts";
 import {
   createExperimentProgressBar,
@@ -6870,6 +6871,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               });
             } else {
               rsvpSpeechPreparationPromise = prepareRsvpSpeechTrial({
+                ...readRsvpSpeechFinishSettings(
+                  paramReader,
+                  status.block_condition,
+                ),
                 blockCondition: status.block_condition,
                 trialNumber: Number(status.trial),
                 provider: paramReader.read(

@@ -110,7 +110,7 @@ describe("RSVP speech trial configuration", () => {
     expect(configuration.targetWords).toEqual(["cat", "dog", "fish"]);
     expect(configuration.languageCode).toBe("en");
     expect(configuration.targetKeytermBiasEnabled).toBe(true);
-    expect(configuration.maximumResponseDurationMs).toBe(6750);
+    expect(configuration.maximumResponseDurationMs).toBe(6000);
     expect(configuration.finalizationTimeoutMs).toBe(5000);
     expect(configuration.utteranceId).toContain("rsvp-2_3-7-");
   });

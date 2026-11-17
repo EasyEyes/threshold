@@ -8,16 +8,19 @@ import {
   type TranscriberEvent,
 } from "../components/speech/transcriber";
 
+type FakeSocketListener =
+  | (() => void)
+  | ((event: MessageEvent<unknown>) => void)
+  | ((event: unknown) => void)
+  | ((event: CloseEvent) => void);
+
 class FakeWebSocket implements DeepgramWebSocketLike {
   readyState = 0;
   readonly sent: Array<string | ArrayBuffer> = [];
   readonly close = jest.fn(() => {
     this.readyState = 3;
   });
-  private readonly listeners = new Map<
-    string,
-    Set<(event?: unknown) => void>
-  >();
+  private readonly listeners = new Map<string, Set<FakeSocketListener>>();
 
   addEventListener(type: "open", listener: () => void): void;
   addEventListener(
@@ -26,7 +29,7 @@ class FakeWebSocket implements DeepgramWebSocketLike {
   ): void;
   addEventListener(type: "error", listener: (event: unknown) => void): void;
   addEventListener(type: "close", listener: (event: CloseEvent) => void): void;
-  addEventListener(type: string, listener: (event?: unknown) => void): void {
+  addEventListener(type: string, listener: FakeSocketListener): void {
     const listeners = this.listeners.get(type) ?? new Set();
     listeners.add(listener);
     this.listeners.set(type, listeners);
@@ -38,12 +41,16 @@ class FakeWebSocket implements DeepgramWebSocketLike {
 
   open(): void {
     this.readyState = 1;
-    for (const listener of this.listeners.get("open") ?? []) listener();
+    for (const listener of this.listeners.get("open") ?? [])
+      (listener as () => void)();
   }
 
   message(message: unknown): void {
     const event = { data: JSON.stringify(message) };
-    for (const listener of this.listeners.get("message") ?? []) listener(event);
+    for (const listener of this.listeners.get("message") ?? [])
+      (listener as (event: MessageEvent<unknown>) => void)(
+        event as MessageEvent<unknown>,
+      );
   }
 }
 
@@ -64,6 +71,68 @@ const deferred = <T>() => {
 };
 
 describe("Deepgram realtime transcription", () => {
+  it("accepts acknowledged final output when the server has begun closing", async () => {
+    const socket = new FakeWebSocket();
+    const transcriber = new DeepgramRealtimeTranscriber({
+      ...options,
+      webSocketFactory: () => socket,
+    });
+    const connecting = transcriber.connect();
+    await Promise.resolve();
+    socket.open();
+    await connecting;
+    transcriber.beginUtterance("trial");
+    transcriber.requestCommit("trial", true);
+    const completed = jest.fn();
+    transcriber.subscribe((event) => {
+      if (event.type === "commit" && event.finalAcknowledgement) {
+        transcriber.endUtterance(event.utteranceId);
+        completed();
+      }
+    });
+    socket.readyState = 2;
+    socket.message({ type: "Metadata", request_id: "request" });
+    expect(completed).toHaveBeenCalledTimes(1);
+    expect(() => transcriber.endUtterance("trial")).toThrow();
+    await transcriber.close();
+  });
+  it.each(["", "cat"])(
+    "acknowledges an ended trial with Metadata, including empty audio results (%s)",
+    async (text) => {
+      const socket = new FakeWebSocket();
+      const transcriber = new DeepgramRealtimeTranscriber({
+        ...options,
+        webSocketFactory: () => socket,
+      });
+      const events: TranscriberEvent[] = [];
+      transcriber.subscribe((event) => events.push(event));
+      const connecting = transcriber.connect();
+      await Promise.resolve();
+      socket.open();
+      await connecting;
+      transcriber.beginUtterance("trial");
+      transcriber.requestCommit("trial", true);
+      expect(socket.sent.at(-1)).toBe(JSON.stringify({ type: "CloseStream" }));
+      socket.message({
+        type: "Results",
+        is_final: true,
+        speech_final: true,
+        channel: { alternatives: [{ transcript: text }] },
+      });
+      expect(events.at(-1)).toMatchObject({
+        type: "commit",
+        text,
+        finalAcknowledgement: false,
+      });
+      socket.message({ type: "Metadata", request_id: "request" });
+      expect(events.at(-1)).toMatchObject({
+        type: "commit",
+        text: "",
+        finalAcknowledgement: true,
+      });
+      await transcriber.close();
+    },
+  );
   it("builds an explicit Nova-3 PCM configuration", () => {
     const url = new URL(buildDeepgramRealtimeUrl(options));
 

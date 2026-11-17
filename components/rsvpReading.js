@@ -12,6 +12,7 @@ import {
   phraseIdentificationResponse,
   dummyStim,
   rsvpReadingResponse,
+  rsvpSpeechRuntime,
   fontSize,
   keypad,
   targetEccentricityDeg,
@@ -613,6 +614,8 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
             RSVP_SPEECH_PARAMETER_NAMES.ignoreOrder,
             status.block_condition,
           ),
+          finishPhrase:
+            rsvpSpeechRuntime.controller?.configuration.finishPhrase,
         })
       : undefined;
     const responseComplete = automaticSpeech
@@ -670,6 +673,11 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
     )
   ) {
     const isFirstTargetSet = rsvpReadingTargetSets.past.length === 0;
+    if (
+      isFirstTargetSet &&
+      isRsvpReadingAutomaticSpeechResponseMode(rsvpReadingResponse.responseType)
+    )
+      startRsvpSpeechCapture();
     // Mark start-time for this target set
     rsvpReadingTargetSets.current.startTime = t;
     rsvpReadingTargetSets.current.stims.forEach((s) => {
@@ -682,11 +690,6 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
     // We have not tested if this frame or the next one is the more accurate measurement
     start = t;
     drawTimingBars(showTimingBarsBool.current, "target", true);
-    if (
-      isFirstTargetSet &&
-      isRsvpReadingAutomaticSpeechResponseMode(rsvpReadingResponse.responseType)
-    )
-      startRsvpSpeechCapture();
   }
 
   // If current target should be done, undraw it and update which is the current targetSet
