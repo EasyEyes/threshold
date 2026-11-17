@@ -426,6 +426,8 @@ export class RsvpSpeechController {
       this.responseWindowStartedAt = performance.now();
       this.stateValue = "finalizing";
       this.responseTimer = setInterval(() => this.checkResponseEnd(), 50);
+      if (typeof window !== "undefined")
+        window.addEventListener("keydown", this.handleFinishKey);
       this.checkResponseEnd();
     } catch (error) {
       const mapped = asControllerError(
@@ -475,6 +477,24 @@ export class RsvpSpeechController {
     }
     return true;
   }
+
+  private readonly handleFinishKey = (event: KeyboardEvent): void => {
+    const target = event.target as HTMLElement | null;
+    if (
+      event.defaultPrevented ||
+      event.code !== "Space" ||
+      event.repeat ||
+      event.isComposing ||
+      event.shiftKey ||
+      event.altKey ||
+      event.ctrlKey ||
+      event.metaKey ||
+      target?.isContentEditable ||
+      /^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(target?.tagName ?? "")
+    )
+      return;
+    if (this.finishResponse()) event.preventDefault();
+  };
 
   private readonly handleSessionEvent: SpeechSessionListener = (event) => {
     if (event.type !== "partial" || this.finishRequested) return;
@@ -541,6 +561,8 @@ export class RsvpSpeechController {
   private clearResponseControls(): void {
     if (this.responseTimer !== undefined) clearInterval(this.responseTimer);
     this.responseTimer = undefined;
+    if (typeof window !== "undefined")
+      window.removeEventListener("keydown", this.handleFinishKey);
   }
 
   waitForResult(): Promise<SpeechUtteranceResult> {

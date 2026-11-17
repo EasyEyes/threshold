@@ -240,6 +240,82 @@ describe("RsvpSpeechController", () => {
     capturedAtMs: performance.now(),
   });
 
+  it("handles Space only after presentation and removes its handler on completion", async () => {
+    const originalWindow = Object.getOwnPropertyDescriptor(
+      globalThis,
+      "window",
+    );
+    const listeners = new Map<string, (event: KeyboardEvent) => void>();
+    const fakeWindow = {
+      addEventListener: jest.fn(
+        (type: string, listener: (event: KeyboardEvent) => void) =>
+          listeners.set(type, listener),
+      ),
+      removeEventListener: jest.fn((type: string) => listeners.delete(type)),
+    };
+    Object.defineProperty(globalThis, "window", {
+      value: fakeWindow,
+      configurable: true,
+    });
+    const harness = makeHarness();
+    const controller = new RsvpSpeechController(
+      makeConfiguration(),
+      harness.dependencies,
+    );
+    try {
+      await controller.prepare();
+      controller.startCapture();
+      harness.capture.emit(quietChunk());
+      expect(listeners.has("keydown")).toBe(false);
+      controller.allowProviderFinalization();
+      const handler = listeners.get("keydown")!;
+      const preventDefault = jest.fn();
+      for (const ignored of [
+        { code: "KeyA" },
+        { defaultPrevented: true },
+        { repeat: true },
+        { isComposing: true },
+        { shiftKey: true },
+        { altKey: true },
+        { ctrlKey: true },
+        { metaKey: true },
+        { target: { tagName: "INPUT" } },
+        { target: { tagName: "TEXTAREA" } },
+        { target: { tagName: "SELECT" } },
+        { target: { tagName: "BUTTON" } },
+        { target: { isContentEditable: true } },
+      ]) {
+        handler({
+          code: "Space",
+          target: { tagName: "BODY" },
+          preventDefault,
+          ...ignored,
+        } as unknown as KeyboardEvent);
+      }
+      expect(harness.session.requestCommit).not.toHaveBeenCalled();
+      handler({
+        code: "Space",
+        target: { tagName: "BODY" },
+        preventDefault,
+      } as unknown as KeyboardEvent);
+      expect(harness.session.requestCommit).toHaveBeenCalledTimes(1);
+      expect(preventDefault).toHaveBeenCalledTimes(1);
+      expect(listeners.has("keydown")).toBe(false);
+      handler({
+        code: "Space",
+        target: { tagName: "BODY" },
+        preventDefault,
+      } as unknown as KeyboardEvent);
+      expect(harness.session.requestCommit).toHaveBeenCalledTimes(1);
+      expect(preventDefault).toHaveBeenCalledTimes(1);
+    } finally {
+      await controller.close();
+      if (originalWindow)
+        Object.defineProperty(globalThis, "window", originalWindow);
+      else Reflect.deleteProperty(globalThis, "window");
+    }
+  });
+
   it("does not fabricate a response when capture produces no PCM", async () => {
     const harness = makeHarness();
     const controller = new RsvpSpeechController(

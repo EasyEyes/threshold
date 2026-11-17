@@ -23,10 +23,10 @@ export const RSVP_SPEECH_PARAMETER_NAMES = Object.freeze({
   finalizationTimeoutSec: "rsvpReadingSTTMaxSec",
   ignoreOrder: "rsvpReadingSTTIgnoreOrderBool",
   silenceSec: "rsvpReadingSpeechSilenceSec",
+  finishPhrase: "rsvpReadingSpeechFinishPhrase",
 });
 
-// Proposed new parameters can be read once published. Older compiled
-// experiments use the agreed initial settings without reading unknown names.
+// Keep defaults until these parameters are published in the Glossary.
 export const readRsvpSpeechFinishSettings = (
   reader: ParamReader,
   condition: string,
@@ -35,6 +35,10 @@ export const readRsvpSpeechFinishSettings = (
     RSVP_SPEECH_PARAMETER_NAMES.silenceSec in getGlossary()
       ? reader.read(RSVP_SPEECH_PARAMETER_NAMES.silenceSec, condition)
       : RSVP_SPEECH_SILENCE_MS / 1000,
+  finishPhrase:
+    RSVP_SPEECH_PARAMETER_NAMES.finishPhrase in getGlossary()
+      ? reader.read(RSVP_SPEECH_PARAMETER_NAMES.finishPhrase, condition)
+      : RSVP_SPEECH_FINISH_PHRASE,
   ignoreWordOrder: reader.read(
     RSVP_SPEECH_PARAMETER_NAMES.ignoreOrder,
     condition,

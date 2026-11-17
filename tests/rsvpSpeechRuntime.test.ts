@@ -15,6 +15,8 @@ jest.mock("../components/global", () => ({
 }));
 
 import { rsvpSpeechRuntime } from "../components/global";
+import * as glossaryRegistry from "../parameters/glossaryRegistry";
+import type { ParamReader } from "../parameters/paramReader";
 import type { RsvpSpeechController } from "../components/rsvpSpeech/rsvpSpeechController";
 import {
   RSVP_SPEECH_PARAMETER_NAMES,
@@ -27,6 +29,7 @@ import {
   injectRsvpSpeechTranscriptForSimulation,
   prepareRsvpSpeechTrial,
   prepareSimulatedRsvpSpeechTrial,
+  readRsvpSpeechFinishSettings,
   resolveRsvpSpeechProviderLanguageCode,
   startRsvpSpeechCapture,
   type RsvpSpeechTrialSetup,
@@ -78,6 +81,82 @@ afterAll(async () => {
 });
 
 describe("RSVP speech trial configuration", () => {
+  it("uses defaults without reading unpublished parameters", () => {
+    const glossary = jest
+      .spyOn(glossaryRegistry, "getGlossary")
+      .mockReturnValue({});
+    const read = jest.fn(() => true);
+    try {
+      expect(
+        readRsvpSpeechFinishSettings({ read } as unknown as ParamReader, "2_3"),
+      ).toEqual({
+        responseSilenceSec: 8,
+        finishPhrase: "don't know",
+        ignoreWordOrder: true,
+      });
+      expect(read.mock.calls).toEqual([
+        [RSVP_SPEECH_PARAMETER_NAMES.ignoreOrder, "2_3"],
+      ]);
+    } finally {
+      glossary.mockRestore();
+    }
+  });
+
+  it.each(["finished", ""])(
+    "reads the current condition's published finish phrase (%j)",
+    (phrase) => {
+      const glossary = jest
+        .spyOn(glossaryRegistry, "getGlossary")
+        .mockReturnValue({
+          [RSVP_SPEECH_PARAMETER_NAMES.finishPhrase]: {
+            name: RSVP_SPEECH_PARAMETER_NAMES.finishPhrase,
+            availability: "TRUE",
+            type: "text",
+            default: phrase,
+            explanation: "Spoken response completion phrase.",
+            example: "finished",
+            categories: [],
+          },
+          [RSVP_SPEECH_PARAMETER_NAMES.silenceSec]: {
+            name: RSVP_SPEECH_PARAMETER_NAMES.silenceSec,
+            availability: "TRUE",
+            type: "numerical",
+            default: "8",
+            explanation: "Silence duration before response completion.",
+            example: "8",
+            categories: [],
+          },
+        });
+      const read = jest.fn((name: string) =>
+        name === RSVP_SPEECH_PARAMETER_NAMES.finishPhrase
+          ? phrase
+          : name === RSVP_SPEECH_PARAMETER_NAMES.silenceSec
+          ? 9
+          : false,
+      );
+      try {
+        const settings = readRsvpSpeechFinishSettings(
+          { read } as unknown as ParamReader,
+          "2_3",
+        );
+        expect(settings).toEqual({
+          responseSilenceSec: 9,
+          finishPhrase: phrase,
+          ignoreWordOrder: false,
+        });
+        expect(read).toHaveBeenCalledWith(
+          RSVP_SPEECH_PARAMETER_NAMES.finishPhrase,
+          "2_3",
+        );
+        expect(
+          buildRsvpSpeechTrialConfiguration({ ...baseSetup(), ...settings })
+            .finishPhrase,
+        ).toBe(phrase);
+      } finally {
+        glossary.mockRestore();
+      }
+    },
+  );
   it("uses the published RSVP speech glossary names", () => {
     expect(RSVP_SPEECH_PARAMETER_NAMES.provider).toBe("rsvpReadingSTTProvider");
     expect(RSVP_SPEECH_PARAMETER_NAMES.targetKeytermBiasEnabled).toBe(
@@ -129,6 +208,8 @@ describe("RSVP speech trial configuration", () => {
     ["targetKeytermBiasEnabled", "true"],
     ["maximumResponseBeyondFinalWordSec", 0],
     ["finalizationTimeoutSec", 0],
+    ["finishPhrase", true],
+    ["responseSilenceSec", 0],
   ] as const)("rejects invalid %s values", (field, value) => {
     expect(() =>
       buildRsvpSpeechTrialConfiguration({
