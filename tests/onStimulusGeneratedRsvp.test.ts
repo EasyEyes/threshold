@@ -165,6 +165,7 @@ describe("onStimulusGeneratedRsvpReading — per-trial state reset", () => {
       "spoken",
       0.15,
     );
+    if (!out) throw new Error("Expected an RSVP stimulus to be generated.");
     expect(out.rsvpReadingTargetSets.skippedDueToBadTracking).toBe(0);
     expect(out.rsvpReadingTargetSets.past).toEqual([]);
   });

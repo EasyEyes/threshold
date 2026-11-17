@@ -64,7 +64,7 @@ describe("RSVP speech compiler validation", () => {
     ).toEqual([]);
   });
 
-  it.each([
+  it.each<Record<string, string[]>>([
     {},
     { responseSpokenBool: ["TRUE"] },
     { responseSpokenToExperimenterBool: ["TRUE"] },

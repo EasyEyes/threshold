@@ -71,6 +71,8 @@ export interface TranscriberCommitEvent {
   readonly utteranceId: string;
   readonly text: string;
   readonly receivedAtMs: number;
+  /** False for a segment emitted before an explicit end-of-stream acknowledgement. */
+  readonly finalAcknowledgement?: boolean;
 }
 
 export interface TranscriberErrorEvent {
@@ -106,7 +108,7 @@ export interface StreamingTranscriber {
   connect(): Promise<TranscriberConnectionInfo>;
   beginUtterance(utteranceId: string): void;
   sendAudio(utteranceId: string, chunk: PcmAudioChunk): void;
-  requestCommit(utteranceId: string): void;
+  requestCommit(utteranceId: string, endStream?: boolean): void;
   endUtterance(utteranceId: string): void;
   cancelUtterance(utteranceId: string): void;
   subscribe(listener: TranscriberListener): () => void;

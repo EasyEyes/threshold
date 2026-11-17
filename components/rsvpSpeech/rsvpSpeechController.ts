@@ -12,7 +12,16 @@ import {
   SpeechSession,
   type SpeechSessionState,
   type SpeechUtteranceResult,
+  type SpeechSessionListener,
 } from "../speech/speechSession";
+import { EnergyVoiceActivityDetector } from "../speech/vad";
+import {
+  RSVP_SPEECH_SILENCE_MS,
+  RSVP_SPEECH_CONFIRMATION_MS,
+  RSVP_SPEECH_FINISH_PHRASE,
+  stripRsvpSpeechFinishPhrase,
+  hasAllRsvpSpeechTargets,
+} from "./rsvpSpeechFinish";
 import {
   createSpeechTokenProvider,
   type SpeechProvider,
@@ -66,6 +75,9 @@ export interface RsvpSpeechTrialConfiguration {
   readonly maximumResponseDurationMs: number;
   readonly finalizationTimeoutMs?: number;
   readonly deepgramEndpointingMs?: number;
+  readonly responseSilenceMs?: number;
+  readonly finishPhrase?: string;
+  readonly ignoreWordOrder?: boolean;
   readonly requestTokenContext: () => SpeechTokenRequestContext;
 }
 
@@ -84,6 +96,8 @@ export interface RsvpSpeechSessionPort {
   beginUtterance(utteranceId: string): Promise<SpeechUtteranceResult>;
   pushAudio(chunk: PcmAudioChunk): boolean;
   allowProviderFinalization(): void;
+  requestCommit(): void;
+  subscribe(listener: SpeechSessionListener): () => void;
   cancelUtterance(): void;
   close(): Promise<void>;
 }
@@ -193,6 +207,42 @@ const normalizeConfiguration = (
     configuration.deepgramEndpointingMs,
     "deepgramEndpointingMs",
   );
+  optionalPositiveDuration(
+    configuration.responseSilenceMs,
+    "responseSilenceMs",
+  );
+  try {
+    // Validate normalized targets before presentation, not inside the response
+    // timer where a scoring exception could prevent the deadline from running.
+    hasAllRsvpSpeechTargets(
+      "",
+      targetWords,
+      languageCode,
+      configuration.ignoreWordOrder ?? true,
+    );
+  } catch (error) {
+    throw new RsvpSpeechControllerError(
+      "invalidConfiguration",
+      "The RSVP speech targets cannot be scored.",
+      error,
+    );
+  }
+  if (
+    configuration.finishPhrase !== undefined &&
+    typeof configuration.finishPhrase !== "string"
+  )
+    throw new RsvpSpeechControllerError(
+      "invalidConfiguration",
+      "The finish phrase must be text.",
+    );
+  if (
+    configuration.ignoreWordOrder !== undefined &&
+    typeof configuration.ignoreWordOrder !== "boolean"
+  )
+    throw new RsvpSpeechControllerError(
+      "invalidConfiguration",
+      "The word-order setting must be Boolean.",
+    );
 
   return Object.freeze({
     ...configuration,
@@ -257,6 +307,26 @@ export class RsvpSpeechController {
   private releasePromise?: Promise<void>;
   private closePromise?: Promise<void>;
   private closeRequested = false;
+  private unsubscribeSession?: () => void;
+  private unsubscribeHealth?: () => void;
+  private inputFailure?: RsvpSpeechControllerError;
+  private responseWindowStartedAt?: number;
+  private lastSpeechAt?: number;
+  private allCorrectSince?: number;
+  private latestSettledText = "";
+  private hasUnsettledText = false;
+  private settledAllCorrect = false;
+  private finishRequested = false;
+  private audioChunkCount = 0;
+  private responseTimer?: ReturnType<typeof setInterval>;
+  private readonly vad = new EnergyVoiceActivityDetector({
+    initialNoiseFloorRms: 0.001,
+    absoluteSpeechFloorRms: 0.01,
+    speechThresholdDbAboveNoise: 10,
+    minimumSpeechDurationMs: 80,
+    endOfSpeechSilenceMs: 100,
+    noiseFloorTimeConstantMs: 2000,
+  });
 
   constructor(
     configuration: RsvpSpeechTrialConfiguration,
@@ -281,6 +351,7 @@ export class RsvpSpeechController {
           new SpeechSession(transcriber, {
             maximumUtteranceDurationMs: config.maximumResponseDurationMs,
             finalizationTimeoutMs: config.finalizationTimeoutMs,
+            externallyControlledEnd: true,
           })),
     };
   }
@@ -317,6 +388,7 @@ export class RsvpSpeechController {
 
     let utterance: Promise<SpeechUtteranceResult> | undefined;
     try {
+      this.assertMicrophoneReady();
       utterance = this.session.beginUtterance(this.configuration.utteranceId);
       this.capture.start();
       this.stateValue = "capturing";
@@ -349,8 +421,12 @@ export class RsvpSpeechController {
       );
     }
     try {
-      this.session.allowProviderFinalization();
+      // A provider segment boundary does not finish an RSVP response. The
+      // response clocks begin only at the actual final-word offset.
+      this.responseWindowStartedAt = performance.now();
       this.stateValue = "finalizing";
+      this.responseTimer = setInterval(() => this.checkResponseEnd(), 50);
+      this.checkResponseEnd();
     } catch (error) {
       const mapped = asControllerError(
         "transcriptionFailed",
@@ -362,6 +438,109 @@ export class RsvpSpeechController {
       void this.releaseResources();
       throw mapped;
     }
+  }
+
+  /** Stop new audio, flush its tail, then wait for the provider's final result. */
+  finishResponse(): boolean {
+    if (
+      this.responseWindowStartedAt === undefined ||
+      this.finishRequested ||
+      !this.session ||
+      this.session.state !== "listening"
+    )
+      return false;
+    this.finishRequested = true;
+    this.clearResponseControls();
+    try {
+      this.assertMicrophoneReady();
+      this.capture?.stop();
+      if (this.audioChunkCount === 0)
+        throw new Error(
+          "No microphone audio reached the transcription session.",
+        );
+      this.session.requestCommit();
+    } catch (error) {
+      this.failureValue = asControllerError(
+        "captureFailed",
+        "RSVP speech could not finish recording.",
+        error,
+      );
+      this.stateValue = "failed";
+      try {
+        this.session.cancelUtterance();
+      } catch {
+        /* Cleanup is best effort. */
+      }
+      void this.releaseResources();
+    }
+    return true;
+  }
+
+  private readonly handleSessionEvent: SpeechSessionListener = (event) => {
+    if (event.type !== "partial" || this.finishRequested) return;
+    // Interim hypotheses may be revised; they cannot end the response.
+    if (!event.settled) {
+      this.hasUnsettledText = true;
+      this.allCorrectSince = undefined;
+      return;
+    }
+    this.hasUnsettledText = false;
+    this.latestSettledText = event.text;
+    const answer = stripRsvpSpeechFinishPhrase(
+      event.text,
+      this.configuration.languageCode,
+      this.configuration.finishPhrase ?? RSVP_SPEECH_FINISH_PHRASE,
+    );
+    this.settledAllCorrect = hasAllRsvpSpeechTargets(
+      answer.text,
+      this.configuration.targetWords,
+      this.configuration.languageCode,
+      this.configuration.ignoreWordOrder ?? true,
+    );
+    this.allCorrectSince = undefined;
+    // Run on the next timer tick: this segment's event must finish dispatching
+    // before a new finalization request can be sent.
+  };
+
+  private checkResponseEnd(): void {
+    if (this.finishRequested || this.responseWindowStartedAt === undefined)
+      return;
+    const now = performance.now();
+    const response = stripRsvpSpeechFinishPhrase(
+      this.latestSettledText,
+      this.configuration.languageCode,
+      this.configuration.finishPhrase ?? RSVP_SPEECH_FINISH_PHRASE,
+    );
+    if (response.finished && !this.hasUnsettledText) {
+      this.finishResponse();
+      return;
+    }
+    const silenceSince = Math.max(
+      this.responseWindowStartedAt,
+      this.lastSpeechAt ?? 0,
+    );
+    if (!this.hasUnsettledText && this.settledAllCorrect) {
+      this.allCorrectSince ??= now;
+      if (
+        now - Math.max(silenceSince, this.allCorrectSince) >=
+        RSVP_SPEECH_CONFIRMATION_MS
+      ) {
+        this.finishResponse();
+        return;
+      }
+    } else this.allCorrectSince = undefined;
+    if (
+      now - this.responseWindowStartedAt >=
+        this.configuration.maximumResponseDurationMs ||
+      now - silenceSince >=
+        (this.configuration.responseSilenceMs ?? RSVP_SPEECH_SILENCE_MS)
+    )
+      this.finishResponse();
+  }
+
+  private clearResponseControls(): void {
+    if (this.responseTimer !== undefined) clearInterval(this.responseTimer);
+    this.responseTimer = undefined;
   }
 
   waitForResult(): Promise<SpeechUtteranceResult> {
@@ -391,6 +570,7 @@ export class RsvpSpeechController {
         transcriber,
         this.configuration,
       );
+      this.unsubscribeSession = this.session.subscribe(this.handleSessionEvent);
 
       const prepareMicrophone = async (): Promise<void> => {
         this.microphone = await this.dependencies.openMicrophone();
@@ -400,6 +580,24 @@ export class RsvpSpeechController {
             "RSVP speech preparation was cancelled.",
           );
         }
+        this.assertMicrophoneReady();
+        this.unsubscribeHealth = this.microphone.subscribeToHealth((health) => {
+          if (
+            health.state === "ready" ||
+            this.closeRequested ||
+            this.finishRequested
+          )
+            return;
+          this.inputFailure = new RsvpSpeechControllerError(
+            "captureFailed",
+            `The RSVP microphone became ${health.state}.`,
+          );
+          if (this.session?.state === "listening") {
+            this.failureValue = this.inputFailure;
+            this.stateValue = "failed";
+            this.session.cancelUtterance();
+          }
+        });
         this.capture = this.dependencies.createCapture(this.microphone);
         await this.capture.initialize();
         if (!this.closeRequested) this.capture.startInput();
@@ -416,6 +614,7 @@ export class RsvpSpeechController {
           ? connectionResult.reason
           : undefined;
       if (preparationError !== undefined) throw preparationError;
+      if (this.inputFailure) throw this.inputFailure;
       if (this.closeRequested) {
         throw new RsvpSpeechControllerError(
           "closed",
@@ -424,18 +623,33 @@ export class RsvpSpeechController {
       }
 
       this.unsubscribeCapture = this.capture!.subscribe((chunk) => {
-        this.session?.pushAudio(chunk);
+        if (this.session?.pushAudio(chunk)) {
+          this.audioChunkCount++;
+          const now = performance.now();
+          const samples = Float32Array.from(
+            chunk.samples,
+            (sample) => sample / 32768,
+          );
+          const decision = this.vad.process(samples, now);
+          if (
+            decision.state === "speech" ||
+            decision.signal.acRms >= decision.speechThresholdRms
+          )
+            this.lastSpeechAt = now;
+        }
       });
       this.stateValue = "ready";
     } catch (error) {
       await this.releaseResources();
-      const mapped = asControllerError(
-        this.closeRequested ? "closed" : "preparationFailed",
-        this.closeRequested
-          ? "RSVP speech preparation was cancelled."
-          : "RSVP speech preparation failed.",
-        error,
-      );
+      const mapped =
+        this.inputFailure ??
+        asControllerError(
+          this.closeRequested ? "closed" : "preparationFailed",
+          this.closeRequested
+            ? "RSVP speech preparation was cancelled."
+            : "RSVP speech preparation failed.",
+          error,
+        );
       if (!this.closeRequested) {
         this.failureValue = mapped;
         this.stateValue = "failed";
@@ -455,13 +669,15 @@ export class RsvpSpeechController {
       return result;
     } catch (error) {
       await this.releaseResources();
-      const mapped = asControllerError(
-        this.closeRequested ? "closed" : "transcriptionFailed",
-        this.closeRequested
-          ? "RSVP speech was closed."
-          : "RSVP speech transcription failed.",
-        error,
-      );
+      const mapped =
+        this.inputFailure ??
+        asControllerError(
+          this.closeRequested ? "closed" : "transcriptionFailed",
+          this.closeRequested
+            ? "RSVP speech was closed."
+            : "RSVP speech transcription failed.",
+          error,
+        );
       if (!this.closeRequested) {
         this.failureValue = mapped;
         this.stateValue = "failed";
@@ -491,7 +707,21 @@ export class RsvpSpeechController {
     return this.releasePromise;
   }
 
+  private assertMicrophoneReady(): void {
+    if (this.inputFailure) throw this.inputFailure;
+    if (this.microphone?.getHealth().state !== "ready")
+      throw new RsvpSpeechControllerError(
+        "captureFailed",
+        "The RSVP microphone is not ready.",
+      );
+  }
+
   private async performReleaseResources(): Promise<void> {
+    this.clearResponseControls();
+    this.unsubscribeSession?.();
+    this.unsubscribeSession = undefined;
+    this.unsubscribeHealth?.();
+    this.unsubscribeHealth = undefined;
     this.unsubscribeCapture?.();
     this.unsubscribeCapture = undefined;
     try {

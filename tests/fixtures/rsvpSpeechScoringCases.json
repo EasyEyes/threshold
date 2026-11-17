@@ -260,8 +260,8 @@
       "expectedVector": [0, 0, 0]
     },
     {
-      "id": "en-empty-transcript-invalid",
-      "description": "No transcribed speech is a technical invalid result and must not become an all-wrong response.",
+      "id": "en-finalized-empty-response",
+      "description": "An empty response finalized by a healthy provider scores as three omissions.",
       "languageCode": "en",
       "targetWords": ["dog", "cat", "book"],
       "transcript": "   ",
@@ -270,7 +270,8 @@
         "repetition": "ignore",
         "selfCorrection": "accept"
       },
-      "expectedErrorCode": "emptyTranscript"
+      "expectedVector": [0, 0, 0],
+      "expectedOutcomes": ["omission", "omission", "omission"]
     },
     {
       "id": "en-lexical-punctuation",

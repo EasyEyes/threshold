@@ -147,6 +147,7 @@ export class DeepgramRealtimeTranscriber implements StreamingTranscriber {
   private connectTimeoutId?: ReturnType<typeof globalThis.setTimeout>;
   private closeExpected = false;
   private closedEventSent = false;
+  private endStreamRequested = false;
 
   constructor(options: DeepgramRealtimeTranscriberOptions) {
     if (!options || typeof options.tokenProvider !== "function") {
@@ -226,13 +227,27 @@ export class DeepgramRealtimeTranscriber implements StreamingTranscriber {
     this.socket?.send(pcm16LittleEndianBuffer(chunk.samples));
   }
 
-  requestCommit(utteranceId: string): void {
+  requestCommit(utteranceId: string, endStream = false): void {
     this.assertActiveUtterance(utteranceId);
-    this.socket?.send(JSON.stringify({ type: "Finalize" }));
+    // Finalize has no guaranteed acknowledgement when its buffer is empty.
+    // A one-trial owner can instead wait for CloseStream's summary Metadata.
+    this.endStreamRequested = endStream;
+    this.socket?.send(
+      JSON.stringify({ type: endStream ? "CloseStream" : "Finalize" }),
+    );
   }
 
   endUtterance(utteranceId: string): void {
-    this.assertActiveUtterance(utteranceId);
+    // Metadata acknowledges the final audio even if the peer has already
+    // started the WebSocket close handshake before this callback runs.
+    if (
+      !(
+        this.endStreamRequested &&
+        this.closeExpected &&
+        this.activeUtteranceId === utteranceId
+      )
+    )
+      this.assertActiveUtterance(utteranceId);
     this.activeUtteranceId = undefined;
     this.committedParts = [];
   }
@@ -365,6 +380,19 @@ export class DeepgramRealtimeTranscriber implements StreamingTranscriber {
     if (message.type === "Metadata" && typeof message.request_id === "string") {
       if (this.info)
         this.info = { ...this.info, sessionId: message.request_id };
+      if (this.endStreamRequested && this.activeUtteranceId) {
+        const utteranceId = this.activeUtteranceId;
+        const text = this.committedParts.join(" ").trim();
+        this.committedParts = [];
+        this.closeExpected = true;
+        this.emit({
+          type: "commit",
+          utteranceId,
+          text,
+          receivedAtMs: this.now(),
+          finalAcknowledgement: true,
+        });
+      }
       return;
     }
     if (message.type === "Error") {
@@ -398,6 +426,7 @@ export class DeepgramRealtimeTranscriber implements StreamingTranscriber {
         utteranceId: this.activeUtteranceId,
         text: transcript,
         receivedAtMs,
+        ...(this.endStreamRequested ? { finalAcknowledgement: false } : {}),
       });
     } else {
       this.emit({

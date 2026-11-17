@@ -186,7 +186,7 @@ describe("ElevenLabs realtime configuration", () => {
 describe("createElevenLabsTokenProvider", () => {
   it("requests a no-store token without accepting an empty response", async () => {
     const fetchImpl = jest.fn(
-      async () =>
+      async (_input: RequestInfo | URL, _init?: RequestInit) =>
         ({
           ok: true,
           status: 200,

@@ -16,12 +16,19 @@ jest.mock("../components/global", () => ({
 
 import {
   phraseIdentificationResponse,
-  rsvpSpeechRuntime,
+  rsvpSpeechRuntime as globalSpeechRuntime,
 } from "../components/global";
 import {
   registerRsvpSpeechResult,
   resetRsvpSpeechResponseRegistration,
 } from "../components/rsvpSpeech/rsvpSpeechRegistrar";
+import type { SpeechUtteranceResult } from "../components/speech/speechSession";
+
+const rsvpSpeechRuntime = globalSpeechRuntime as unknown as {
+  status: string;
+  result?: SpeechUtteranceResult;
+  responseRegistrationStatus: string;
+};
 
 const result = (text: string) => ({
   utteranceId: "rsvp-test-1",
@@ -76,7 +83,7 @@ describe("RSVP speech response registrar", () => {
     expect(phraseIdentificationResponse.correct).toEqual([1, 1, 1]);
   });
 
-  it("marks an empty committed transcript invalid instead of fabricating zeros", () => {
+  it("registers a successfully committed empty answer as omissions", () => {
     rsvpSpeechRuntime.result = result("");
 
     const registration = registerRsvpSpeechResult({
@@ -85,13 +92,25 @@ describe("RSVP speech response registrar", () => {
       ignoreWordOrder: false,
     });
 
-    expect(registration).toEqual({
-      status: "invalid",
-      errorCode: "emptyTranscript",
+    expect(registration.status).toBe("registered");
+    expect(phraseIdentificationResponse.current).toEqual(["", "", ""]);
+    expect(phraseIdentificationResponse.correct).toEqual([0, 0, 0]);
+    expect(rsvpSpeechRuntime.responseRegistrationStatus).toBe("registered");
+  });
+
+  it("scores the answer before a finish command through the same registers", () => {
+    rsvpSpeechRuntime.result = result("cat dog I don't know");
+    registerRsvpSpeechResult({
+      targetWords: ["cat", "dog", "fish"],
+      languageCode: "en",
+      ignoreWordOrder: true,
     });
-    expect(phraseIdentificationResponse.current).toEqual([]);
-    expect(phraseIdentificationResponse.correct).toEqual([]);
-    expect(rsvpSpeechRuntime.responseRegistrationStatus).toBe("invalid");
+    expect(phraseIdentificationResponse.correct).toEqual([1, 1, 0]);
+    expect(phraseIdentificationResponse.targetWord).toEqual([
+      "cat",
+      "dog",
+      "fish",
+    ]);
   });
 
   it("waits while the provider result is still pending", () => {

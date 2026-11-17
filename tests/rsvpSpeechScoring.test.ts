@@ -106,12 +106,8 @@ describe("RSVP speech scoring", () => {
     expect(result.diagnostics.outOfOrderCount).toBe(1);
   });
 
-  it("rejects an empty transcript so it cannot be scored as incorrect", () => {
-    expect(() => score(" ")).toThrow(
-      expect.objectContaining<Partial<RsvpSpeechScoringError>>({
-        code: "emptyTranscript",
-      }),
-    );
+  it("scores a finalized empty transcript as omissions", () => {
+    expect(score(" ").responseVector).toEqual([0, 0, 0]);
   });
 
   it("scores Persian targets across a provider-created half-space boundary", () => {
