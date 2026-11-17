@@ -102,3 +102,11 @@ describe("colorsEnabledByDefault", () => {
     else process.env.NO_COLOR = old;
   });
 });
+
+it("preserves semantic diagnostic colors and plain text", () => {
+  const html =
+    '<span class="diagnostic-deleted">old</span><span class="diagnostic-inserted">new</span><span class="diagnostic-invalid">bad</span>';
+  expect(htmlToTerminal(html, false)).toBe("oldnewbad");
+  expect(htmlToTerminal(html, true)).toContain("\x1b[");
+  expect(htmlToTerminal(html, true)).not.toBe("oldnewbad");
+});

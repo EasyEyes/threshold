@@ -765,12 +765,12 @@ const diffSuggestion = (name: string, suggestion: string): string | null => {
   // struck span is already red, so nesting red-in-red would be noise.
   const struck = (t: string) =>
     t
-      ? `<span style="color: #bb2c22; font-weight: bold; text-decoration: line-through;">${revealInvisibleCharacters(
+      ? `<span class="diagnostic-deleted">${revealInvisibleCharacters(
           t,
         )}</span>`
       : "";
   const green = (t: string) =>
-    t ? `<span style="color: #147133; font-weight: bold;">${t}</span>` : "";
+    t ? `<span class="diagnostic-inserted">${t}</span>` : "";
   // The parenthetical echoes the suggestion as plain text (not the
   // error-parameter span): only the standalone suggestion above is a
   // glossary link, the diff echo must stay click-less.

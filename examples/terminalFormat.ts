@@ -52,6 +52,18 @@ export const htmlToTerminal = (
   colors = colorsEnabledByDefault(),
 ): string => {
   let s = html;
+  s = s.replace(
+    /<span class="diagnostic-deleted">([\s\S]*?)<\/span>/g,
+    (_m, text) => color.redStrike(String(text), colors),
+  );
+  s = s.replace(
+    /<span class="diagnostic-invalid">([\s\S]*?)<\/span>/g,
+    (_m, text) => color.red(String(text) || "◆", colors),
+  );
+  s = s.replace(
+    /<span class="diagnostic-inserted">([\s\S]*?)<\/span>/g,
+    (_m, text) => color.boldGreen(String(text), colors),
+  );
   // Known semantic spans → colored text
   s = s.replace(/<span class="error-parameter">([\s\S]*?)<\/span>/g, (_m, p1) =>
     color.boldYellow(String(p1), colors),

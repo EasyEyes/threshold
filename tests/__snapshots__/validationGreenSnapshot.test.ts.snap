@@ -30,7 +30,7 @@ exports[`Part A: example tables demoFlickeringGaborMovie.csv — error output is
     "context": "preprocessor",
     "hint": "All parameters are case-sensitive.",
     "kind": "error",
-    "message": "This parameter is not defined in the Parameter Glossary. The closest supported parameter is <span class="error-parameter">_consentForm</span> (<span style="color: #bb2c22; font-weight: bold; text-decoration: line-through;">%</span>_consentForm) &#8212 is that what you meant?",
+    "message": "This parameter is not defined in the Parameter Glossary. The closest supported parameter is <span class="error-parameter">_consentForm</span> (<span class="diagnostic-deleted">%</span>_consentForm) &#8212 is that what you meant?",
     "name": "Parameter is unrecognized",
     "parameters": [
       "%_consentForm",
@@ -61,7 +61,7 @@ exports[`Part A: example tables demoFlickeringGaborMovie.csv — error output is
     "context": "preprocessor",
     "hint": "All parameters are case-sensitive.",
     "kind": "error",
-    "message": "This parameter is not defined in the Parameter Glossary. The closest supported parameter is <span class="error-parameter">_debriefForm</span> (<span style="color: #bb2c22; font-weight: bold; text-decoration: line-through;">%</span>_debriefForm) &#8212 is that what you meant?",
+    "message": "This parameter is not defined in the Parameter Glossary. The closest supported parameter is <span class="error-parameter">_debriefForm</span> (<span class="diagnostic-deleted">%</span>_debriefForm) &#8212 is that what you meant?",
     "name": "Parameter is unrecognized",
     "parameters": [
       "%_debriefForm",
@@ -322,7 +322,7 @@ exports[`Part A: example tables test-many-errors.csv — error output is unchang
     "context": "preprocessor",
     "hint": "All parameters are case-sensitive.",
     "kind": "error",
-    "message": "This parameter is not defined in the Parameter Glossary. The closest supported parameter is <span class="error-parameter">readingCorpus</span> (readingCorpu<span style="color: #147133; font-weight: bold;">s</span>) &#8212 is that what you meant?",
+    "message": "This parameter is not defined in the Parameter Glossary. The closest supported parameter is <span class="error-parameter">readingCorpus</span> (readingCorpu<span class="diagnostic-inserted">s</span>) &#8212 is that what you meant?",
     "name": "Parameter is unrecognized",
     "parameters": [
       "readingCorpu",

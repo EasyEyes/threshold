@@ -36,13 +36,10 @@ const errorsFor = (csv: string) => {
 const unrecognized = (csv: string) =>
   errorsFor(csv).find((e) => e.name === "Parameter is unrecognized");
 
-const RED = (s: string) =>
-  `<span style="color: #bb2c22; font-weight: bold; text-decoration: line-through;">${s}</span>`;
-const GREEN = (s: string) =>
-  `<span style="color: #147133; font-weight: bold;">${s}</span>`;
+const RED = (s: string) => `<span class="diagnostic-deleted">${s}</span>`;
+const GREEN = (s: string) => `<span class="diagnostic-inserted">${s}</span>`;
 const PARAM = (s: string) => `<span class="error-parameter">${s}</span>`;
-const REVEALED = (s: string) =>
-  `<span style="color: #bb2c22; font-weight: bold;">${s}</span>`;
+const REVEALED = (s: string) => `<span class="diagnostic-invalid">${s}</span>`;
 
 describe("hidden-character twins are normalized, not errored", () => {
   it("zero-width space before a valid parameter name compiles as that parameter", () => {
@@ -160,7 +157,7 @@ describe("suggestions stay relevant and retain glossary links", () => {
     }));
     const linked = linkGlossaryParameters(error!.message);
     expect(linked.match(/<a class="error-parameter-link"/g)).toHaveLength(1);
-    expect(linked).toMatch(/\(targetKind<span style="color: #bb2c22/);
+    expect(linked).toMatch(/\(targetKind<span class="diagnostic-deleted/);
     const { __resetGlossaryRowsForTests } = await import(
       "../parameters/glossaryLink"
     );

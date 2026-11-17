@@ -80,8 +80,6 @@ export { codePointLabel };
 export const annotateInvisibleCharacters = (name: string): string =>
   name.replace(/./gu, (ch) =>
     isHiddenBlank(ch)
-      ? `<span style="color: #bb2c22; font-weight: bold;">${codePointLabel(
-          ch,
-        )}</span>`
+      ? `<span class="diagnostic-invalid">${codePointLabel(ch)}</span>`
       : ch,
   );
