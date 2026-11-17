@@ -9,6 +9,9 @@
 
 import { FONT_READING_CORPUS_CHARACTERS_MISSING } from "../preprocess/errorMessages";
 
+const characterSupport =
+  '<span class="diagnostic-section"><strong>Character support.</strong> Unsupported characters may appear as empty boxes, e.g. □. The "wrongLanguage" setting does not suppress this error; it only tolerates incomplete support for <span class="error-parameter">fontLanguage</span> character shapes.</span>';
+
 const error = (offendingConditions: number[]) =>
   FONT_READING_CORPUS_CHARACTERS_MISSING(
     "SomeFont.ttf",
@@ -21,7 +24,8 @@ const error = (offendingConditions: number[]) =>
 describe("message", () => {
   it("states font, count, corpus, and a sample", () => {
     expect(error([2]).message).toBe(
-      `The font "SomeFont.ttf" is missing 3 characters required by <span class="error-parameter">readingCorpus</span> "corpus.txt" (for example: 你好).`,
+      `The font "SomeFont.ttf" is missing 3 characters required by <span class="error-parameter">readingCorpus</span> "corpus.txt" (for example: 你好).` +
+        characterSupport,
     );
   });
 
@@ -29,7 +33,8 @@ describe("message", () => {
     expect(
       FONT_READING_CORPUS_CHARACTERS_MISSING("F", "c", "x", 1, [0]).message,
     ).toBe(
-      `The font "F" is missing 1 character required by <span class="error-parameter">readingCorpus</span> "c" (for example: x).`,
+      `The font "F" is missing 1 character required by <span class="error-parameter">readingCorpus</span> "c" (for example: x).` +
+        characterSupport,
     );
   });
 });
@@ -47,9 +52,10 @@ describe("hint", () => {
     );
   });
 
-  it("documents the tolerate escape hatch with the empty-box consequence", () => {
+  it("keeps the escape hatch in the hint and the consequence in the message", () => {
+    expect(error([0]).message).toContain(characterSupport);
     expect(error([0]).hint).toContain(
-      `To use the font despite missing characters, add "missingCharacters" to <span class="error-parameter">fontTolerateFaults</span> for the affected condition. Unsupported characters may appear as empty boxes, e.g. □.`,
+      `To use the font despite missing characters, add "missingCharacters" to <span class="error-parameter">fontTolerateFaults</span> for the affected condition.`,
     );
   });
 

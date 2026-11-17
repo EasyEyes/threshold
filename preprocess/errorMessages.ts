@@ -861,14 +861,14 @@ export const FONT_SHAPING_TABLE_REJECTED = (
       tablesPlural ? "both tables in full" : "the whole table"
     }, so the font silently loses ${verballyEnumerate(
       lostCapabilities,
-    )}. In connected scripts such as Arabic this can misspell words on screen. Safari uses CoreText rather than HarfBuzz, so the failure may not appear there or in macOS apps like Notes — visual checks there won't reliably reveal the problem.`,
+    )}. In connected scripts such as Arabic this can misspell words on screen. Safari uses CoreText rather than HarfBuzz, so the failure may not appear there or in macOS apps like Notes — visual checks there won't reliably reveal the problem.<span class="diagnostic-section"><strong>Font diagnostics.</strong> ${SHAPERGLOT_HINT}</span>`,
     hint: `${offendingString}Repair the font (if your license allows it) or use a different one. A font editor (or the fontTools Python library) can locate the offending rules; deleting or rebuilding them usually fixes the font without changing its design. To tolerate ${
       tablesPlural ? "these faults" : "this fault"
     }, add "${toleranceValues.join(
       ", ",
     )}" to <span class="error-parameter">fontTolerateFaults</span> for the affected condition${
       plural ? "s" : ""
-    }. Add "all" to tolerate every font fault.<br><br>${SHAPERGLOT_HINT}`,
+    }. Add "all" to tolerate every font fault.`,
     context: "preprocessor",
     kind: "error",
     parameters: ["font", "fontTolerateFaults", "_needBrowser"],
@@ -898,10 +898,10 @@ export const FONT_WRONG_LANGUAGE = (
       : "";
   return {
     name: "Font lacks support for its fontLanguage",
-    message: `The font "${fontName}" does not support the language <span class="error-parameter">fontLanguage</span>="${fontLanguage}" (${shaperglotLanguageId}).${problemDetail}`,
+    message: `The font "${fontName}" does not support the language <span class="error-parameter">fontLanguage</span>="${fontLanguage}" (${shaperglotLanguageId}).${problemDetail}<span class="diagnostic-section"><strong>Font diagnostics.</strong> ${SHAPERGLOT_HINT}</span>`,
     hint: `${offendingString}Choose a font that supports <span class="error-parameter">fontLanguage</span>="${fontLanguage}", or add "wrongLanguage" to <span class="error-parameter">fontTolerateFaults</span> for the affected condition${
       plural ? "s" : ""
-    } to tolerate the font's incomplete language support.<br><br>${SHAPERGLOT_HINT}`,
+    } to tolerate the font's incomplete language support.`,
     context: "preprocessor",
     kind: "error",
     parameters: ["font", "fontTolerateFaults", "fontLanguage"],
@@ -926,10 +926,10 @@ export const FONT_READING_CORPUS_CHARACTERS_MISSING = (
     name: "Font missing readingCorpus characters",
     message: `The font "${fontName}" is missing ${missingCount} character${
       missingCount === 1 ? "" : "s"
-    } required by <span class="error-parameter">readingCorpus</span> "${corpusName}" (for example: ${missingSample}).`,
+    } required by <span class="error-parameter">readingCorpus</span> "${corpusName}" (for example: ${missingSample}).<span class="diagnostic-section"><strong>Character support.</strong> Unsupported characters may appear as empty boxes, e.g. □. The "wrongLanguage" setting does not suppress this error; it only tolerates incomplete support for <span class="error-parameter">fontLanguage</span> character shapes.</span>`,
     hint: `${offendingString}Fix this either by choosing a font that supports every character in <span class="error-parameter">readingCorpus</span>, or by removing unsupported characters from <span class="error-parameter">readingCorpus</span>. To use the font despite missing characters, add "missingCharacters" to <span class="error-parameter">fontTolerateFaults</span> for the affected condition${
       plural ? "s" : ""
-    }. Unsupported characters may appear as empty boxes, e.g. □.<br><br>The "wrongLanguage" setting does not suppress this error; it only tolerates incomplete support for <span class="error-parameter">fontLanguage</span> character shapes.`,
+    }.`,
     context: "preprocessor",
     kind: "error",
     parameters: ["font", "readingCorpus", "fontTolerateFaults"],
