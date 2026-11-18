@@ -676,8 +676,14 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
     if (
       isFirstTargetSet &&
       isRsvpReadingAutomaticSpeechResponseMode(rsvpReadingResponse.responseType)
-    )
-      startRsvpSpeechCapture();
+    ) {
+      const started = startRsvpSpeechCapture();
+      if (
+        !started &&
+        rsvpSpeechRuntime.controller?.configuration.provider === "chirp3"
+      )
+        return false;
+    }
     // Mark start-time for this target set
     rsvpReadingTargetSets.current.startTime = t;
     rsvpReadingTargetSets.current.stims.forEach((s) => {

@@ -1,7 +1,12 @@
 import { getEasyEyesBaseUrl } from "../easyeyesBaseUrl";
 import { TranscriberError } from "./transcriber";
 
-export type SpeechProvider = "elevenlabs" | "deepgram";
+export type SpeechProvider = "elevenlabs" | "deepgram" | "chirp3";
+
+export interface SpeechCredential {
+  readonly token: string;
+  readonly websocketUrl?: string;
+}
 
 export interface SpeechTokenRequestContext {
   readonly experimentFullPath: string;
@@ -47,10 +52,10 @@ export const buildSpeechTokenEndpoint = (baseUrl: string): string => {
   return `${base.origin}${SPEECH_TOKEN_PATH}`;
 };
 
-export const createSpeechTokenProvider = (
+export const createSpeechCredentialProvider = (
   provider: SpeechProvider,
   options: SpeechTokenProviderOptions,
-): (() => Promise<string>) => {
+): (() => Promise<SpeechCredential>) => {
   if (!options || typeof options.requestContext !== "function") {
     throw new TranscriberError(
       "invalidConfiguration",
@@ -114,7 +119,10 @@ export const createSpeechTokenProvider = (
           { retryable: response.status === 429 || response.status >= 500 },
         );
       }
-      const body = (await response.json()) as { token?: unknown };
+      const body = (await response.json()) as {
+        token?: unknown;
+        websocketUrl?: unknown;
+      };
       if (typeof body.token !== "string" || !body.token.trim()) {
         throw new TranscriberError(
           "credentialFailure",
@@ -122,7 +130,24 @@ export const createSpeechTokenProvider = (
           { retryable: true },
         );
       }
-      return body.token;
+      if (provider === "chirp3") {
+        if (typeof body.websocketUrl !== "string")
+          throw new Error("Missing speech relay URL.");
+        const url = new URL(body.websocketUrl);
+        const local =
+          url.hostname === "localhost" || url.hostname === "127.0.0.1";
+        if (
+          (url.protocol !== "wss:" && !(local && url.protocol === "ws:")) ||
+          url.username ||
+          url.password ||
+          url.search ||
+          url.hash ||
+          url.pathname !== "/v1/stream"
+        )
+          throw new Error("Invalid speech relay URL.");
+        return { token: body.token, websocketUrl: url.toString() };
+      }
+      return { token: body.token };
     } catch (error) {
       if (error instanceof TranscriberError) throw error;
       throw new TranscriberError(
@@ -134,4 +159,12 @@ export const createSpeechTokenProvider = (
       globalThis.clearTimeout(timeoutId);
     }
   };
+};
+
+export const createSpeechTokenProvider = (
+  provider: SpeechProvider,
+  options: SpeechTokenProviderOptions,
+): (() => Promise<string>) => {
+  const credentials = createSpeechCredentialProvider(provider, options);
+  return async () => (await credentials()).token;
 };

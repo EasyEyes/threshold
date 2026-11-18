@@ -203,6 +203,32 @@ describe("RSVP speech trial configuration", () => {
     expect(configuration.provider).toBe("deepgram");
   });
 
+  it("accepts Chirp 3 and preserves the condition locale", () => {
+    const config = buildRsvpSpeechTrialConfiguration({
+      ...baseSetup(),
+      provider: "chirp3",
+    });
+    expect(config.provider).toBe("chirp3");
+    expect(config.languageCode).toBe("en-US");
+  });
+
+  it.each([
+    ["en", "en-US"],
+    ["fa", "fa-IR"],
+    ["en-GB", "en-GB"],
+    ["fa_IR", "fa-IR"],
+  ])(
+    "maps Chirp 3 condition language %s to %s without changing other providers",
+    (input, expected) => {
+      expect(resolveRsvpSpeechProviderLanguageCode("chirp3", input)).toBe(
+        expected,
+      );
+      expect(resolveRsvpSpeechProviderLanguageCode("deepgram", input)).toBe(
+        input.replace(/_/g, "-"),
+      );
+    },
+  );
+
   it.each([
     ["provider", "unknown"],
     ["targetKeytermBiasEnabled", "true"],
@@ -270,6 +296,28 @@ describe("RSVP speech runtime lifecycle", () => {
     expect(hasActiveRsvpSpeechResources()).toBe(false);
     expect(startRsvpSpeechCapture()).toBe(false);
     expect(allowRsvpSpeechProviderFinalization()).toBe(false);
+  });
+
+  it("does not count a failed Chirp capture as exposure", async () => {
+    const error = new Error("Disconnected before the first word");
+    const controller = {
+      configuration: { provider: "chirp3" },
+      prepare: jest.fn(async () => undefined),
+      startCapture: jest.fn(() => {
+        throw error;
+      }),
+      close: jest.fn(async () => undefined),
+    } as unknown as RsvpSpeechController;
+    await prepareRsvpSpeechTrial(
+      { ...baseSetup(), provider: "chirp3" },
+      {
+        createController: () => controller,
+      },
+    );
+    expect(startRsvpSpeechCapture()).toBe(false);
+    expect(rsvpSpeechRuntime.error).toBe(error);
+    expect(rsvpSpeechRuntime.captureStartedAtMs).toBeUndefined();
+    expect(rsvpSpeechRuntime.responseRegistrationStatus).toBe("pending");
   });
 
   it("keeps preparation failures in speech state instead of throwing into RSVP", async () => {

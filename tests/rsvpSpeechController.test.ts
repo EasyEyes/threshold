@@ -3,6 +3,8 @@ import * as elevenLabsAdapter from "../components/speech/elevenLabsRealtimeTrans
 import * as deepgramAdapter from "../components/speech/deepgramRealtimeTranscriber";
 import { DeepgramRealtimeTranscriber } from "../components/speech/deepgramRealtimeTranscriber";
 import { ElevenLabsRealtimeTranscriber } from "../components/speech/elevenLabsRealtimeTranscriber";
+import { GoogleChirp3Transcriber } from "../components/speech/googleChirp3Transcriber";
+import { SpeechSessionError } from "../components/speech/speechSession";
 import type {
   SpeechSessionState,
   SpeechUtteranceResult,
@@ -61,7 +63,7 @@ const makeConfiguration = (
 class FakeCapture implements RsvpSpeechCapturePort {
   readonly initialize = jest.fn(async (): Promise<void> => undefined);
   readonly startInput = jest.fn(() => undefined);
-  readonly start = jest.fn(() => undefined);
+  readonly start = jest.fn((): void => undefined);
   readonly stop = jest.fn(() => undefined);
   readonly close = jest.fn(async () => undefined);
   private listener?: (chunk: PcmAudioChunk) => void;
@@ -96,6 +98,13 @@ class FakeSession implements RsvpSpeechSessionPort {
       text,
       settled,
       receivedAtMs: performance.now(),
+    });
+  }
+  disconnectBeforeCapture(): void {
+    this.state = "failed";
+    this.listener?.({
+      type: "error",
+      error: new SpeechSessionError("transcriberFailure", "Connection lost"),
     });
   }
   state: SpeechSessionState = "idle";
@@ -483,6 +492,41 @@ describe("RsvpSpeechController", () => {
     expect(controller.state).toBe("ready");
   });
 
+  it.each(["preparing", "ready"])(
+    "does not start capture if Chirp disconnects while %s",
+    async (phase) => {
+      const h = makeHarness();
+      const initialized = deferred<void>();
+      const micReady = deferred<void>();
+      h.capture.initialize.mockImplementationOnce(() => {
+        initialized.resolve();
+        return micReady.promise;
+      });
+      const controller = new RsvpSpeechController(
+        makeConfiguration({ provider: "chirp3" }),
+        h.dependencies,
+      );
+      const preparing = controller.prepare();
+      await initialized.promise;
+      if (phase === "ready") {
+        micReady.resolve();
+        await preparing;
+      }
+      h.session.disconnectBeforeCapture();
+      if (phase === "preparing") {
+        micReady.resolve();
+        await expect(preparing).rejects.toMatchObject({
+          code: "preparationFailed",
+        });
+      }
+      expect(controller.state).toBe("failed");
+      expect(() => controller.startCapture()).toThrow(controller.failure);
+      expect(h.capture.start).not.toHaveBeenCalled();
+      await controller.close();
+      expect(h.microphone.close).toHaveBeenCalledTimes(1);
+    },
+  );
+
   it("copies only this trial's target words into immutable provider configuration", async () => {
     const targetWords = ["cat", "dog", "fish"];
     const harness = makeHarness();
@@ -508,6 +552,7 @@ describe("RsvpSpeechController", () => {
   it.each([
     ["elevenlabs", ElevenLabsRealtimeTranscriber],
     ["deepgram", DeepgramRealtimeTranscriber],
+    ["chirp3", GoogleChirp3Transcriber],
   ] as const)(
     "constructs the selected %s adapter",
     async (provider, Adapter) => {
