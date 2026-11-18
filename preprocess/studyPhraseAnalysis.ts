@@ -192,8 +192,8 @@ export async function checkStudyPhraseAnalysis(
     errors.push({
       name: "Study phrase analysis unavailable",
       message:
-        "The study phrase analysis could not be completed with an index matching this compiler build. Compilation is blocked.",
-      hint: "Reload the compiler and try again. The deployment must include a complete phrase analysis index and its API.",
+        'The study phrase analysis could not be completed with an index matching this compiler build. Compilation is blocked.<span class="alert-section"><strong>For developers.</strong> The deployment must include a complete phrase analysis index and its API.</span>',
+      hint: "Reload the compiler and try again.",
       context: "preprocessor",
       kind: "error",
       parameters: [],
