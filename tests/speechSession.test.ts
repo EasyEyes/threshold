@@ -69,6 +69,83 @@ class FakeTranscriber implements StreamingTranscriber {
 }
 
 describe("SpeechSession", () => {
+  it("waits for end-of-stream acknowledgement while preserving the last segment", async () => {
+    const transcriber = new FakeTranscriber();
+    const session = new SpeechSession(transcriber, {
+      maximumUtteranceDurationMs: 20,
+      externallyControlledEnd: true,
+    });
+    await session.connect();
+    const result = session.beginUtterance("trial");
+    session.requestCommit();
+    transcriber.emit({
+      type: "commit",
+      utteranceId: "trial",
+      text: "cat",
+      receivedAtMs: 1,
+      finalAcknowledgement: false,
+    });
+    expect(session.state).toBe("finalizing");
+    transcriber.emit({
+      type: "commit",
+      utteranceId: "trial",
+      text: "",
+      receivedAtMs: 2,
+      finalAcknowledgement: true,
+    });
+    await expect(result).resolves.toMatchObject({ text: "cat" });
+    await session.close();
+  });
+  it("retains provider segments until the RSVP owner explicitly ends recording, including an empty final response", async () => {
+    jest.useFakeTimers();
+    const transcriber = new FakeTranscriber();
+    const session = new SpeechSession(transcriber, {
+      maximumUtteranceDurationMs: 2,
+      externallyControlledEnd: true,
+      finalizationTimeoutMs: 10000,
+    });
+    await session.connect();
+    const result = session.beginUtterance("trial");
+    session.allowProviderFinalization();
+    transcriber.emit({
+      type: "commit",
+      utteranceId: "trial",
+      text: "",
+      receivedAtMs: 1,
+    });
+    jest.advanceTimersByTime(30000);
+    expect(session.state).toBe("listening");
+    expect(transcriber.requestCommit).not.toHaveBeenCalled();
+    session.requestCommit();
+    jest.advanceTimersByTime(9999);
+    expect(session.state).toBe("finalizing");
+    transcriber.emit({
+      type: "commit",
+      utteranceId: "trial",
+      text: "",
+      receivedAtMs: 40000,
+    });
+    await expect(result).resolves.toMatchObject({ text: "" });
+    await session.close();
+  });
+
+  it("keeps a missing provider acknowledgement technical instead of producing zeros", async () => {
+    jest.useFakeTimers();
+    const transcriber = new FakeTranscriber();
+    const session = new SpeechSession(transcriber, {
+      maximumUtteranceDurationMs: 20,
+      externallyControlledEnd: true,
+      finalizationTimeoutMs: 10000,
+    });
+    await session.connect();
+    const failed = expect(
+      session.beginUtterance("trial"),
+    ).rejects.toMatchObject({ code: "finalizationTimeout" });
+    session.requestCommit();
+    jest.advanceTimersByTime(10000);
+    await failed;
+    await session.close();
+  });
   afterEach(() => {
     jest.useRealTimers();
   });

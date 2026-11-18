@@ -98,6 +98,8 @@ export interface SpeechSessionOptions {
   readonly maximumUtteranceDurationMs: number;
   readonly finalizationTimeoutMs?: number;
   readonly now?: () => number;
+  /** An owner such as RSVP can manage recording end independently of segments. */
+  readonly externallyControlledEnd?: boolean;
 }
 
 interface PendingUtterance {
@@ -179,12 +181,14 @@ export class SpeechSession {
   private finalizationTimer?: ReturnType<typeof globalThis.setTimeout>;
   private closePromise?: Promise<void>;
   private expectedClose = false;
+  private readonly externallyControlledEnd: boolean;
 
   constructor(
     transcriber: StreamingTranscriber,
     options: SpeechSessionOptions,
   ) {
     this.transcriber = transcriber;
+    this.externallyControlledEnd = options.externallyControlledEnd ?? false;
     this.maximumUtteranceDurationMs = positiveDuration(
       options.maximumUtteranceDurationMs,
       "maximumUtteranceDurationMs",
@@ -264,10 +268,11 @@ export class SpeechSession {
     }
 
     this.setState("listening", id);
-    this.maximumDurationTimer = globalThis.setTimeout(() => {
-      if (this.pending?.id !== id || this.stateValue !== "listening") return;
-      this.requestCommit("maxDuration");
-    }, this.maximumUtteranceDurationMs);
+    if (!this.externallyControlledEnd)
+      this.maximumDurationTimer = globalThis.setTimeout(() => {
+        if (this.pending?.id !== id || this.stateValue !== "listening") return;
+        this.requestCommit("maxDuration");
+      }, this.maximumUtteranceDurationMs);
     return pending.promise;
   }
 
@@ -310,13 +315,6 @@ export class SpeechSession {
     const utteranceId = this.pending.id;
     this.pending.finalizationTrigger = trigger;
     this.clearMaximumDurationTimer();
-    try {
-      this.transcriber.requestCommit(utteranceId);
-    } catch (error) {
-      this.fail(asSessionError(error));
-      return;
-    }
-
     this.setState("finalizing", utteranceId);
     this.finalizationTimer = globalThis.setTimeout(() => {
       if (this.pending?.id !== utteranceId) return;
@@ -332,6 +330,13 @@ export class SpeechSession {
         // The session is already failed; cancellation is best-effort cleanup.
       }
     }, this.finalizationTimeoutMs);
+    try {
+      if (this.externallyControlledEnd)
+        this.transcriber.requestCommit(utteranceId, true);
+      else this.transcriber.requestCommit(utteranceId);
+    } catch (error) {
+      this.fail(asSessionError(error));
+    }
   }
 
   cancelUtterance(): void {
@@ -404,6 +409,7 @@ export class SpeechSession {
     event: Extract<TranscriberEvent, { type: "commit" }>,
   ): void {
     if (!this.pending || event.utteranceId !== this.pending.id) return;
+    const wasFinalizing = this.stateValue === "finalizing";
     const text = event.text.trim();
     if (text) {
       this.pending.committedSegments.push({
@@ -419,10 +425,12 @@ export class SpeechSession {
       settled: true,
       receivedAtMs: event.receivedAtMs,
     });
+    if (!this.pending) return;
 
     if (
-      this.stateValue === "finalizing" ||
-      this.pending.providerFinalizationAllowed
+      (wasFinalizing && event.finalAcknowledgement !== false) ||
+      (this.pending.providerFinalizationAllowed &&
+        !this.externallyControlledEnd)
     ) {
       this.completeUtterance(
         event.utteranceId,

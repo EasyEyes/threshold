@@ -9,6 +9,12 @@ import type {
   SpeechTokenRequestContext,
 } from "../speech/speechToken";
 import type { SpeechUtteranceResult } from "../speech/speechSession";
+import { getGlossary } from "../../parameters/glossaryRegistry";
+import type { ParamReader } from "../../parameters/paramReader";
+import {
+  RSVP_SPEECH_SILENCE_MS,
+  RSVP_SPEECH_FINISH_PHRASE,
+} from "./rsvpSpeechFinish";
 
 export const RSVP_SPEECH_PARAMETER_NAMES = Object.freeze({
   provider: "rsvpReadingSTTProvider",
@@ -16,6 +22,23 @@ export const RSVP_SPEECH_PARAMETER_NAMES = Object.freeze({
   responseTimeoutSec: "rsvpReadingSpeechTimeoutSec",
   finalizationTimeoutSec: "rsvpReadingSTTMaxSec",
   ignoreOrder: "rsvpReadingSTTIgnoreOrderBool",
+  silenceSec: "rsvpReadingSpeechSilenceSec",
+});
+
+// Proposed new parameters can be read once published. Older compiled
+// experiments use the agreed initial settings without reading unknown names.
+export const readRsvpSpeechFinishSettings = (
+  reader: ParamReader,
+  condition: string,
+) => ({
+  responseSilenceSec:
+    RSVP_SPEECH_PARAMETER_NAMES.silenceSec in getGlossary()
+      ? reader.read(RSVP_SPEECH_PARAMETER_NAMES.silenceSec, condition)
+      : RSVP_SPEECH_SILENCE_MS / 1000,
+  ignoreWordOrder: reader.read(
+    RSVP_SPEECH_PARAMETER_NAMES.ignoreOrder,
+    condition,
+  ),
 });
 
 export type RsvpSpeechRuntimeStatus =
@@ -55,6 +78,9 @@ export interface RsvpSpeechTrialSetup {
   readonly maximumResponseBeyondFinalWordSec: unknown;
   readonly finalizationTimeoutSec: unknown;
   readonly stimulusDurationMs: number;
+  readonly responseSilenceSec?: unknown;
+  readonly finishPhrase?: unknown;
+  readonly ignoreWordOrder?: unknown;
   readonly requestTokenContext: () => SpeechTokenRequestContext;
 }
 
@@ -160,8 +186,15 @@ export const buildRsvpSpeechTrialConfiguration = (
       "The RSVP stimulus duration must be a positive number.",
     );
   }
-  const maximumResponseDurationMs =
-    setup.stimulusDurationMs + maximumResponseBeyondFinalWordMs;
+  const maximumResponseDurationMs = maximumResponseBeyondFinalWordMs;
+  if (
+    setup.finishPhrase !== undefined &&
+    typeof setup.finishPhrase !== "string"
+  )
+    throw new RsvpSpeechControllerError(
+      "invalidConfiguration",
+      "The finish phrase must be text.",
+    );
 
   return {
     utteranceId: createRsvpSpeechUtteranceId(
@@ -179,6 +212,15 @@ export const buildRsvpSpeechTrialConfiguration = (
       RSVP_SPEECH_PARAMETER_NAMES.targetKeytermBiasEnabled,
     ),
     maximumResponseDurationMs,
+    responseSilenceMs: positiveSecondsToMilliseconds(
+      setup.responseSilenceSec ?? RSVP_SPEECH_SILENCE_MS / 1000,
+      RSVP_SPEECH_PARAMETER_NAMES.silenceSec,
+    ),
+    finishPhrase: setup.finishPhrase ?? RSVP_SPEECH_FINISH_PHRASE,
+    ignoreWordOrder: requireBoolean(
+      setup.ignoreWordOrder ?? true,
+      RSVP_SPEECH_PARAMETER_NAMES.ignoreOrder,
+    ),
     finalizationTimeoutMs,
     requestTokenContext: setup.requestTokenContext,
   };

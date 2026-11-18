@@ -5,6 +5,7 @@ import { ExperimentTable } from "./experimentTable";
 import { collectInternationalPhraseReferences } from "./internationalPhraseAudit";
 import { internationalPhraseUrl } from "./internationalPhraseLink";
 import type { EasyEyesError } from "./errorMessages";
+import { diagnosticValueHtml } from "./diagnosticHtml";
 import {
   analysePhrasePaths,
   type PhraseCondition,
@@ -39,9 +40,11 @@ export function validateStudyPhraseDefinitions(
     return [
       {
         name: "International phrase not defined",
-        message: `Phrase ${linkedKey(reference.key)} in ${escape(
+        message: `Phrase ${diagnosticValueHtml(
+          linkedKey(reference.key),
+        )} in <span class="error-parameter">${escape(
           reference.parameter,
-        )} (column ${
+        )}</span> (column ${
           reference.column + 1
         }) is not defined in International Phrases.`,
         hint: "Add the missing key to column A of International Phrases before compiling.",
@@ -170,7 +173,7 @@ export async function checkStudyPhraseAnalysis(
         message: `This study’s source references ${count} ${
           count === 1 ? "key that is" : "keys that are"
         } not defined in International Phrases:<br>${uncertainMissing
-          .map(linkedKey)
+          .map((key) => diagnosticValueHtml(linkedKey(key)))
           .join(
             "<br>",
           )}<br><span class="diagnostic-section"><strong>Can I run the study?</strong> Yes, if the missing phrases are not essential. If the study tries to display one, it will show a missing-phrase error instead.</span><br><span class="diagnostic-section"><strong>Report the problem.</strong> Please select “Report bug” at the top of this page to notify the developers. To fix the problem, they will either remove unused keys from the source or add missing keys and their translations to International Phrases.</span>`,

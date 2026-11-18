@@ -14,6 +14,7 @@
  */
 
 // ── Binary readers ──────────────────────────────────────────────────────────
+import { diagnosticValue } from "./diagnosticHtml";
 
 function readU16(data: Uint8Array, offset: number): number {
   return (data[offset] << 8) | data[offset + 1];
@@ -188,7 +189,9 @@ export function analyzeFontFeatureSettings(
       warnings.push({
         tag,
         kind: "not-in-font",
-        message: `This font does not contain the '${tag}' feature. It will have no effect.`,
+        message: `This font does not contain the ${diagnosticValue(
+          tag,
+        )} feature. It will have no effect.`,
       });
       continue;
     }
@@ -198,7 +201,9 @@ export function analyzeFontFeatureSettings(
       warnings.push({
         tag,
         kind: "empty-lookups",
-        message: `'${tag}' exists in this font but has no lookups. It will have no effect.`,
+        message: `${diagnosticValue(
+          tag,
+        )} exists in this font but has no lookups. It will have no effect.`,
       });
       continue;
     }
@@ -216,7 +221,9 @@ export function analyzeFontFeatureSettings(
           warnings.push({
             tag,
             kind: "empty-subtables",
-            message: `'${tag}' references a lookup with no subtable data. It may not take full effect.`,
+            message: `${diagnosticValue(
+              tag,
+            )} references a lookup with no subtable data. It may not take full effect.`,
           });
           flagged = true;
           break;
@@ -233,7 +240,9 @@ export function analyzeFontFeatureSettings(
         warnings.push({
           tag,
           kind: "has-alternate",
-          message: `'${tag}' uses alternate substitution. The first available alternate will be used.`,
+          message: `${diagnosticValue(
+            tag,
+          )} uses alternate substitution. The first available alternate will be used.`,
         });
         break;
       }

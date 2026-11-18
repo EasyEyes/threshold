@@ -48,11 +48,12 @@ import {
   parsePhraseFile,
   type PhraseTable,
 } from "../../source/components/parsePhraseFile";
+import { diagnosticValue, diagnosticValues } from "./diagnosticHtml";
 
 /* -------------------------------- Errors --------------------------------- */
 // Download source errors reuse the compiler's EasyEyesError shape so Table.js can show
-// them in the same list as compiler errors. context === "export" is what makes
-// the UI label them "Download source error:" instead of "Compiler error:".
+// them in the same list as compiler errors. context === "export" marks their
+// provenance for any consumer that needs to distinguish them.
 
 const escapeHtml = (text: string): string =>
   text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -63,12 +64,14 @@ export const NO_SPREADSHEET_TO_EXPORT = (
   name: "No spreadsheet selected",
   message: `Download source packages your experiment spreadsheet, together with every resource it mentions (fonts, forms, texts, sounds, images, code), into one raw.source.zip file that is easy to share. ${
     fileNames.length
-      ? `None of the selected files (${fileNames
-          .map(escapeHtml)
-          .join(", ")}) is an experiment spreadsheet.`
+      ? `None of the selected files (${diagnosticValues(
+          fileNames,
+        )}) is an experiment spreadsheet.`
       : "No file was selected."
   }`,
-  hint: `Click "Select file to download raw source" and choose your experiment spreadsheet (a .csv or .xlsx file).`,
+  hint: `Click Select file to download raw source and choose your experiment spreadsheet (a ${diagnosticValue(
+    ".csv",
+  )} or ${diagnosticValue(".xlsx")} file).`,
   context: "export",
   kind: "error",
   parameters: [],
@@ -79,12 +82,14 @@ export const UNREADABLE_SPREADSHEET_FOR_EXPORT = (
   details: string,
 ): EasyEyesError => ({
   name: "Cannot read spreadsheet",
-  message: `EasyEyes cannot read <span class="error-parameter">${escapeHtml(
+  message: `EasyEyes cannot read ${diagnosticValue(
     fileName,
-  )}</span> as a spreadsheet, so it cannot work out which resources your experiment uses.`,
+  )} as a spreadsheet, so it cannot work out which resources your experiment uses.`,
   hint: `${
     details ? escapeHtml(details) + "<br/>" : ""
-  }Try re-saving the file as .xlsx or .csv, then download the source again.`,
+  }Try re-saving the file as ${diagnosticValue(".xlsx")} or ${diagnosticValue(
+    ".csv",
+  )}, then download the source again.`,
   context: "export",
   kind: "error",
   parameters: [],
@@ -95,9 +100,9 @@ export const EXPORT_FAILED = (
   details: string,
 ): EasyEyesError => ({
   name: "Download source failed",
-  message: `Something went wrong while downloading the source for <span class="error-parameter">${escapeHtml(
+  message: `Something went wrong while downloading the source for ${diagnosticValue(
     fileName,
-  )}</span>.${details ? ` ${escapeHtml(details)}` : ""}`,
+  )}.${details ? ` ${escapeHtml(details)}` : ""}`,
   hint: "Please try again. If the problem persists, refresh the page, log in again, and retry.",
   context: "export",
   kind: "error",

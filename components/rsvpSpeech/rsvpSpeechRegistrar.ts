@@ -1,5 +1,6 @@
 import { phraseIdentificationResponse, rsvpSpeechRuntime } from "../global";
 import type { SpeechUtteranceResult } from "../speech/speechSession";
+import { stripRsvpSpeechFinishPhrase } from "./rsvpSpeechFinish";
 import {
   scoreRsvpSpeechResponse,
   type RsvpSpeechScoringDiagnostics,
@@ -69,6 +70,7 @@ export const registerRsvpSpeechResult = (input: {
   readonly ignoreWordOrder?: unknown;
   readonly policy?: RsvpSpeechScoringPolicy;
   readonly speechResult?: SpeechUtteranceResult;
+  readonly finishPhrase?: string;
 }): RsvpSpeechRegistrationResult => {
   if (runtime.responseRegistrationStatus === "registered") {
     return {
@@ -95,7 +97,11 @@ export const registerRsvpSpeechResult = (input: {
     const policy = resolveScoringPolicy(input);
     const scored = scoreRsvpSpeechResponse({
       targetWords: input.targetWords,
-      transcript: speechResult.text,
+      transcript: stripRsvpSpeechFinishPhrase(
+        speechResult.text,
+        input.languageCode,
+        input.finishPhrase,
+      ).text,
       languageCode: input.languageCode,
       policy,
     });

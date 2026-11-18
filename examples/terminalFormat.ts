@@ -68,6 +68,10 @@ export const htmlToTerminal = (
   s = s.replace(/<span class="error-parameter">([\s\S]*?)<\/span>/g, (_m, p1) =>
     color.boldYellow(String(p1), colors),
   );
+  // Literal parameter values → cyan, distinct from yellow parameter names.
+  s = s.replace(/<code class="error-value">([\s\S]*?)<\/code>/g, (_m, p1) =>
+    color.boldCyan(String(p1), colors),
+  );
   // Red marker span (empty one marks a position in a list) → red text/marker.
   // Struck variant (diff deletions) must run first → bold red + strikethrough.
   // Property order in the style attribute varies, so match flexibly.

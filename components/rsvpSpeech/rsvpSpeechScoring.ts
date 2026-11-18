@@ -359,12 +359,8 @@ export const scoreRsvpSpeechResponse = (
     input.languageCode,
   );
   const transcript = tokenization.tokens;
-  if (transcript.length === 0) {
-    throw new RsvpSpeechScoringError(
-      "emptyTranscript",
-      "RSVP speech scoring cannot score an empty transcript.",
-    );
-  }
+  // A successfully finalized empty response is an omission for every target.
+  // Transport/capture failures are rejected before this scorer is called.
   const alignment = alignSpeechTokensToTargets(targets, transcript);
   const events = classifyInsertions(alignment.events, targets, transcript);
   const eventsByTarget = targetEventMap(events);

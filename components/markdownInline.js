@@ -65,3 +65,16 @@ export const renderInstructionMarkdown = (text) =>
   renderMarkdown(text, { breaks: true })
     .replace(/>\n+</g, "><")
     .replace(/\n+$/g, "");
+
+// Plain-text projection of instruction markdown: render, turn <br> into a
+// newline, strip tags via textContent. For canvas-rendered text where HTML
+// is not available. Requires a DOM.
+export const plainTextOfInstruction = (text) => {
+  const html = renderInstructionMarkdown(text ?? "").replace(
+    /<br\s*\/?>/gi,
+    "\n",
+  );
+  const el = document.createElement("div");
+  el.innerHTML = html;
+  return el.textContent ?? "";
+};

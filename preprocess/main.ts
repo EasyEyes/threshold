@@ -22,6 +22,7 @@ import {
   checkReadingFoils,
   isPhraseFileMissing,
 } from "./experimentFileChecks";
+import { diagnosticValue } from "./diagnosticHtml";
 import { validateExperimentTable } from "./validateExperimentTable";
 import { validateFontShaping } from "./fontShapingCheck";
 import { validateFontLanguageSupport } from "./fontLanguageCheck";
@@ -437,8 +438,10 @@ export const prepareExperimentFileForThreshold = async (
     if (namedPhraseColumns && !namedPhraseColumns.includes(namedColumn)) {
       errors.push({
         name: "Phrase column not found",
-        message: `Column ${namedColumn} is not in _phrasesSpreadsheet.`,
-        hint: "Set _phrasesColumnName to a column name in the first row.",
+        message: `Column ${diagnosticValue(
+          namedColumn,
+        )} is not in <span class="error-parameter">_phrasesSpreadsheet</span>.`,
+        hint: `Set <span class="error-parameter">_phrasesColumnName</span> to a column name in the first row.`,
         context: "preprocessor",
         kind: "error",
         parameters: ["_phrasesColumnName"],
@@ -849,8 +852,9 @@ export const prepareExperimentFileForThreshold = async (
       if (!hasEmails) falultyParameters.push("_authorEmails");
       errors.push({
         name: "_calibrateMicrophonesBool", // which field triggered
-        message:
-          "In order to set _calibrateMicrophonesBool=TRUE (which allows you to calibrate microphones), you must also specify _authors, _authorAffiliations, and _authorEmails.",
+        message: `In order to set <span class="error-parameter">_calibrateMicrophonesBool</span>=${diagnosticValue(
+          "TRUE",
+        )} (which allows you to calibrate microphones), you must also specify <span class="error-parameter">_authors</span>, <span class="error-parameter">_authorAffiliations</span>, and <span class="error-parameter">_authorEmails</span>.`,
         hint: "",
         context: "prepareExperimentFileForThreshold", // where the check lives
         kind: "error", // severity
@@ -876,9 +880,23 @@ export const prepareExperimentFileForThreshold = async (
       errors.push({
         name: "_stepperBool requires compatible _calibrateDistance",
         message:
-          `Setting _stepperBool=FALSE requires _calibrateDistance to be "object" or "blindspot" (not "paper" or "paperOrRuler"). ` +
-          `Current _calibrateDistance value is "${calibrateDistanceValue}".`,
-        hint: `Either set _stepperBool=TRUE, or change _calibrateDistance to "object" or "blindspot" (not "paper" or "paperOrRuler").`,
+          `Setting <span class="error-parameter">_stepperBool</span>=${diagnosticValue(
+            "FALSE",
+          )} requires <span class="error-parameter">_calibrateDistance</span> to be ${diagnosticValue(
+            "object",
+          )} or ${diagnosticValue("blindspot")} (not ${diagnosticValue(
+            "paper",
+          )} or ${diagnosticValue("paperOrRuler")}). ` +
+          `Current <span class="error-parameter">_calibrateDistance</span> value is ${diagnosticValue(
+            calibrateDistanceValue,
+          )}.`,
+        hint: `Either set <span class="error-parameter">_stepperBool</span>=${diagnosticValue(
+          "TRUE",
+        )}, or change <span class="error-parameter">_calibrateDistance</span> to ${diagnosticValue(
+          "object",
+        )} or ${diagnosticValue("blindspot")} (not ${diagnosticValue(
+          "paper",
+        )} or ${diagnosticValue("paperOrRuler")}).`,
         context: "prepareExperimentFileForThreshold",
         kind: "error",
         parameters: ["_stepperBool", "_calibrateDistance"],
@@ -1354,7 +1372,6 @@ export const prepareExperimentFileForThreshold = async (
     const unexpectedPhrase = match ? match[1] : undefined;
     console.error("Compiler error:", e);
     errors.push({
-      // Displayed with a "Compiler error:" prefix (see Table.js).
       name: "Unexpected error.",
       message: message,
       hint: "",

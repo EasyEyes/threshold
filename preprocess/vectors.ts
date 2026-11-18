@@ -14,6 +14,7 @@
 
 import { plural } from "../components/vectorParsing";
 import type { VectorTypeSpec } from "../components/vectorParsing";
+import { diagnosticValue } from "./diagnosticHtml";
 
 export {
   parseVectorType,
@@ -21,6 +22,12 @@ export {
   checkVectorValue,
   isLegalVectorElement,
 } from "../components/vectorParsing";
+
+/** The shared parser quotes illegal elements; render those values canonically. */
+export const diagnosticVectorReason = (reason: string | undefined): string =>
+  (reason ?? "").replace(/"([^"]*)"/g, (_match, value) =>
+    diagnosticValue(value),
+  );
 
 /** Human-readable description of the type, for error messages. */
 export const describeVectorType = (spec: VectorTypeSpec): string => {

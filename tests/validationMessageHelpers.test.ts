@@ -6,6 +6,7 @@ import {
   valueAtColumn,
   valuesAtColumns,
 } from "../preprocess/validateExperimentTable";
+import { diagnosticValue } from "../preprocess/diagnosticHtml";
 
 describe("validation message helpers", () => {
   it("param wraps name in the error-parameter span", () => {
@@ -51,8 +52,10 @@ describe("validation message helpers", () => {
   });
 
   it("valueAtColumn reports value with column letter", () => {
-    expect(valueAtColumn("abc", 0)).toBe("abc (column C)");
-    expect(valueAtColumn(5.1, 2)).toBe("5.1 (column E)");
+    expect(valueAtColumn("abc", 0)).toBe(
+      `${diagnosticValue("abc")} (column C)`,
+    );
+    expect(valueAtColumn(5.1, 2)).toBe(`${diagnosticValue(5.1)} (column E)`);
   });
 
   it("valuesAtColumns enumerates value/column pairs", () => {
@@ -61,6 +64,10 @@ describe("validation message helpers", () => {
         ["abc", 0],
         ["5", 2],
       ]),
-    ).toBe("abc (column C) and 5 (column E)");
+    ).toBe(
+      `${diagnosticValue("abc")} (column C) and ${diagnosticValue(
+        5,
+      )} (column E)`,
+    );
   });
 });

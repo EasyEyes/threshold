@@ -1371,6 +1371,41 @@ export const centerAt = async (textStim, nominalPos) => {
 
 export const tand = (deg) => Math.tan((deg * Math.PI) / 180);
 
+// Total trials a block will actually run: the conditionTrials of enabled
+// conditions, counting only positive values. (Extracted from threshold.js.)
+export const totalEnabledTrialsThisBlock = (reader, block) => {
+  const possibleTrials = reader
+    .read("conditionTrials", block)
+    .filter((c, i) => reader.read("conditionEnabledBool", block)[i] && c > 0);
+  return possibleTrials.reduce((a, b) => a + b, 0);
+};
+
+// Furthest viewing distance (cm) at which a screen `screenWidthCm` wide
+// still spans `needScreenWidthDeg` of visual angle. 0 means unconstrained.
+// (Extracted from threshold.js.)
+export const maxViewingDistanceCmForScreenWidthDeg = (
+  screenWidthCm,
+  needScreenWidthDeg,
+) =>
+  needScreenWidthDeg === 0
+    ? Infinity
+    : screenWidthCm / (2 * tand(needScreenWidthDeg / 2));
+
+// The LAST condition whose block_condition equals `name` (the historical
+// lookup loop never breaks, so a duplicated name resolves to the last
+// entry). undefined when no condition matches. (Extracted from threshold.js.)
+export const lastConditionNamed = (conditions, name) => {
+  let found;
+  for (const c of conditions) if (c.block_condition === name) found = c;
+  return found;
+};
+
+// Current viewing distance: the measured RC value when available, else the
+// desired distance clamped to the allowed maximum. (Extracted from
+// threshold.js.)
+export const currentViewingDistanceCm = (rcViewingDistanceCm, desired, max) =>
+  rcViewingDistanceCm ? rcViewingDistanceCm.value : Math.min(desired, max);
+
 export const getCursorLocation = () => {
   // Analog to [cX, cY] (see _takeFixationClick), as determined by psychojs
   return to_px(psychojsMouse.getPos(), "height", psychoJS.window, true);

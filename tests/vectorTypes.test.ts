@@ -551,9 +551,9 @@ describe("compiler: value checking for vector-typed parameters", () => {
     const errs = typeErrorsFor(errors, "testVec2Numerical");
     expect(errs).toHaveLength(1);
     expect(errs[0].message).toMatch(/comma-separated list of 2 numbers/);
-    expect(errs[0].hint).toContain('"1"');
+    expect(errs[0].hint).toContain('<code class="error-value">1</code>');
     expect(errs[0].hint).toMatch(/expected 2 values, but found 1/);
-    expect(errs[0].hint).not.toContain('"3, 4"');
+    expect(errs[0].hint).not.toContain('<code class="error-value">3, 4</code>');
   });
 
   it("rejects malformed numbers, naming the bad element", () => {
@@ -593,7 +593,7 @@ describe("compiler: value checking for vector-typed parameters", () => {
     );
     expect(errs).toHaveLength(1);
     expect(errs[0].message).toMatch(/2x2 matrix of numbers/);
-    expect(errs[0].hint).toContain('"1,2;3"');
+    expect(errs[0].hint).toContain('<code class="error-value">1,2;3</code>');
     expect(errs[0].hint).toMatch(/row 2 has 1 value/);
   });
 

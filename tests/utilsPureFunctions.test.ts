@@ -107,6 +107,7 @@ import {
   closeEnough,
   colorRGBASnippetToRGBA,
   colorRGBSnippetToRGB,
+  currentViewingDistanceCm,
   cursorNearFixation,
   degreesToPixels,
   distance,
@@ -126,6 +127,9 @@ import {
   isRectTouchingRect,
   isFullscreen,
   isReadingWithSimultaneousQuestionAndAnswer,
+  lastConditionNamed,
+  maxViewingDistanceCmForScreenWidthDeg,
+  totalEnabledTrialsThisBlock,
   getUnionRect,
   log,
   norm,
@@ -1204,5 +1208,98 @@ describe("fullscreen", () => {
     } finally {
       releaseFullscreen();
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// threshold.js extraction helpers (batch 1). Pure logic moved out of the
+// untestable monolith; see notes/DONE-threshold-extraction-batch-1.md.
+// The imports live in the main utils.js import at the top of this file.
+// ---------------------------------------------------------------------------
+
+const readerWith = (
+  trials: unknown[],
+  enabled: unknown[],
+): { read: (p: string, b: string) => unknown[] } => ({
+  read: (p: string) => (p === "conditionTrials" ? trials : enabled),
+});
+
+describe("totalEnabledTrialsThisBlock", () => {
+  test("sums trials of enabled conditions only", () => {
+    expect(
+      totalEnabledTrialsThisBlock(
+        readerWith([5, 10, 3], [true, false, true]),
+        "2",
+      ),
+    ).toBe(8);
+  });
+  test.each([
+    [[0, 4], [true, true], 4], // 0-trial conditions contribute nothing
+    [[-2, 0, 6], [true, true, true], 6], // strict c>0 excludes 0/negative
+    [[1, 2, 3], [false, false, true], 3], // enabled flag paired by index
+    [[1, 2], [false, false], 0], // all disabled
+    [[], [], 0], // empty block
+  ])("trials %p enabled %p → %p", (trials, enabled, expected) => {
+    expect(totalEnabledTrialsThisBlock(readerWith(trials, enabled), "1")).toBe(
+      expected,
+    );
+  });
+});
+
+describe("maxViewingDistanceCmForScreenWidthDeg", () => {
+  test("needScreenWidthDeg 0 means unconstrained → Infinity", () => {
+    expect(maxViewingDistanceCmForScreenWidthDeg(34.5, 0)).toBe(Infinity);
+  });
+  test("width / (2·tan(deg/2)) for a typical laptop panel", () => {
+    const expected = 34.5 / (2 * Math.tan((40 / 2) * (Math.PI / 180)));
+    expect(maxViewingDistanceCmForScreenWidthDeg(34.5, 40)).toBeCloseTo(
+      expected,
+      12,
+    );
+  });
+  test("inverse relationship: from the max distance the screen subtends deg", () => {
+    const width = 30;
+    const deg = 60;
+    const d = maxViewingDistanceCmForScreenWidthDeg(width, deg);
+    const regained = (2 * Math.atan(width / 2 / d) * 180) / Math.PI;
+    expect(regained).toBeCloseTo(deg, 9);
+  });
+  test("wider allowed angle → smaller max distance", () => {
+    expect(maxViewingDistanceCmForScreenWidthDeg(34.5, 80)).toBeLessThan(
+      maxViewingDistanceCmForScreenWidthDeg(34.5, 20),
+    );
+  });
+});
+
+describe("lastConditionNamed", () => {
+  const conds = [
+    { block_condition: "1_a", v: 1 },
+    { block_condition: "1_b", v: 2 },
+    { block_condition: "1_a", v: 3 },
+  ];
+  test("returns the LAST matching condition (original loop never breaks)", () => {
+    expect(lastConditionNamed(conds, "1_a").v).toBe(3);
+  });
+  test("unique name → that condition", () => {
+    expect(lastConditionNamed(conds, "1_b").v).toBe(2);
+  });
+  test("no match / empty → undefined", () => {
+    expect(lastConditionNamed(conds, "9_z")).toBeUndefined();
+    expect(lastConditionNamed([], "1_a")).toBeUndefined();
+  });
+});
+
+describe("currentViewingDistanceCm", () => {
+  test("measured rc distance wins", () => {
+    expect(currentViewingDistanceCm({ value: 57 }, 40, 100)).toBe(57);
+  });
+  test.each([
+    ["desired below max → desired", undefined, 40, Infinity, 40],
+    ["desired beyond max → max", undefined, 120, 100, 100],
+  ])("%s", (_label, rc, desired, max, expected) => {
+    expect(currentViewingDistanceCm(rc, desired, max)).toBe(expected);
+  });
+  test("rc signal present but value undefined → undefined propagates (current behavior)", () => {
+    expect(currentViewingDistanceCm({} as any, 40, 100)).toBeUndefined();
   });
 });
