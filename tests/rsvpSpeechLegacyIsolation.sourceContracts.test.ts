@@ -12,6 +12,15 @@ const trialRoutinesSource = readSource("components", "trialRoutines.js");
 const thresholdSource = readSource("threshold.js");
 
 describe("legacy RSVP response-path isolation", () => {
+  it("stops before drawing the first target only on a failed Chirp capture", () => {
+    const onset = rsvpReadingSource.indexOf("const isFirstTargetSet =");
+    const draw = rsvpReadingSource.indexOf("s.setAutoDraw(true)", onset);
+    expect(onset).toBeGreaterThan(0);
+    expect(draw).toBeGreaterThan(onset);
+    expect(rsvpReadingSource.slice(onset, draw).replace(/\s+/g, " ")).toContain(
+      'isFirstTargetSet && isRsvpReadingAutomaticSpeechResponseMode(rsvpReadingResponse.responseType) ) { const started = startRsvpSpeechCapture(); if ( !started && rsvpSpeechRuntime.controller?.configuration.provider === "chirp3" ) return false;',
+    );
+  });
   it("keeps automatic registration behind the automatic-speech branch", () => {
     const responsePhaseStart = rsvpReadingSource.indexOf(
       "const automaticSpeechRegistration = automaticSpeech",

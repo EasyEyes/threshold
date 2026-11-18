@@ -5,6 +5,7 @@
 import {
   buildSpeechTokenEndpoint,
   createSpeechTokenProvider,
+  createSpeechCredentialProvider,
 } from "../components/speech/speechToken";
 import { TranscriberError } from "../components/speech/transcriber";
 
@@ -38,6 +39,47 @@ describe("buildSpeechTokenEndpoint", () => {
 });
 
 describe("createSpeechTokenProvider", () => {
+  it("returns the relay address only for Chirp 3", async () => {
+    const provider = createSpeechCredentialProvider("chirp3", {
+      endpoint: "https://easyeyes.app/.netlify/functions/speech-token",
+      requestContext: () => ({
+        experimentFullPath: "owner/test",
+        pavloviaSessionToken: "session",
+      }),
+      fetchImpl: jest.fn(async () => ({
+        ok: true,
+        json: async () => ({
+          token: "ticket",
+          websocketUrl: "wss://relay.run.app/v1/stream",
+        }),
+      })) as unknown as typeof fetch,
+    });
+    await expect(provider()).resolves.toEqual({
+      token: "ticket",
+      websocketUrl: "wss://relay.run.app/v1/stream",
+    });
+  });
+
+  it.each([
+    "ws://relay.run.app/v1/stream",
+    "wss://user:secret@relay.run.app/v1/stream",
+    "wss://relay.run.app/v1/stream?token=secret",
+  ])("rejects an unsafe relay address %s", async (websocketUrl) => {
+    const provider = createSpeechCredentialProvider("chirp3", {
+      endpoint: "https://easyeyes.app/.netlify/functions/speech-token",
+      requestContext: () => ({
+        experimentFullPath: "owner/test",
+        pavloviaSessionToken: "session",
+      }),
+      fetchImpl: jest.fn(async () => ({
+        ok: true,
+        json: async () => ({ token: "ticket", websocketUrl }),
+      })) as unknown as typeof fetch,
+    });
+    await expect(provider()).rejects.toMatchObject({
+      code: "credentialFailure",
+    });
+  });
   it("does not send a Pavlovia session to an untrusted default endpoint", async () => {
     window.history.replaceState(
       {},

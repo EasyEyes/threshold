@@ -23,10 +23,10 @@ export const RSVP_SPEECH_PARAMETER_NAMES = Object.freeze({
   finalizationTimeoutSec: "rsvpReadingSTTMaxSec",
   ignoreOrder: "rsvpReadingSTTIgnoreOrderBool",
   silenceSec: "rsvpReadingSpeechSilenceSec",
+  finishPhrase: "rsvpReadingSpeechFinishPhrase",
 });
 
-// Proposed new parameters can be read once published. Older compiled
-// experiments use the agreed initial settings without reading unknown names.
+// Keep defaults until these parameters are published in the Glossary.
 export const readRsvpSpeechFinishSettings = (
   reader: ParamReader,
   condition: string,
@@ -35,6 +35,10 @@ export const readRsvpSpeechFinishSettings = (
     RSVP_SPEECH_PARAMETER_NAMES.silenceSec in getGlossary()
       ? reader.read(RSVP_SPEECH_PARAMETER_NAMES.silenceSec, condition)
       : RSVP_SPEECH_SILENCE_MS / 1000,
+  finishPhrase:
+    RSVP_SPEECH_PARAMETER_NAMES.finishPhrase in getGlossary()
+      ? reader.read(RSVP_SPEECH_PARAMETER_NAMES.finishPhrase, condition)
+      : RSVP_SPEECH_FINISH_PHRASE,
   ignoreWordOrder: reader.read(
     RSVP_SPEECH_PARAMETER_NAMES.ignoreOrder,
     condition,
@@ -102,17 +106,18 @@ const normalizeProvider = (value: unknown): SpeechProvider => {
   if (typeof value !== "string") {
     throw new RsvpSpeechControllerError(
       "invalidConfiguration",
-      `${RSVP_SPEECH_PARAMETER_NAMES.provider} must select ElevenLabs or Deepgram.`,
+      `${RSVP_SPEECH_PARAMETER_NAMES.provider} must select elevenlabs, deepgram, or chirp3.`,
     );
   }
   const normalized = value.trim().toLowerCase();
   if (normalized === "elevenlabs") return "elevenlabs";
+  if (normalized === "chirp3") return "chirp3";
 
   if (normalized === "deepgram" || normalized === "deepgram.")
     return "deepgram";
   throw new RsvpSpeechControllerError(
     "invalidConfiguration",
-    `${RSVP_SPEECH_PARAMETER_NAMES.provider} must select ElevenLabs or Deepgram.`,
+    `${RSVP_SPEECH_PARAMETER_NAMES.provider} must select elevenlabs, deepgram, or chirp3.`,
   );
 };
 
@@ -149,6 +154,13 @@ export const resolveRsvpSpeechProviderLanguageCode = (
       "invalidConfiguration",
       "The condition language is required for RSVP speech recognition.",
     );
+  }
+  if (provider === "chirp3") {
+    const languageDefaults: Readonly<Record<string, string>> = {
+      en: "en-US",
+      fa: "fa-IR",
+    };
+    return languageDefaults[normalized.toLowerCase()] ?? normalized;
   }
   return provider === "elevenlabs"
     ? normalized.split("-")[0].toLowerCase()
@@ -391,6 +403,8 @@ export const startRsvpSpeechCapture = (
       });
     return true;
   } catch (error) {
+    if (controller.configuration?.provider === "chirp3")
+      runtime.captureStartedAtMs = undefined;
     return storeFailure(error);
   }
 };

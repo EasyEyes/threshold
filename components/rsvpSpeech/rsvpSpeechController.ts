@@ -1,4 +1,5 @@
 import { PcmMicrophoneCapture } from "../speech/audioCapture";
+import { GoogleChirp3Transcriber } from "../speech/googleChirp3Transcriber";
 import {
   DeepgramRealtimeTranscriber,
   type DeepgramRealtimeTranscriberOptions,
@@ -24,6 +25,7 @@ import {
 } from "./rsvpSpeechFinish";
 import {
   createSpeechTokenProvider,
+  createSpeechCredentialProvider,
   type SpeechProvider,
   type SpeechTokenRequestContext,
 } from "../speech/speechToken";
@@ -157,7 +159,8 @@ const normalizeConfiguration = (
   }
   if (
     configuration.provider !== "elevenlabs" &&
-    configuration.provider !== "deepgram"
+    configuration.provider !== "deepgram" &&
+    configuration.provider !== "chirp3"
   ) {
     throw new RsvpSpeechControllerError(
       "invalidConfiguration",
@@ -255,6 +258,17 @@ const normalizeConfiguration = (
 const createDefaultTranscriber = (
   configuration: Readonly<RsvpSpeechTrialConfiguration>,
 ): StreamingTranscriber => {
+  if (configuration.provider === "chirp3") {
+    return new GoogleChirp3Transcriber({
+      credentialProvider: createSpeechCredentialProvider("chirp3", {
+        requestContext: configuration.requestTokenContext,
+      }),
+      utteranceId: configuration.utteranceId,
+      languageCode: configuration.languageCode,
+      keyterms: configuration.targetWords,
+      targetKeytermBiasEnabled: configuration.targetKeytermBiasEnabled,
+    });
+  }
   const tokenProvider = createSpeechTokenProvider(configuration.provider, {
     requestContext: configuration.requestTokenContext,
   });
@@ -379,6 +393,12 @@ export class RsvpSpeechController {
   }
 
   startCapture(): void {
+    if (
+      this.configuration.provider === "chirp3" &&
+      this.stateValue === "failed" &&
+      this.failureValue
+    )
+      throw this.failureValue;
     if (this.stateValue !== "ready" || !this.capture || !this.session) {
       throw new RsvpSpeechControllerError(
         "invalidState",
@@ -426,6 +446,8 @@ export class RsvpSpeechController {
       this.responseWindowStartedAt = performance.now();
       this.stateValue = "finalizing";
       this.responseTimer = setInterval(() => this.checkResponseEnd(), 50);
+      if (typeof window !== "undefined")
+        window.addEventListener("keydown", this.handleFinishKey);
       this.checkResponseEnd();
     } catch (error) {
       const mapped = asControllerError(
@@ -476,7 +498,43 @@ export class RsvpSpeechController {
     return true;
   }
 
+  private readonly handleFinishKey = (event: KeyboardEvent): void => {
+    const target = event.target as HTMLElement | null;
+    if (
+      event.defaultPrevented ||
+      event.code !== "Space" ||
+      event.repeat ||
+      event.isComposing ||
+      event.shiftKey ||
+      event.altKey ||
+      event.ctrlKey ||
+      event.metaKey ||
+      target?.isContentEditable ||
+      /^(INPUT|TEXTAREA|SELECT|BUTTON)$/.test(target?.tagName ?? "")
+    )
+      return;
+    if (this.finishResponse()) event.preventDefault();
+  };
+
   private readonly handleSessionEvent: SpeechSessionListener = (event) => {
+    if (
+      this.configuration.provider === "chirp3" &&
+      event.type === "error" &&
+      !event.utteranceId &&
+      !this.closeRequested &&
+      (this.stateValue === "preparing" || this.stateValue === "ready")
+    ) {
+      this.failureValue = asControllerError(
+        "preparationFailed",
+        "Chirp 3 disconnected before recording started.",
+        event.error,
+      );
+      if (this.stateValue === "ready") {
+        this.stateValue = "failed";
+        void this.releaseResources();
+      }
+      return;
+    }
     if (event.type !== "partial" || this.finishRequested) return;
     // Interim hypotheses may be revised; they cannot end the response.
     if (!event.settled) {
@@ -541,6 +599,8 @@ export class RsvpSpeechController {
   private clearResponseControls(): void {
     if (this.responseTimer !== undefined) clearInterval(this.responseTimer);
     this.responseTimer = undefined;
+    if (typeof window !== "undefined")
+      window.removeEventListener("keydown", this.handleFinishKey);
   }
 
   waitForResult(): Promise<SpeechUtteranceResult> {
@@ -614,6 +674,7 @@ export class RsvpSpeechController {
           ? connectionResult.reason
           : undefined;
       if (preparationError !== undefined) throw preparationError;
+      if (this.failureValue) throw this.failureValue;
       if (this.inputFailure) throw this.inputFailure;
       if (this.closeRequested) {
         throw new RsvpSpeechControllerError(
