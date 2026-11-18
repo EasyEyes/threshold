@@ -15,6 +15,8 @@ jest.mock("../components/global", () => ({
 }));
 
 import { rsvpSpeechRuntime } from "../components/global";
+import * as glossaryRegistry from "../parameters/glossaryRegistry";
+import type { ParamReader } from "../parameters/paramReader";
 import type { RsvpSpeechController } from "../components/rsvpSpeech/rsvpSpeechController";
 import {
   RSVP_SPEECH_PARAMETER_NAMES,
@@ -27,6 +29,7 @@ import {
   injectRsvpSpeechTranscriptForSimulation,
   prepareRsvpSpeechTrial,
   prepareSimulatedRsvpSpeechTrial,
+  readRsvpSpeechFinishSettings,
   resolveRsvpSpeechProviderLanguageCode,
   startRsvpSpeechCapture,
   type RsvpSpeechTrialSetup,
@@ -78,6 +81,82 @@ afterAll(async () => {
 });
 
 describe("RSVP speech trial configuration", () => {
+  it("uses defaults without reading unpublished parameters", () => {
+    const glossary = jest
+      .spyOn(glossaryRegistry, "getGlossary")
+      .mockReturnValue({});
+    const read = jest.fn(() => true);
+    try {
+      expect(
+        readRsvpSpeechFinishSettings({ read } as unknown as ParamReader, "2_3"),
+      ).toEqual({
+        responseSilenceSec: 8,
+        finishPhrase: "don't know",
+        ignoreWordOrder: true,
+      });
+      expect(read.mock.calls).toEqual([
+        [RSVP_SPEECH_PARAMETER_NAMES.ignoreOrder, "2_3"],
+      ]);
+    } finally {
+      glossary.mockRestore();
+    }
+  });
+
+  it.each(["finished", ""])(
+    "reads the current condition's published finish phrase (%j)",
+    (phrase) => {
+      const glossary = jest
+        .spyOn(glossaryRegistry, "getGlossary")
+        .mockReturnValue({
+          [RSVP_SPEECH_PARAMETER_NAMES.finishPhrase]: {
+            name: RSVP_SPEECH_PARAMETER_NAMES.finishPhrase,
+            availability: "TRUE",
+            type: "text",
+            default: phrase,
+            explanation: "Spoken response completion phrase.",
+            example: "finished",
+            categories: [],
+          },
+          [RSVP_SPEECH_PARAMETER_NAMES.silenceSec]: {
+            name: RSVP_SPEECH_PARAMETER_NAMES.silenceSec,
+            availability: "TRUE",
+            type: "numerical",
+            default: "8",
+            explanation: "Silence duration before response completion.",
+            example: "8",
+            categories: [],
+          },
+        });
+      const read = jest.fn((name: string) =>
+        name === RSVP_SPEECH_PARAMETER_NAMES.finishPhrase
+          ? phrase
+          : name === RSVP_SPEECH_PARAMETER_NAMES.silenceSec
+          ? 9
+          : false,
+      );
+      try {
+        const settings = readRsvpSpeechFinishSettings(
+          { read } as unknown as ParamReader,
+          "2_3",
+        );
+        expect(settings).toEqual({
+          responseSilenceSec: 9,
+          finishPhrase: phrase,
+          ignoreWordOrder: false,
+        });
+        expect(read).toHaveBeenCalledWith(
+          RSVP_SPEECH_PARAMETER_NAMES.finishPhrase,
+          "2_3",
+        );
+        expect(
+          buildRsvpSpeechTrialConfiguration({ ...baseSetup(), ...settings })
+            .finishPhrase,
+        ).toBe(phrase);
+      } finally {
+        glossary.mockRestore();
+      }
+    },
+  );
   it("uses the published RSVP speech glossary names", () => {
     expect(RSVP_SPEECH_PARAMETER_NAMES.provider).toBe("rsvpReadingSTTProvider");
     expect(RSVP_SPEECH_PARAMETER_NAMES.targetKeytermBiasEnabled).toBe(
@@ -124,11 +203,39 @@ describe("RSVP speech trial configuration", () => {
     expect(configuration.provider).toBe("deepgram");
   });
 
+  it("accepts Chirp 3 and preserves the condition locale", () => {
+    const config = buildRsvpSpeechTrialConfiguration({
+      ...baseSetup(),
+      provider: "chirp3",
+    });
+    expect(config.provider).toBe("chirp3");
+    expect(config.languageCode).toBe("en-US");
+  });
+
+  it.each([
+    ["en", "en-US"],
+    ["fa", "fa-IR"],
+    ["en-GB", "en-GB"],
+    ["fa_IR", "fa-IR"],
+  ])(
+    "maps Chirp 3 condition language %s to %s without changing other providers",
+    (input, expected) => {
+      expect(resolveRsvpSpeechProviderLanguageCode("chirp3", input)).toBe(
+        expected,
+      );
+      expect(resolveRsvpSpeechProviderLanguageCode("deepgram", input)).toBe(
+        input.replace(/_/g, "-"),
+      );
+    },
+  );
+
   it.each([
     ["provider", "unknown"],
     ["targetKeytermBiasEnabled", "true"],
     ["maximumResponseBeyondFinalWordSec", 0],
     ["finalizationTimeoutSec", 0],
+    ["finishPhrase", true],
+    ["responseSilenceSec", 0],
   ] as const)("rejects invalid %s values", (field, value) => {
     expect(() =>
       buildRsvpSpeechTrialConfiguration({
@@ -189,6 +296,28 @@ describe("RSVP speech runtime lifecycle", () => {
     expect(hasActiveRsvpSpeechResources()).toBe(false);
     expect(startRsvpSpeechCapture()).toBe(false);
     expect(allowRsvpSpeechProviderFinalization()).toBe(false);
+  });
+
+  it("does not count a failed Chirp capture as exposure", async () => {
+    const error = new Error("Disconnected before the first word");
+    const controller = {
+      configuration: { provider: "chirp3" },
+      prepare: jest.fn(async () => undefined),
+      startCapture: jest.fn(() => {
+        throw error;
+      }),
+      close: jest.fn(async () => undefined),
+    } as unknown as RsvpSpeechController;
+    await prepareRsvpSpeechTrial(
+      { ...baseSetup(), provider: "chirp3" },
+      {
+        createController: () => controller,
+      },
+    );
+    expect(startRsvpSpeechCapture()).toBe(false);
+    expect(rsvpSpeechRuntime.error).toBe(error);
+    expect(rsvpSpeechRuntime.captureStartedAtMs).toBeUndefined();
+    expect(rsvpSpeechRuntime.responseRegistrationStatus).toBe("pending");
   });
 
   it("keeps preparation failures in speech state instead of throwing into RSVP", async () => {

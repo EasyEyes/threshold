@@ -15,7 +15,7 @@ import Papa from "papaparse";
 import { loadGlossaryForTests } from "./helpers/glossary";
 import { ExperimentTable } from "../preprocess/experimentTable";
 import { validateExperimentTable } from "../preprocess/validateExperimentTable";
-import type { EasyEyesError } from "../preprocess/errorMessages";
+import type { Alert } from "../preprocess/alerts";
 
 beforeAll(async () => {
   await loadGlossaryForTests();
@@ -27,7 +27,7 @@ function parse(csv: string): ExperimentTable {
 }
 
 /** Extract column labels from an error's message + hint strings. */
-function columnLabels(errors: EasyEyesError[]): string[] {
+function columnLabels(errors: Alert[]): string[] {
   const labels = new Set<string>();
   const text = errors
     .map((e) => `${e.message ?? ""} ${e.hint ?? ""}`)

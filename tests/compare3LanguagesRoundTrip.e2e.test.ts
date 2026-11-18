@@ -31,7 +31,7 @@ import {
   parseSpreadsheetRows,
 } from "../preprocess/exportBeforeCompile";
 import { parsePhraseFile } from "../../source/components/parsePhraseFile";
-import type { EasyEyesError } from "../preprocess/errorMessages";
+import type { Alert } from "../preprocess/alerts";
 
 const FIXTURES = path.resolve(__dirname, "fixtures/compare3languages");
 const EXAMPLE_TEXTS = path.join(FIXTURES, "texts");

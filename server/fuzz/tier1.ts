@@ -19,7 +19,7 @@ import {
   type LocalCompileOptions,
 } from "../../examples/localCompile";
 import { toSpec, type GlossarySpec } from "./glossaryAdapter";
-import type { EasyEyesError } from "../../preprocess/errorMessages";
+import type { Alert } from "../../preprocess/alerts";
 import type { GlossaryData } from "../../../source/components/types";
 
 export interface CompileOutcome {
@@ -70,7 +70,7 @@ export const stillContainsInvalid = (
   rows: string[][],
 ): boolean => rows.some((r) => (r[0] ?? "").trim() === invalid.param);
 
-const describeError = (e: EasyEyesError): string =>
+const describeError = (e: Alert): string =>
   [e.name, stripHtml(e.message ?? ""), stripHtml(e.hint ?? "")]
     .filter(Boolean)
     .join(" — ") + ` [${(e.parameters ?? []).join(", ")}]`;

@@ -1,7 +1,7 @@
 /**
  * Composes the participant-facing HTML of the fatal run-time error dialog.
  *
- * Outline (see notes/how-to-write-a-runtime-error-message.md):
+ * Outline (see notes/how-to-write-a-runtime-alert-message.md):
  *
  *   a. Localized: title, summary, and hint.  (skipped when _language is English)
  *   b. English:   title, summary, and hint.  (omitted for localized keyed guidance)

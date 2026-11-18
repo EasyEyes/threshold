@@ -8,7 +8,7 @@ import {
 } from "./phrasePathAnalysis";
 import type { ExperimentTable } from "./experimentTable";
 import type { GlossaryReference } from "./glossaryAudit";
-import type { EasyEyesError } from "./errorMessages";
+import type { Alert } from "./alerts";
 
 export async function checkStudyGlossaryAnalysis(
   table: ExperimentTable,
@@ -16,7 +16,7 @@ export async function checkStudyGlossaryAnalysis(
   normalized?: Record<string, string>[],
   localIndex?: PhraseSourceIndex,
 ): Promise<{
-  errors: EasyEyesError[];
+  errors: Alert[];
   report?: PhrasePathReport & {
     glossaryVersion: string | null;
     studyDefinedParameters: GlossaryReference[];
@@ -92,7 +92,7 @@ export async function checkStudyGlossaryAnalysis(
         {
           name: "Study glossary analysis unavailable",
           message:
-            'The study glossary analysis could not be completed with an index matching this compiler build. Compilation is blocked.<span class="diagnostic-section"><strong>For developers.</strong> The deployment must include a complete glossary source index and its API.</span>',
+            'The study glossary analysis could not be completed with an index matching this compiler build. Compilation is blocked.<span class="alert-section"><strong>For developers.</strong> The deployment must include a complete glossary source index and its API.</span>',
           hint: "Reload the compiler and try again.",
           context: "preprocessor",
           kind: "error",

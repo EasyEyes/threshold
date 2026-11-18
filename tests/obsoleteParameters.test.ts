@@ -62,7 +62,7 @@ it.each([
       parameters: [name],
     });
     expect(errors[0].hint).toContain(
-      `<span class="error-parameter">${replacement}</span>`,
+      `<span class="alert-parameter">${replacement}</span>`,
     );
     expect(linkGlossaryParameters(errors[0].hint)).toContain("<a ");
   },
@@ -108,7 +108,7 @@ it("treats the Glossary explanation as text while linking parameter names", () =
   expect(error.hint).toContain("&lt;img");
   expect(error.hint).toContain("&amp;");
   expect(error.hint).toContain(
-    '<br/>Use <span class="error-parameter">fontDirection</span>',
+    '<br/>Use <span class="alert-parameter">fontDirection</span>',
   );
 });
 
@@ -116,7 +116,7 @@ it("explains undefined names and only suggests similar non-obsolete entries", ()
   const [error] = errorsFor("fontDirectionz");
   expect(error.message).toContain("not defined in the Parameter Glossary");
   expect(error.message).toContain(
-    '<span class="error-parameter">fontDirection</span>',
+    '<span class="alert-parameter">fontDirection</span>',
   );
   expect(error.message + error.hint).not.toContain(">fontDirections<");
   expect(error.message + error.hint).not.toContain("undefined");
@@ -125,6 +125,6 @@ it("explains undefined names and only suggests similar non-obsolete entries", ()
 it("omits unrelated guesses for an unknown name", () => {
   const [error] = errorsFor("zzzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
   expect(error.message).toContain("not defined in the Parameter Glossary");
-  expect(error.message + error.hint).not.toContain('class="error-parameter"');
+  expect(error.message + error.hint).not.toContain('class="alert-parameter"');
   expect(error.hint).toContain("No similarly spelled");
 });

@@ -4,8 +4,8 @@ import { getPhrases, getPhrasesVersion } from "../parameters/phrasesRegistry";
 import { ExperimentTable } from "./experimentTable";
 import { collectInternationalPhraseReferences } from "./internationalPhraseAudit";
 import { internationalPhraseUrl } from "./internationalPhraseLink";
-import type { EasyEyesError } from "./errorMessages";
-import { diagnosticValueHtml } from "./diagnosticHtml";
+import type { Alert } from "./alerts";
+import { alertParameter, alertValueHtml, escapeAlertHtml } from "./alertHtml";
 import {
   analysePhrasePaths,
   type PhraseCondition,
@@ -17,41 +17,31 @@ import {
 type Reference = ReturnType<
   typeof collectInternationalPhraseReferences
 >[number];
-const escape = (value: string) =>
-  String(value).replace(
-    /[&<>"']/g,
-    (character) =>
-      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
-        character
-      ]!,
-  );
 const linkedKey = (key: string) =>
   `<a href="${internationalPhraseUrl(
     key,
     new Map(),
-  )}" target="_blank" rel="noopener noreferrer">${escape(key)}</a>`;
+  )}" target="_blank" rel="noopener noreferrer">${escapeAlertHtml(key)}</a>`;
 
 export function validateStudyPhraseDefinitions(
   references: Reference[],
   phrases: Record<string, Record<string, string>>,
-): EasyEyesError[] {
+): Alert[] {
   return references.flatMap((reference) => {
     if (Object.prototype.hasOwnProperty.call(phrases, reference.key)) return [];
     return [
       {
         name: "International phrase not defined",
-        message: `Phrase ${diagnosticValueHtml(
+        message: `Phrase ${alertValueHtml(
           linkedKey(reference.key),
-        )} in <span class="error-parameter">${escape(
-          reference.parameter,
-        )}</span> (column ${
+        )} in ${alertParameter(reference.parameter)} (column ${
           reference.column + 1
         }) is not defined in International Phrases.`,
         hint: "Add the missing key to column A of International Phrases before compiling.",
         context: "preprocessor",
         kind: "error",
         parameters: [reference.parameter],
-      } as EasyEyesError,
+      } as Alert,
     ];
   });
 }
@@ -95,17 +85,17 @@ export async function checkStudyPhraseAnalysis(
   normalized?: Record<string, string>[],
   localIndex?: PhraseSourceIndex,
 ): Promise<{
-  errors: EasyEyesError[];
+  errors: Alert[];
   report?: PhrasePathReport & {
     phrasesVersion: string | null;
     language: string;
     studyDefinedPhrases: Reference[];
-    definitionErrors: EasyEyesError[];
+    definitionErrors: Alert[];
     candidateDefinitionIssues: string[];
   };
 }> {
   const language = table.colBOrDefault("_language");
-  let errors: EasyEyesError[] = [];
+  let errors: Alert[] = [];
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15000);
   try {
@@ -173,10 +163,10 @@ export async function checkStudyPhraseAnalysis(
         message: `This study’s source references ${count} ${
           count === 1 ? "key that is" : "keys that are"
         } not defined in International Phrases:<br>${uncertainMissing
-          .map((key) => diagnosticValueHtml(linkedKey(key)))
+          .map((key) => alertValueHtml(linkedKey(key)))
           .join(
             "<br>",
-          )}<br><span class="diagnostic-section"><strong>Can I run the study?</strong> Yes, if the missing phrases are not essential. If the study tries to display one, it will show a missing-phrase error instead.</span><br><span class="diagnostic-section"><strong>Report the problem.</strong> Please select “Report bug” at the top of this page to notify the developers. To fix the problem, they will either remove unused keys from the source or add missing keys and their translations to International Phrases.</span>`,
+          )}<br><span class="alert-section"><strong>Can I run the study?</strong> Yes, if the missing phrases are not essential. If the study tries to display one, it will show a missing-phrase error instead.</span><br><span class="alert-section"><strong>Report the problem.</strong> Please select “Report bug” at the top of this page to notify the developers. To fix the problem, they will either remove unused keys from the source or add missing keys and their translations to International Phrases.</span>`,
         hint: "",
         context: "preprocessor",
         kind: "warning",
@@ -202,7 +192,7 @@ export async function checkStudyPhraseAnalysis(
     errors.push({
       name: "Study phrase analysis unavailable",
       message:
-        'The study phrase analysis could not be completed with an index matching this compiler build. Compilation is blocked.<span class="diagnostic-section"><strong>For developers.</strong> The deployment must include a complete phrase analysis index and its API.</span>',
+        'The study phrase analysis could not be completed with an index matching this compiler build. Compilation is blocked.<span class="alert-section"><strong>For developers.</strong> The deployment must include a complete phrase analysis index and its API.</span>',
       hint: "Reload the compiler and try again.",
       context: "preprocessor",
       kind: "error",

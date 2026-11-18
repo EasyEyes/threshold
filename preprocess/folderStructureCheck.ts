@@ -53,12 +53,12 @@ import JSZip from "jszip";
 import Swal from "sweetalert2";
 
 import {
-  EasyEyesError,
+  Alert,
   IMAGE_FOLDER_INVALID_EXTENSION_FILES,
   IMAGE_FOLDER_INVALID_NUMBER_OF_FILES,
   IMAGE_FOLDER_INVALID_NUMBER_OF_OPTIONS,
   INVALID_FOLDER_STRUCTURE,
-} from "./errorMessages";
+} from "./alerts";
 import { getUserInfo } from "./user";
 import { tempAccessToken } from "./global";
 import { getGlossary } from "../parameters/glossaryRegistry";
@@ -438,7 +438,7 @@ export const getTotalNumberOfOptions = (imageFileObjectList: any[]) => {
   return targetImageFolderToOptions;
 };
 export const folderStructureCheckImage = async (imageFileObjectList: any[]) => {
-  const errors: EasyEyesError[] = [];
+  const errors: Alert[] = [];
 
   const totalNumberOfOptions = getTotalNumberOfOptions(imageFileObjectList);
 
@@ -657,7 +657,7 @@ export const getFontFilesForValidationLocal = async (
 //folders Object[]:  [{name: "", file: File}, {name: "", file: File}]
 export const folderStructureCheck = async (
   folders: Object[],
-): Promise<EasyEyesError[]> => {
+): Promise<Alert[]> => {
   const errors: any[] = [];
 
   await Promise.all(
@@ -676,7 +676,7 @@ export const folderStructureCheck = async (
 };
 
 export const folderStructureCheckSound = async (folder: any): Promise<any> => {
-  // const errors: EasyEyesError[] = [];
+  // const errors: Alert[] = [];
 
   // await Promise.all(
   // folders.map(async (folder) => {
@@ -706,8 +706,8 @@ export const folderStructureCheckSound = async (folder: any): Promise<any> => {
 
 export const folderStructureCheckVocoderPhrase = async (
   folder: any,
-): Promise<EasyEyesError[]> => {
-  const errors: EasyEyesError[] = [];
+): Promise<Alert[]> => {
+  const errors: Alert[] = [];
 
   return Promise.resolve(errors);
 };

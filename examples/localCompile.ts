@@ -22,7 +22,7 @@ import { basename, extname, resolve } from "path";
 import { existsSync, readdirSync, readFileSync } from "fs";
 
 import { prepareExperimentFileForThreshold } from "../preprocess/main";
-import type { EasyEyesError } from "../preprocess/errorMessages";
+import type { Alert } from "../preprocess/alerts";
 import type { PhraseSourceIndex } from "../preprocess/phrasePathAnalysis";
 
 import type { GlossaryCompilerAudit } from "../preprocess/glossaryAudit";
@@ -49,8 +49,8 @@ export interface LocalCompileResult {
   requestedCodeList: string[];
   fileStringList: string[][];
   /** Errors sorted by parameter name, exactly like the web compiler page. */
-  blockingErrors: EasyEyesError[];
-  warnings: EasyEyesError[];
+  blockingErrors: Alert[];
+  warnings: Alert[];
   /** Descriptions of web-compiler checks that cannot run locally. */
   skippedChecks: string[];
   requestedImpulseResponseList: string[];
@@ -245,7 +245,7 @@ export const compileExperimentTableLocally = async (
         requestedImageList: string[],
         requestedCodeList: string[],
         fileStringList: string[][],
-        errorList: EasyEyesError[],
+        errorList: Alert[],
         requestedImpulseResponseList: string[],
         requestedFrequencyResponseList: string[],
         requestedTargetSoundLists: string[],

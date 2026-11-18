@@ -7,8 +7,8 @@
  * and the fix instructions must name each remedy exactly once.
  */
 
-import { FONT_READING_CORPUS_CHARACTERS_MISSING } from "../preprocess/errorMessages";
-import { diagnosticValue } from "../preprocess/diagnosticHtml";
+import { FONT_READING_CORPUS_CHARACTERS_MISSING } from "../preprocess/alerts";
+import { alertValue } from "../preprocess/alertHtml";
 
 const error = (offendingConditions: number[]) =>
   FONT_READING_CORPUS_CHARACTERS_MISSING(
@@ -22,11 +22,11 @@ const error = (offendingConditions: number[]) =>
 describe("message", () => {
   it("states font, count, corpus, and a sample", () => {
     expect(error([2]).message).toBe(
-      `The font ${diagnosticValue(
+      `The font ${alertValue(
         "SomeFont.ttf",
-      )} is missing 3 characters required by <span class="error-parameter">readingCorpus</span> ${diagnosticValue(
+      )} is missing 3 characters required by <span class="alert-parameter">readingCorpus</span> ${alertValue(
         "corpus.txt",
-      )} (for example: ${diagnosticValue("你好")}).`,
+      )} (for example: ${alertValue("你好")}).`,
     );
   });
 
@@ -34,11 +34,11 @@ describe("message", () => {
     expect(
       FONT_READING_CORPUS_CHARACTERS_MISSING("F", "c", "x", 1, [0]).message,
     ).toBe(
-      `The font ${diagnosticValue(
+      `The font ${alertValue(
         "F",
-      )} is missing 1 character required by <span class="error-parameter">readingCorpus</span> ${diagnosticValue(
+      )} is missing 1 character required by <span class="alert-parameter">readingCorpus</span> ${alertValue(
         "c",
-      )} (for example: ${diagnosticValue("x")}).`,
+      )} (for example: ${alertValue("x")}).`,
     );
   });
 });
@@ -52,21 +52,21 @@ describe("name", () => {
 describe("hint", () => {
   it("offers each remedy exactly once: better font, or trim the corpus", () => {
     expect(error([0]).hint).toContain(
-      `Fix this either by choosing a font that supports every character in <span class="error-parameter">readingCorpus</span>, or by removing unsupported characters from <span class="error-parameter">readingCorpus</span>.`,
+      `Fix this either by choosing a font that supports every character in <span class="alert-parameter">readingCorpus</span>, or by removing unsupported characters from <span class="alert-parameter">readingCorpus</span>.`,
     );
   });
 
   it("documents the tolerate escape hatch with the empty-box consequence", () => {
     expect(error([0]).hint).toContain(
-      `To use the font despite missing characters, add ${diagnosticValue(
+      `To use the font despite missing characters, add ${alertValue(
         "missingCharacters",
-      )} to <span class="error-parameter">fontTolerateFaults</span> for the affected condition. Unsupported characters may appear as empty boxes, e.g. □.`,
+      )} to <span class="alert-parameter">fontTolerateFaults</span> for the affected condition. Unsupported characters may appear as empty boxes, e.g. □.`,
     );
   });
 
   it("pluralizes condition for several offending columns", () => {
     expect(error([0, 1]).hint).toContain(
-      `<span class="error-parameter">fontTolerateFaults</span> for the affected conditions.`,
+      `<span class="alert-parameter">fontTolerateFaults</span> for the affected conditions.`,
     );
   });
 

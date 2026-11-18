@@ -1,7 +1,7 @@
 import { ExperimentTable } from "../preprocess/experimentTable";
 import { validateExperimentTable } from "../preprocess/validateExperimentTable";
 import { loadGlossaryForTests } from "./helpers/glossary";
-import { diagnosticValue } from "../preprocess/diagnosticHtml";
+import { alertValue } from "../preprocess/alertHtml";
 
 const ERROR_NAME = "Incompatible RSVP speech response modes";
 
@@ -47,9 +47,9 @@ describe("RSVP speech compiler validation", () => {
           "targetKind",
         ],
         message: expect.stringContaining(
-          `cannot both be ${diagnosticValue("TRUE")}`,
+          `cannot both be ${alertValue("TRUE")}`,
         ),
-        hint: `Check column C. Set one of the two response parameters to ${diagnosticValue(
+        hint: `Check column C. Set one of the two response parameters to ${alertValue(
           "FALSE",
         )}.`,
       },
@@ -110,7 +110,7 @@ describe("RSVP speech compiler validation", () => {
     }).filter((error) => error.name === ERROR_NAME);
     expect(errors).toHaveLength(1);
     expect(errors[0].hint).toBe(
-      `Check columns E and G. Set one of the two response parameters to ${diagnosticValue(
+      `Check columns E and G. Set one of the two response parameters to ${alertValue(
         "FALSE",
       )}.`,
     );

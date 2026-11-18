@@ -15,10 +15,10 @@ import {
   isResourceReferenced,
   parseSpreadsheetRows,
 } from "../../preprocess/exportBeforeCompile";
-import type { EasyEyesError } from "../../preprocess/errorMessages";
+import type { Alert } from "../../preprocess/alerts";
 
 export interface ArchiveCompileResult {
-  blockingErrors: EasyEyesError[];
+  blockingErrors: Alert[];
   requestedTextList: string[];
   blockFileCount: number;
 }
@@ -76,7 +76,7 @@ export const compileFromArchive = async (
         _images: string[],
         _code: string[],
         fileStringList: string[][],
-        errorList: EasyEyesError[],
+        errorList: Alert[],
       ) => {
         resolvePromise({
           blockingErrors: errorList.filter((e) => e.kind === "error"),

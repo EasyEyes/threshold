@@ -1,11 +1,11 @@
 import type { PhraseTable } from "../../source/components/parsePhraseFile";
 import { ExperimentTable } from "./experimentTable";
 import {
-  type EasyEyesError,
+  type Alert,
   TILDE_WITHOUT_PHRASE_TABLE,
   TILDE_SYMBOL_NOT_FOUND,
   TILDE_LANGUAGE_NOT_IN_TABLE,
-} from "./errorMessages";
+} from "./alerts";
 
 export function resolveTildeValues(
   paramTable: ExperimentTable,
@@ -13,8 +13,8 @@ export function resolveTildeValues(
   languageCode: string,
   prefix = "~",
   selectorParameter = "_language",
-): { resolved: ExperimentTable; errors: EasyEyesError[] } {
-  const errors: EasyEyesError[] = [];
+): { resolved: ExperimentTable; errors: Alert[] } {
+  const errors: Alert[] = [];
   const resolvedRows: string[][] = [];
 
   for (const name of paramTable.params) {
@@ -109,7 +109,7 @@ export function resolveLanguageValues(
   phraseTable: PhraseTable | undefined,
   languageCode: string,
   phraseFileMissing: boolean,
-): { resolved: ExperimentTable; errors: EasyEyesError[] } {
+): { resolved: ExperimentTable; errors: Alert[] } {
   if (phraseFileMissing) return { resolved: table, errors: [] };
 
   const current = resolveTildeValues(table, phraseTable, languageCode, "Ⓛ");
@@ -130,7 +130,7 @@ export function resolveNamedValues(
   phraseTable: PhraseTable | undefined,
   columnName: string,
   phraseFileMissing: boolean,
-): { resolved: ExperimentTable; errors: EasyEyesError[] } {
+): { resolved: ExperimentTable; errors: Alert[] } {
   if (phraseFileMissing) return { resolved: table, errors: [] };
 
   return resolveTildeValues(

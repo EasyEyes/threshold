@@ -6,7 +6,7 @@ import {
   TYPEKIT_FONT_ONLY_AVAILABLE_WITH_SUBSCRIPTION,
   TYPEKIT_FONTS_MISSING,
   PROLIFIC_API_ERROR,
-} from "../preprocess/errorMessages";
+} from "../preprocess/alerts";
 
 it.each([
   FONT_SHAPING_TABLE_REJECTED("Example", ["GSUB"], [0]),
@@ -16,9 +16,9 @@ it.each([
   "retains production value markup and corrective advice for font errors",
   (error) => {
     expect(error.kind).toBe("error");
-    expect(error.message).toContain('<code class="error-value">Example</code>');
-    expect(error.hint).toContain('class="error-parameter"');
-    expect(error.hint).toContain('class="error-value"');
+    expect(error.message).toContain('<code class="alert-value">Example</code>');
+    expect(error.hint).toContain('class="alert-parameter"');
+    expect(error.hint).toContain('class="alert-value"');
     expect(error.parameters).toContain("font");
   },
 );
@@ -28,7 +28,7 @@ it.each([TYPEKIT_FONT_ONLY_AVAILABLE_WITH_SUBSCRIPTION, TYPEKIT_FONTS_MISSING])(
   (factory) => {
     const error = factory("font", { Example: { columns: ["C"], blocks: [1] } });
     expect(error.message).toContain(
-      '<li><code class="error-value">Example</code>',
+      '<li><code class="alert-value">Example</code>',
     );
     expect(error.hint).toContain("https://");
     expect(error.kind).toBe("error");
@@ -43,7 +43,7 @@ it("uses production group-value markup and retains Prolific recovery details", (
     "<img src=x>",
   );
   expect(error.message).toContain(
-    '<code class="error-value">&lt;img src=x&gt;</code>',
+    '<code class="alert-value">&lt;img src=x&gt;</code>',
   );
   expect(error.hint).toContain("HTTP 503");
   expect(error.hint).toContain("Prolific token and internet connection");

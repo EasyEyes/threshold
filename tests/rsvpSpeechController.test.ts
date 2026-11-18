@@ -3,6 +3,8 @@ import * as elevenLabsAdapter from "../components/speech/elevenLabsRealtimeTrans
 import * as deepgramAdapter from "../components/speech/deepgramRealtimeTranscriber";
 import { DeepgramRealtimeTranscriber } from "../components/speech/deepgramRealtimeTranscriber";
 import { ElevenLabsRealtimeTranscriber } from "../components/speech/elevenLabsRealtimeTranscriber";
+import { GoogleChirp3Transcriber } from "../components/speech/googleChirp3Transcriber";
+import { SpeechSessionError } from "../components/speech/speechSession";
 import type {
   SpeechSessionState,
   SpeechUtteranceResult,
@@ -61,7 +63,7 @@ const makeConfiguration = (
 class FakeCapture implements RsvpSpeechCapturePort {
   readonly initialize = jest.fn(async (): Promise<void> => undefined);
   readonly startInput = jest.fn(() => undefined);
-  readonly start = jest.fn(() => undefined);
+  readonly start = jest.fn((): void => undefined);
   readonly stop = jest.fn(() => undefined);
   readonly close = jest.fn(async () => undefined);
   private listener?: (chunk: PcmAudioChunk) => void;
@@ -96,6 +98,13 @@ class FakeSession implements RsvpSpeechSessionPort {
       text,
       settled,
       receivedAtMs: performance.now(),
+    });
+  }
+  disconnectBeforeCapture(): void {
+    this.state = "failed";
+    this.listener?.({
+      type: "error",
+      error: new SpeechSessionError("transcriberFailure", "Connection lost"),
     });
   }
   state: SpeechSessionState = "idle";
@@ -238,6 +247,82 @@ describe("RsvpSpeechController", () => {
     samples: new Int16Array(1600),
     sampleRate: 16000,
     capturedAtMs: performance.now(),
+  });
+
+  it("handles Space only after presentation and removes its handler on completion", async () => {
+    const originalWindow = Object.getOwnPropertyDescriptor(
+      globalThis,
+      "window",
+    );
+    const listeners = new Map<string, (event: KeyboardEvent) => void>();
+    const fakeWindow = {
+      addEventListener: jest.fn(
+        (type: string, listener: (event: KeyboardEvent) => void) =>
+          listeners.set(type, listener),
+      ),
+      removeEventListener: jest.fn((type: string) => listeners.delete(type)),
+    };
+    Object.defineProperty(globalThis, "window", {
+      value: fakeWindow,
+      configurable: true,
+    });
+    const harness = makeHarness();
+    const controller = new RsvpSpeechController(
+      makeConfiguration(),
+      harness.dependencies,
+    );
+    try {
+      await controller.prepare();
+      controller.startCapture();
+      harness.capture.emit(quietChunk());
+      expect(listeners.has("keydown")).toBe(false);
+      controller.allowProviderFinalization();
+      const handler = listeners.get("keydown")!;
+      const preventDefault = jest.fn();
+      for (const ignored of [
+        { code: "KeyA" },
+        { defaultPrevented: true },
+        { repeat: true },
+        { isComposing: true },
+        { shiftKey: true },
+        { altKey: true },
+        { ctrlKey: true },
+        { metaKey: true },
+        { target: { tagName: "INPUT" } },
+        { target: { tagName: "TEXTAREA" } },
+        { target: { tagName: "SELECT" } },
+        { target: { tagName: "BUTTON" } },
+        { target: { isContentEditable: true } },
+      ]) {
+        handler({
+          code: "Space",
+          target: { tagName: "BODY" },
+          preventDefault,
+          ...ignored,
+        } as unknown as KeyboardEvent);
+      }
+      expect(harness.session.requestCommit).not.toHaveBeenCalled();
+      handler({
+        code: "Space",
+        target: { tagName: "BODY" },
+        preventDefault,
+      } as unknown as KeyboardEvent);
+      expect(harness.session.requestCommit).toHaveBeenCalledTimes(1);
+      expect(preventDefault).toHaveBeenCalledTimes(1);
+      expect(listeners.has("keydown")).toBe(false);
+      handler({
+        code: "Space",
+        target: { tagName: "BODY" },
+        preventDefault,
+      } as unknown as KeyboardEvent);
+      expect(harness.session.requestCommit).toHaveBeenCalledTimes(1);
+      expect(preventDefault).toHaveBeenCalledTimes(1);
+    } finally {
+      await controller.close();
+      if (originalWindow)
+        Object.defineProperty(globalThis, "window", originalWindow);
+      else Reflect.deleteProperty(globalThis, "window");
+    }
   });
 
   it("does not fabricate a response when capture produces no PCM", async () => {
@@ -407,6 +492,41 @@ describe("RsvpSpeechController", () => {
     expect(controller.state).toBe("ready");
   });
 
+  it.each(["preparing", "ready"])(
+    "does not start capture if Chirp disconnects while %s",
+    async (phase) => {
+      const h = makeHarness();
+      const initialized = deferred<void>();
+      const micReady = deferred<void>();
+      h.capture.initialize.mockImplementationOnce(() => {
+        initialized.resolve();
+        return micReady.promise;
+      });
+      const controller = new RsvpSpeechController(
+        makeConfiguration({ provider: "chirp3" }),
+        h.dependencies,
+      );
+      const preparing = controller.prepare();
+      await initialized.promise;
+      if (phase === "ready") {
+        micReady.resolve();
+        await preparing;
+      }
+      h.session.disconnectBeforeCapture();
+      if (phase === "preparing") {
+        micReady.resolve();
+        await expect(preparing).rejects.toMatchObject({
+          code: "preparationFailed",
+        });
+      }
+      expect(controller.state).toBe("failed");
+      expect(() => controller.startCapture()).toThrow(controller.failure);
+      expect(h.capture.start).not.toHaveBeenCalled();
+      await controller.close();
+      expect(h.microphone.close).toHaveBeenCalledTimes(1);
+    },
+  );
+
   it("copies only this trial's target words into immutable provider configuration", async () => {
     const targetWords = ["cat", "dog", "fish"];
     const harness = makeHarness();
@@ -432,6 +552,7 @@ describe("RsvpSpeechController", () => {
   it.each([
     ["elevenlabs", ElevenLabsRealtimeTranscriber],
     ["deepgram", DeepgramRealtimeTranscriber],
+    ["chirp3", GoogleChirp3Transcriber],
   ] as const)(
     "constructs the selected %s adapter",
     async (provider, Adapter) => {

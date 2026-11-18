@@ -14,7 +14,7 @@ import Papa from "papaparse";
 import { loadGlossaryForTests } from "./helpers/glossary";
 import { ExperimentTable } from "../preprocess/experimentTable";
 import { validateExperimentTable } from "../preprocess/validateExperimentTable";
-import type { EasyEyesError } from "../preprocess/errorMessages";
+import type { Alert } from "../preprocess/alerts";
 
 function parse(csv: string): ExperimentTable {
   const p = Papa.parse(csv, { skipEmptyLines: true });
@@ -47,7 +47,7 @@ function table(
   return parse(rows.join("\n"));
 }
 
-function ligatureErrors(t: ExperimentTable): EasyEyesError[] {
+function ligatureErrors(t: ExperimentTable): Alert[] {
   return validateExperimentTable(t).filter((e) =>
     e.parameters.includes("fontVariantLigatures"),
   );

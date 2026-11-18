@@ -142,19 +142,19 @@ export const glossaryParameterUrl = (name: string): string | null => {
 };
 
 /**
- * Wrap every `<span class="error-parameter">name</span>` in `html` with a
- * glossary link — the standard markup emitted by the error factories for
- * parameter mentions, wherever the HTML ultimately renders on the website.
- * Spans naming non-parameters are left as they are.
+ * Link parameter spans to their glossary rows. data-glossary-key supports
+ * numbered family members; existing anchors are preserved, so this is safe
+ * to apply once at the rendering boundary without nesting links.
  */
 export const linkGlossaryParameters = (html: string): string =>
   html.replace(
-    /<span class="error-parameter">([^<]+)<\/span>/g,
-    (span, name: string) => {
-      const href = glossaryParameterUrl(name);
+    /<a\b[^>]*>[\s\S]*?<\/a>|<span class="alert-parameter"(?: data-glossary-key="([^"]*)")?>([^<]+)<\/span>/g,
+    (match, glossaryKey: string | undefined, name: string | undefined) => {
+      if (match.startsWith("<a")) return match;
+      const href = glossaryParameterUrl(glossaryKey ?? name!);
       return href
-        ? `<a class="error-parameter-link" href="${href}" target="_blank" rel="noopener noreferrer">${span}</a>`
-        : span;
+        ? `<a class="alert-parameter-link" href="${href}" target="_blank" rel="noopener noreferrer">${match}</a>`
+        : match;
     },
   );
 

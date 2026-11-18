@@ -19,6 +19,12 @@ import { loadGlossaryForTests } from "./helpers/glossary";
 import { ExperimentTable } from "../preprocess/experimentTable";
 import { validateExperimentTable } from "../preprocess/validateExperimentTable";
 import { stripBlankEnds } from "../preprocess/parameterName";
+import {
+  alertDeleted,
+  alertInserted,
+  alertInvalid,
+  alertParameter,
+} from "../preprocess/alertHtml";
 
 beforeAll(async () => {
   await loadGlossaryForTests();
@@ -36,13 +42,10 @@ const errorsFor = (csv: string) => {
 const unrecognized = (csv: string) =>
   errorsFor(csv).find((e) => e.name === "Parameter is unrecognized");
 
-const RED = (s: string) =>
-  `<span style="color: #bb2c22; font-weight: bold; text-decoration: line-through;">${s}</span>`;
-const GREEN = (s: string) =>
-  `<span style="color: #147133; font-weight: bold;">${s}</span>`;
-const PARAM = (s: string) => `<span class="error-parameter">${s}</span>`;
-const REVEALED = (s: string) =>
-  `<span style="color: #bb2c22; font-weight: bold;">${s}</span>`;
+const RED = alertDeleted;
+const GREEN = alertInserted;
+const PARAM = alertParameter;
+const REVEALED = alertInvalid;
 
 describe("hidden-character twins are normalized, not errored", () => {
   it("zero-width space before a valid parameter name compiles as that parameter", () => {
@@ -159,8 +162,8 @@ describe("suggestions stay relevant and retain glossary links", () => {
         ["INPUT PARAMETER", "targetKind", "conditionName"].join("\n"),
     }));
     const linked = linkGlossaryParameters(error!.message);
-    expect(linked.match(/<a class="error-parameter-link"/g)).toHaveLength(1);
-    expect(linked).toMatch(/\(targetKind<span style="color: #bb2c22/);
+    expect(linked.match(/<a class="alert-parameter-link"/g)).toHaveLength(1);
+    expect(linked).toMatch(/\(targetKind<span class="alert-deleted"/);
     const { __resetGlossaryRowsForTests } = await import(
       "../parameters/glossaryLink"
     );

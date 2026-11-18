@@ -1,3 +1,4 @@
+import { mediaUrl } from "./mediaPreload.js";
 import { Scheduler } from "../psychojs/src/util";
 import { renderMarkdown } from "./markdownInline";
 import { updateColor } from "./color";
@@ -123,7 +124,7 @@ export const showImageBegin = (
     showImage.setAutoDraw(true);
 
     realImageElement = document.createElement("img");
-    realImageElement.src = `./images/${fileName}`;
+    realImageElement.src = mediaUrl(`./images/${fileName}`);
     realImageElement.id = "showImageEle";
     realImageElement.style.display = "block";
     realImageElement.style.margin = "auto";

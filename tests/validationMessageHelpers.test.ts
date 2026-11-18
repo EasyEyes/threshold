@@ -1,42 +1,33 @@
 import {
-  makeCaution,
-  makeError,
-  param,
   columnsHint,
   valueAtColumn,
   valuesAtColumns,
 } from "../preprocess/validateExperimentTable";
-import { diagnosticValue } from "../preprocess/diagnosticHtml";
+import { makeAlert } from "../preprocess/alerts";
+import { alertParameter, alertValue } from "../preprocess/alertHtml";
 
 describe("validation message helpers", () => {
-  it("param wraps name in the error-parameter span", () => {
-    expect(param("targetKind")).toBe(
-      `<span class="error-parameter">targetKind</span>`,
+  it("alertParameter wraps a name in the standard span", () => {
+    expect(alertParameter("targetKind")).toBe(
+      `<span class="alert-parameter">targetKind</span>`,
     );
   });
 
-  it("makeError fills kind/context defaults and passes fields through", () => {
-    expect(
-      makeError({
-        name: "N",
-        message: "M",
-        hint: "H",
-        parameters: ["a", "b"],
-      }),
-    ).toEqual({
+  it("makeAlert supplies defaults without boilerplate", () => {
+    expect(makeAlert({ name: "N" })).toEqual({
       name: "N",
       kind: "error",
       context: "preprocessor",
-      message: "M",
-      hint: "H",
-      parameters: ["a", "b"],
+      message: "",
+      hint: "",
+      parameters: [],
     });
   });
 
-  it("makeCaution uses kind warning", () => {
+  it("makeAlert accepts kind and context overrides", () => {
     expect(
-      makeCaution({ name: "N", message: "M", hint: "H", parameters: [] }).kind,
-    ).toBe("warning");
+      makeAlert({ name: "N", kind: "warning", context: "media" }),
+    ).toMatchObject({ kind: "warning", context: "media" });
   });
 
   it("columnsHint singular", () => {
@@ -52,10 +43,8 @@ describe("validation message helpers", () => {
   });
 
   it("valueAtColumn reports value with column letter", () => {
-    expect(valueAtColumn("abc", 0)).toBe(
-      `${diagnosticValue("abc")} (column C)`,
-    );
-    expect(valueAtColumn(5.1, 2)).toBe(`${diagnosticValue(5.1)} (column E)`);
+    expect(valueAtColumn("abc", 0)).toBe(`${alertValue("abc")} (column C)`);
+    expect(valueAtColumn(5.1, 2)).toBe(`${alertValue(5.1)} (column E)`);
   });
 
   it("valuesAtColumns enumerates value/column pairs", () => {
@@ -64,10 +53,6 @@ describe("validation message helpers", () => {
         ["abc", 0],
         ["5", 2],
       ]),
-    ).toBe(
-      `${diagnosticValue("abc")} (column C) and ${diagnosticValue(
-        5,
-      )} (column E)`,
-    );
+    ).toBe(`${alertValue("abc")} (column C) and ${alertValue(5)} (column E)`);
   });
 });

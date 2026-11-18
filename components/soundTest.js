@@ -1,3 +1,4 @@
+import { fetchMedia } from "./mediaPreload.js";
 import JSZip from "jszip";
 import { renderMarkdown } from "./markdownInline";
 import {
@@ -634,7 +635,7 @@ const populateSoundFiles = async (
     targetSoundFolders.map(async (targetSoundFolder, blockCount) => {
       blockCount++;
       // targetSoundFiles[`Block${blockCount}`] = [];
-      targetSoundFiles[`Block${blockCount}`] = await fetch(
+      targetSoundFiles[`Block${blockCount}`] = await fetchMedia(
         `folders/${targetSoundFolder}.zip`,
       )
         .then((response) => {
@@ -673,7 +674,7 @@ const populateSoundFiles = async (
     maskerSoundFolders.map(async (maskerSoundFolder, blockCount) => {
       blockCount++;
       // targetSoundFiles[`Block${blockCount}`] = [];
-      targetSoundFiles[`Masker Sounds: Block ${blockCount}`] = await fetch(
+      targetSoundFiles[`Masker Sounds: Block ${blockCount}`] = await fetchMedia(
         `folders/${maskerSoundFolder}.zip`,
       )
         .then((response) => {

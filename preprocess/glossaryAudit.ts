@@ -3,13 +3,10 @@ import {
   getGlossaryVersion,
   getSuperMatchingParams,
 } from "../parameters/glossaryRegistry";
-import {
-  glossaryParameterUrl,
-  loadGlossaryRows,
-  GLOSSARY_SHEET_URL,
-} from "../parameters/glossaryLink";
+import { loadGlossaryRows } from "../parameters/glossaryLink";
 import { getEasyEyesBaseUrl } from "../components/easyeyesBaseUrl";
-import { OBSOLETE_PARAMETER, type EasyEyesError } from "./errorMessages";
+import { OBSOLETE_PARAMETER, type Alert } from "./alerts";
+import { alertParameter, escapeAlertHtml } from "./alertHtml";
 
 export type GlossaryReference = { parameter: string; key: string };
 export type GlossaryCompilerAudit = {
@@ -23,15 +20,6 @@ export type GlossaryCompilerAudit = {
     removals?: { repository: string; removedAt?: string }[];
   }[];
 };
-const escape = (value: string) =>
-  String(value).replace(
-    /[&<>"']/g,
-    (c) =>
-      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
-        c
-      ]!,
-  );
-
 export function collectStudyGlossaryReferences(
   rows: readonly (readonly string[])[],
 ): GlossaryReference[] {
@@ -68,7 +56,7 @@ class GlossaryAuditVersionMismatch extends Error {}
 export function validateGlossaryAudit(
   refs: GlossaryReference[],
   audit: GlossaryCompilerAudit,
-): EasyEyesError[] {
+): Alert[] {
   if (
     !audit?.id ||
     !audit.generatedAt ||
@@ -90,9 +78,9 @@ export function validateGlossaryAudit(
     throw new Error("Incomplete glossary audit report");
   if (audit.glossaryVersion !== getGlossaryVersion())
     throw new GlossaryAuditVersionMismatch(
-      `Loaded glossary version ${escape(
+      `Loaded glossary version ${escapeAlertHtml(
         getGlossaryVersion() ?? "unknown",
-      )} does not match completed audit version ${escape(
+      )} does not match completed audit version ${escapeAlertHtml(
         audit.glossaryVersion,
       )}.`,
     );
@@ -107,11 +95,10 @@ export function validateGlossaryAudit(
         return OBSOLETE_PARAMETER(ref.parameter, ref.key);
       return {
         name: "Glossary parameter not audited as used",
-        message: `Parameter <a href="${
-          glossaryParameterUrl(ref.key) ?? GLOSSARY_SHEET_URL
-        }" target="_blank" rel="noopener noreferrer"><span class="error-parameter">${escape(
+        message: `Parameter ${alertParameter(
           ref.parameter,
-        )}</span></a> is defined in the Parameter Glossary, but no source usage was detected.`,
+          ref.key,
+        )} is defined in the Parameter Glossary, but no source usage was detected.`,
         hint: "No source usage was detected in the completed glossary audit. Check the Glossary entry and remove this parameter if it is not needed. If it is required, report it to the EasyEyes team. This finding does not establish that the parameter is obsolete.",
         context: "preprocessor",
         kind: "error",
@@ -123,7 +110,7 @@ export function validateGlossaryAudit(
 export async function checkGlossaryAudit(
   rows: readonly (readonly string[])[],
   localAudit?: GlossaryCompilerAudit,
-): Promise<EasyEyesError[]> {
+): Promise<Alert[]> {
   const refs = collectStudyGlossaryReferences(rows);
   if (!refs.length) return [];
   const controller = new AbortController();
