@@ -23,7 +23,7 @@
  * reports none => HarfBuzz rejected the table => fail the compile.
  */
 
-import { EasyEyesError, FONT_SHAPING_TABLE_REJECTED } from "./errorMessages";
+import { Alert, FONT_SHAPING_TABLE_REJECTED } from "./alerts";
 import { getGlossary } from "../parameters/glossaryRegistry";
 import { getColumnValuesOrDefaults } from "./utils";
 import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
@@ -337,8 +337,8 @@ export const validateFontShaping = async (
   fontDirectory?: string,
   gitlabOAuthClient?: GitLabOAuthClient,
   fontCache?: FontDataCache,
-): Promise<EasyEyesError[]> => {
-  const errors: EasyEyesError[] = [];
+): Promise<Alert[]> => {
+  const errors: Alert[] = [];
   try {
     const fontNames = getColumnValuesOrDefaults(df, "font");
     const fontSources = getColumnValuesOrDefaults(df, "fontSource");

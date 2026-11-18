@@ -197,27 +197,44 @@ describe("linkGlossaryParameters", () => {
     await loadGlossaryRows(async () => csvResponse(CSV));
     expect(
       linkGlossaryParameters(
-        `Check <span class="error-parameter">font</span> in column C.`,
+        `Check <span class="alert-parameter">font</span> in column C.`,
       ),
     ).toBe(
-      `Check <a class="error-parameter-link" href="${GLOSSARY_SHEET_URL}&range=A5:G5" target="_blank" rel="noopener noreferrer"><span class="error-parameter">font</span></a> in column C.`,
+      `Check <a class="alert-parameter-link" href="${GLOSSARY_SHEET_URL}&range=A5:G5" target="_blank" rel="noopener noreferrer"><span class="alert-parameter">font</span></a> in column C.`,
     );
   });
 
   it("leaves spans that are not glossary parameters untouched", async () => {
     await loadGlossaryRows(async () => csvResponse(CSV));
-    const html = `File <span class="error-parameter">myFont.ttf</span> is missing.`;
+    const html = `File <span class="alert-parameter">myFont.ttf</span> is missing.`;
     expect(linkGlossaryParameters(html)).toBe(html);
   });
 
   it("links every parameter span in a longer hint", async () => {
     await loadGlossaryRows(async () => csvResponse(CSV));
     const out = linkGlossaryParameters(
-      `Set <span class="error-parameter">font</span> or add to <span class="error-parameter">fontTolerateFaults</span>.`,
+      `Set <span class="alert-parameter">font</span> or add to <span class="alert-parameter">fontTolerateFaults</span>.`,
     );
     expect(out).toContain("range=A5:G5");
     expect(out).toContain("range=A6:G6");
-    expect(out.match(/<a class="error-parameter-link"/g)).toHaveLength(2);
+    expect(out.match(/<a class="alert-parameter-link"/g)).toHaveLength(2);
+  });
+
+  it("uses an explicit glossary key for numbered parameter families", async () => {
+    await loadGlossaryRows(async () => csvResponse(CSV));
+    const out = linkGlossaryParameters(
+      `Check <span class="alert-parameter" data-glossary-key="font">fontDirection</span>.`,
+    );
+    expect(out).toContain("range=A5:G5");
+    expect(out).toContain(">fontDirection</span></a>");
+  });
+
+  it("is idempotent and never nests an existing glossary link", async () => {
+    await loadGlossaryRows(async () => csvResponse(CSV));
+    const once = linkGlossaryParameters(
+      `Check <span class="alert-parameter">font</span>.`,
+    );
+    expect(linkGlossaryParameters(once)).toBe(once);
   });
 
   it("returns HTML without parameter spans unchanged", () => {

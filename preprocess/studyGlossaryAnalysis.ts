@@ -8,7 +8,7 @@ import {
 } from "./phrasePathAnalysis";
 import type { ExperimentTable } from "./experimentTable";
 import type { GlossaryReference } from "./glossaryAudit";
-import type { EasyEyesError } from "./errorMessages";
+import type { Alert } from "./alerts";
 
 export async function checkStudyGlossaryAnalysis(
   table: ExperimentTable,
@@ -16,7 +16,7 @@ export async function checkStudyGlossaryAnalysis(
   normalized?: Record<string, string>[],
   localIndex?: PhraseSourceIndex,
 ): Promise<{
-  errors: EasyEyesError[];
+  errors: Alert[];
   report?: PhrasePathReport & {
     glossaryVersion: string | null;
     studyDefinedParameters: GlossaryReference[];

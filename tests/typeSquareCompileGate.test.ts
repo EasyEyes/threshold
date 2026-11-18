@@ -61,7 +61,7 @@ describe("checkTypeSquareGate (compile-time gate for fontSource=typeSquare)", ()
     expect(errs[0].parameters).toEqual(["fontSource"]);
     // The message tells the experimenter what to do.
     expect(errs[0].message).toContain(
-      '<span class="error-parameter">fontSource</span>=<code class="error-value">file</code>',
+      '<span class="alert-parameter">fontSource</span>=<code class="alert-value">file</code>',
     );
   });
 

@@ -1,5 +1,5 @@
-import type { EasyEyesError } from "./errorMessages";
-import { diagnosticValue } from "./diagnosticHtml";
+import type { Alert } from "./alerts";
+import { alertValue, escapeAlertHtml } from "./alertHtml";
 
 /** GitLab/Pavlovia project path limit is 255; leave room for a version suffix. */
 export const MAX_REPO_BASE_NAME_LENGTH = 245;
@@ -12,9 +12,9 @@ export const REPO_NAME_RULES_HTML = [
   "Pavlovia repository names (GitLab project slugs) must:",
   "• contain only letters, digits, underscores (_), dots (.), and dashes (-)",
   "• start with a letter or digit (not a dash, underscore, or dot)",
-  `• not contain consecutive special characters (for example ${diagnosticValue(
+  `• not contain consecutive special characters (for example ${alertValue(
     "--",
-  )} or ${diagnosticValue("..")})`,
+  )} or ${alertValue("..")})`,
   `• be at most ${MAX_REPO_BASE_NAME_LENGTH} characters, so the appended version number still fits GitLab's 255-character limit`,
   "Rename the spreadsheet to follow these rules, then compile again. The compiler copies the spreadsheet name as-is; it will not change the name for you.",
 ].join("<br/>");
@@ -32,13 +32,6 @@ export class IllegalRepoNameError extends Error {
     this.reason = reason;
   }
 }
-
-const escapeHtml = (value: string): string =>
-  value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
 
 const describeChar = (char: string): string => {
   if (char === " ") return "a space";
@@ -118,13 +111,11 @@ export const versionedRepoName = (
   return `${name}${max + 1}`;
 };
 
-export const illegalRepoNameToEasyEyesError = (
-  error: IllegalRepoNameError,
-): EasyEyesError => ({
+export const illegalRepoNameToAlert = (error: IllegalRepoNameError): Alert => ({
   name: "Illegal Pavlovia repository name",
-  message: `The compiler names the Pavlovia repository after your spreadsheet, then appends a version number. It does not change the name. ${diagnosticValue(
+  message: `The compiler names the Pavlovia repository after your spreadsheet, then appends a version number. It does not change the name. ${alertValue(
     error.baseName,
-  )} is not a legal repository name: ${escapeHtml(error.reason)}`,
+  )} is not a legal repository name: ${escapeAlertHtml(error.reason)}`,
   hint: REPO_NAME_RULES_HTML,
   context: "preprocessor",
   kind: "error",

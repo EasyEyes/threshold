@@ -27,7 +27,7 @@ import {
   runSafely,
   TABLE_CHECKS,
 } from "../preprocess/validateExperimentTable";
-import type { EasyEyesError } from "../preprocess/errorMessages";
+import type { Alert } from "../preprocess/alerts";
 import { exampleTables } from "./helpers/exampleTables";
 
 const parse = (csv: string): ExperimentTable => {
@@ -35,7 +35,7 @@ const parse = (csv: string): ExperimentTable => {
   return new ExperimentTable(p.data as readonly (readonly string[])[]);
 };
 
-const normalize = (errors: EasyEyesError[]) =>
+const normalize = (errors: Alert[]) =>
   errors.map((e) => ({
     name: e.name,
     kind: e.kind,
@@ -648,7 +648,7 @@ thresholdParameter,,targetSizeDeg,targetSizeDeg`;
     expect(keys).toEqual(sorted);
   });
 
-  it("every error has the full EasyEyesError shape", () => {
+  it("every error has the full Alert shape", () => {
     const errors = validateExperimentTable(parse(messyCsv));
     for (const e of errors) {
       expect(typeof e.name).toBe("string");

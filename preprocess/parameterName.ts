@@ -11,7 +11,7 @@
  * names via "Parameter is unrecognized", values via the wrong-type hint.
  */
 
-import { escapeDiagnosticHtml } from "./diagnosticHtml";
+import { alertInvalid, escapeAlertHtml } from "./alertHtml";
 
 // Characters that render as nothing (or as a blank) both in spreadsheets
 // and in HTML. NBSP and BOM are already covered by JS \s, so they aren't
@@ -81,9 +81,5 @@ export { codePointLabel };
  */
 export const annotateInvisibleCharacters = (name: string): string =>
   name.replace(/./gu, (ch) =>
-    isHiddenBlank(ch)
-      ? `<span style="color: #bb2c22; font-weight: bold;">${codePointLabel(
-          ch,
-        )}</span>`
-      : escapeDiagnosticHtml(ch),
+    isHiddenBlank(ch) ? alertInvalid(codePointLabel(ch)) : escapeAlertHtml(ch),
   );

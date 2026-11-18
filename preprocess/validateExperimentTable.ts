@@ -4,20 +4,21 @@
  * else) lives here.
  *
  * HOW TO ADD A CHECK
- * Follow the AUTHORING DIAGNOSTICS rules in errorMessages.ts.
- * 1. Write `checkSomething(t: ExperimentTable): EasyEyesError[]` below,
- *    building messages with makeError/makeCaution and the message helpers
- *    (columnsHint, valueAtColumn, param, diagnosticValue).
+ * Follow the AUTHORING ALERTS rules in alerts.ts.
+ * 1. Write `checkSomething(t: ExperimentTable): Alert[]` below,
+ *    building messages with makeAlert and the message helpers
+ *    (columnsHint, valueAtColumn, alertParameter, alertValue).
  * 2. Add it to the TABLE_CHECKS registry — that is the ONLY wiring step.
  * 3. Add one scenario to tests/validationGreenSnapshot.test.ts Part B;
  *    the scenario-count guard enforces this.
  */
 import {
   type Offender,
-  type EasyEyesError,
+  type Alert,
+  makeAlert,
   IMPROPER_GLOSSARY_FONT_PIXI_METRICS_STRING_DEFAULT,
   OBSOLETE_PARAMETER,
-} from "./errorMessages";
+} from "./alerts";
 import { ExperimentTable } from "./experimentTable";
 import {
   conditionIndexToColumnName,
@@ -60,36 +61,15 @@ import {
 import { parseFontPixiMetricsStringDefault } from "./fontPixiMetricsStringDefault";
 import { splitQuestionAndAnswerString } from "../components/questionAndAnswer";
 import {
-  diagnosticOffendingValuesLabel,
-  diagnosticValue,
-  diagnosticValueHtml,
-  diagnosticValues,
-} from "./diagnosticHtml";
-
-export const makeError = (e: {
-  name: string;
-  message: string;
-  hint: string;
-  parameters: string[];
-}): EasyEyesError => ({
-  name: e.name,
-  kind: "error",
-  context: "preprocessor",
-  parameters: e.parameters,
-  message: e.message,
-  hint: e.hint,
-});
-
-export const makeCaution = (e: {
-  name: string;
-  message: string;
-  hint: string;
-  parameters: string[];
-}): EasyEyesError => ({ ...makeError(e), kind: "warning" });
-
-/** Renders a parameter name in the standard error-message span. */
-export const param = (parameterName: string): string =>
-  `<span class="error-parameter">${parameterName}</span>`;
+  alertDeleted,
+  alertInserted,
+  alertOffendingValuesLabel,
+  alertParameter,
+  alertValue,
+  alertValueHtml,
+  alertValues,
+  escapeAlertHtml,
+} from "./alertHtml";
 
 /** "Check column C" / "Check columns C and E" — the dominant hint idiom. */
 export const columnsHint = (conditionIndices: number[]): string =>
@@ -102,9 +82,7 @@ export const valueAtColumn = (
   value: string | number,
   conditionIndex: number,
 ): string =>
-  `${diagnosticValue(value)} (column ${conditionIndexToColumnName(
-    conditionIndex,
-  )})`;
+  `${alertValue(value)} (column ${conditionIndexToColumnName(conditionIndex)})`;
 
 /** "abc (column C) and 5 (column E)" */
 export const valuesAtColumns = (pairs: [string | number, number][]): string =>
@@ -137,10 +115,9 @@ const explainInvisibleDifference = (
   const codes = [...subject].flatMap((ch, i) =>
     isHiddenBlank(ch) ? [`${codePointLabel(ch)} at character ${i + 1}`] : [],
   );
-  const label =
-    options.label ?? `the valid category ${diagnosticValue(candidate)}`;
+  const label = options.label ?? `the valid category ${alertValue(candidate)}`;
   return (
-    `Value ${diagnosticValueHtml(
+    `Value ${alertValueHtml(
       annotateInvisibleCharacters(subject),
     )} differs from ${label} ` +
     `only in invisible characters${
@@ -166,7 +143,7 @@ const invisibleValueHints = (values: string[], g: GlossaryEntry): string => {
         maybe(
           explainInvisibleDifference(value, b, {
             caseFold: true,
-            label: diagnosticValue(b),
+            label: alertValue(b),
           }),
         );
     } else if (g.type === "categorical" || g.type === "multicategorical") {
@@ -190,7 +167,7 @@ const invisibleValueHints = (values: string[], g: GlossaryEntry): string => {
         if (candidate && candidate !== subject && legal(candidate))
           maybe(
             explainInvisibleDifference(subject, candidate, {
-              label: `the number ${diagnosticValue(candidate)}`,
+              label: `the number ${alertValue(candidate)}`,
             }),
           );
       }
@@ -220,9 +197,7 @@ const similarlySpelledCandidates = (
   return candidates.map((c) => c.replace(/@/g, "9"));
 };
 
-const checkGlossaryParametersProper = (
-  _t: ExperimentTable,
-): EasyEyesError[] => {
+const checkGlossaryParametersProper = (_t: ExperimentTable): Alert[] => {
   return [
     ..._areGlossaryParametersValidTypes(),
     ..._isFontPixiMetricsStringDefaultValid(),
@@ -234,7 +209,7 @@ const checkGlossaryParametersProper = (
  * e.g. "ar, ٱغ, ja, 高黒". Every language named must be one EasyEyes knows,
  * otherwise its metrics string could never reach a condition.
  */
-const _isFontPixiMetricsStringDefaultValid = (): EasyEyesError[] => {
+const _isFontPixiMetricsStringDefaultValid = (): Alert[] => {
   const { unrecognizedLanguages, unpairedLanguage } =
     parseFontPixiMetricsStringDefault(
       (getGlossary()["fontPixiMetricsString"]?.default as string) ?? "",
@@ -248,7 +223,7 @@ const _isFontPixiMetricsStringDefaultValid = (): EasyEyesError[] => {
   ];
 };
 
-const _areGlossaryParametersValidTypes = (): EasyEyesError[] => {
+const _areGlossaryParametersValidTypes = (): Alert[] => {
   const validTypes = [
     "integer",
     "numerical",
@@ -268,10 +243,10 @@ const _areGlossaryParametersValidTypes = (): EasyEyesError[] => {
   const types = offendingParams.map((p) => p["type"]) as string[];
   const plural = names.length > 1;
   const nameTypeMessage = verballyEnumerate(
-    names.map((n, i) => `${param(n)} (${diagnosticValue(types[i])})`),
+    names.map((n, i) => `${alertParameter(n)} (${alertValue(types[i])})`),
   );
   return [
-    makeError({
+    makeAlert({
       name: "Type in glossary is unsupported",
       message: `${nameTypeMessage} ${plural ? "have" : "has"} invalid type${
         plural ? "s" : ""
@@ -290,7 +265,7 @@ const FONT_GAUNTLET_HINT = `<a href="https://fontgauntlet.com/" target="_blank" 
 // would otherwise surface as type errors against the scientist's own empty
 // cells (or, if empty, as a runtime NaN-fill). Scoped to vector/matrix types
 // only — pre-existing scalar defaults are not policed.
-const checkGlossaryVectorDefaults = (_t: ExperimentTable): EasyEyesError[] => {
+const checkGlossaryVectorDefaults = (_t: ExperimentTable): Alert[] => {
   const bad: { name: string; type: string; def: string; reason: string }[] = [];
   for (const entry of Object.values(getGlossary())) {
     const spec = parseVectorType(entry["type"] as string);
@@ -313,11 +288,11 @@ const checkGlossaryVectorDefaults = (_t: ExperimentTable): EasyEyesError[] => {
       });
   }
   return bad.map((b) =>
-    makeError({
+    makeAlert({
       name: "Vector default in glossary is invalid",
-      message: `The glossary default ${diagnosticValue(b.def)} for ${param(
+      message: `The glossary default ${alertValue(b.def)} for ${alertParameter(
         b.name,
-      )} does not match its type ${diagnosticValue(
+      )} does not match its type ${alertValue(
         b.type,
       )}, which requires ${describeVectorType(
         parseVectorType(b.type)!,
@@ -328,9 +303,7 @@ const checkGlossaryVectorDefaults = (_t: ExperimentTable): EasyEyesError[] => {
   );
 };
 
-const checkFontWeightAndWghtConflict = (
-  t: ExperimentTable,
-): EasyEyesError[] => {
+const checkFontWeightAndWghtConflict = (t: ExperimentTable): Alert[] => {
   if (
     !t.params.includes("fontWeight") &&
     !t.params.includes("fontVariableSettings")
@@ -351,11 +324,13 @@ const checkFontWeightAndWghtConflict = (
   }
   if (!off.length) return [];
   return [
-    makeError({
+    makeAlert({
       name: `fontWeight and fontVariableSettings "wght" conflict`,
-      message: `Cannot use both ${param("fontWeight")} and ${param(
-        "fontVariableSettings",
-      )} ${diagnosticValue("wght")} in the same condition.`,
+      message: `Cannot use both ${alertParameter(
+        "fontWeight",
+      )} and ${alertParameter("fontVariableSettings")} ${alertValue(
+        "wght",
+      )} in the same condition.`,
       hint: `${columnsHint(off)}. ${FONT_GAUNTLET_HINT}`,
       parameters: ["fontWeight", "fontVariableSettings"],
     }),
@@ -364,9 +339,7 @@ const checkFontWeightAndWghtConflict = (
 
 // Only letter/repeatedLetters run the runtime blackout check; missing
 // targetKind is treated as letter (the default).
-const checkBlackoutScreenColorConflict = (
-  t: ExperimentTable,
-): EasyEyesError[] => {
+const checkBlackoutScreenColorConflict = (t: ExperimentTable): Alert[] => {
   const blackoutAllowed = t.effectiveValues("thresholdAllowedBlackoutBool");
   const screenColors = t.effectiveValues("screenColorRGBA");
   const targetKinds = t.effectiveValues("targetKind");
@@ -383,28 +356,28 @@ const checkBlackoutScreenColorConflict = (
   }
   if (!off.length) return [];
   return [
-    makeError({
+    makeAlert({
       name: "Background color conflicts with blackout detection",
-      message: `Blackout detection is on (${param(
+      message: `Blackout detection is on (${alertParameter(
         "thresholdAllowedBlackoutBool",
-      )} is ${diagnosticValue("FALSE")}) but ${param(
+      )} is ${alertValue("FALSE")}) but ${alertParameter(
         "screenColorRGBA",
-      )} is pure black ${diagnosticValue(
+      )} is pure black ${alertValue(
         "0,0,0,1",
       )} in the same condition. On a black screen every trial looks like a blackout, so every trial would be discarded.`,
-      hint: `Set ${param(
+      hint: `Set ${alertParameter(
         "screenColorRGBA",
-      )} to a dark gray (e.g. ${diagnosticValue(
+      )} to a dark gray (e.g. ${alertValue(
         "0.004, 0.004, 0.004, 1",
-      )}, i.e. about 1/256) to enable blackout detection, or set ${param(
+      )}, i.e. about 1/256) to enable blackout detection, or set ${alertParameter(
         "thresholdAllowedBlackoutBool",
-      )} to ${diagnosticValue("TRUE")} to skip it. ${columnsHint(off)}.`,
+      )} to ${alertValue("TRUE")} to skip it. ${columnsHint(off)}.`,
       parameters: ["thresholdAllowedBlackoutBool", "screenColorRGBA"],
     }),
   ];
 };
 
-const checkImpulseResponsePairs = (t: ExperimentTable): EasyEyesError[] => {
+const checkImpulseResponsePairs = (t: ExperimentTable): Alert[] => {
   const hasLoudspeaker =
     t.params.includes("_calibrateSoundSimulateLoudspeaker") &&
     t.colBOrDefault("_calibrateSoundSimulateLoudspeaker").trim() !== "";
@@ -413,13 +386,13 @@ const checkImpulseResponsePairs = (t: ExperimentTable): EasyEyesError[] => {
     t.colBOrDefault("_calibrateSoundSimulateMicrophone").trim() !== "";
   if (hasLoudspeaker === hasMicrophone) return [];
   return [
-    makeError({
+    makeAlert({
       name: "Missing paired impulse response file",
       message:
         "Sound simulation requires both loudspeaker and microphone impulse/frequency response files.",
-      hint: `You must provide values for both ${param(
+      hint: `You must provide values for both ${alertParameter(
         "_calibrateSoundSimulateLoudspeaker",
-      )} and ${param(
+      )} and ${alertParameter(
         "_calibrateSoundSimulateMicrophone",
       )}, or neither. Sound simulation requires both to function correctly.`,
       parameters: [
@@ -434,7 +407,7 @@ const checkImpulseResponsePairs = (t: ExperimentTable): EasyEyesError[] => {
 // target before onset, collapsing its eccentricity to zero.
 const checkMarkingOffsetZeroForPeripheralTarget = (
   t: ExperimentTable,
-): EasyEyesError[] => {
+): Alert[] => {
   const offset = t.effectiveValues("markingOffsetBeforeTargetOnsetSecs");
   const xs = t.effectiveValues("targetEccentricityXDeg");
   const ys = t.effectiveValues("targetEccentricityYDeg");
@@ -453,16 +426,16 @@ const checkMarkingOffsetZeroForPeripheralTarget = (
   // Cite only the eccentricity components that cause the peripherality.
   const hintParts = off.map(({ i, x, y }) => {
     const terms = [
-      `${param("markingOffsetBeforeTargetOnsetSecs")}=${offset[i]}`,
-      ...(x ? [`${param("targetEccentricityXDeg")}=${xs[i]}`] : []),
-      ...(y ? [`${param("targetEccentricityYDeg")}=${ys[i]}`] : []),
+      `${alertParameter("markingOffsetBeforeTargetOnsetSecs")}=${offset[i]}`,
+      ...(x ? [`${alertParameter("targetEccentricityXDeg")}=${xs[i]}`] : []),
+      ...(y ? [`${alertParameter("targetEccentricityYDeg")}=${ys[i]}`] : []),
     ];
     return `column ${conditionIndexToColumnName(i)} (${terms.join(", ")})`;
   });
   return [
-    makeError({
+    makeAlert({
       name: "Non-zero markingOffsetBeforeTargetOnsetSecs set for peripheral target",
-      message: `To prevent peeking (ie participants changing fixation before target onset), ${param(
+      message: `To prevent peeking (ie participants changing fixation before target onset), ${alertParameter(
         "markingOffsetBeforeTargetOnsetSecs",
       )} must be 0 in peripheral conditions.`,
       hint: "Check " + verballyEnumerate(hintParts) + ".",
@@ -479,7 +452,7 @@ const checkMarkingOffsetZeroForPeripheralTarget = (
 // when some condition enables calibrateDistanceBool.
 const checkCalibrateDistanceCheckRequiresDistance = (
   t: ExperimentTable,
-): EasyEyesError[] => {
+): Alert[] => {
   const wantsCheck =
     t.colBOrDefault("_calibrateDistanceCheckBool").toUpperCase() === "TRUE";
   if (!wantsCheck) return [];
@@ -488,12 +461,12 @@ const checkCalibrateDistanceCheckRequiresDistance = (
     .some((v) => v.toUpperCase() === "TRUE");
   if (calibrates) return [];
   return [
-    makeError({
+    makeAlert({
       name: "Invalid combination of parameters",
       message: "To check distance tracking you must enable it.",
-      hint: `${param("_calibrateDistanceCheckBool")} requires ${param(
-        "calibrateDistanceBool",
-      )}.`,
+      hint: `${alertParameter(
+        "_calibrateDistanceCheckBool",
+      )} requires ${alertParameter("calibrateDistanceBool")}.`,
       parameters: ["_calibrateDistanceCheckBool", "calibrateDistanceBool"],
     }),
   ];
@@ -503,9 +476,7 @@ const checkCalibrateDistanceCheckRequiresDistance = (
 // drawing path (_screenFloat16Bool): dithering an image that has already been
 // rounded to 8 bits adds visible noise without adding any precision, which is
 // worse than not dithering at all.
-const checkScreenDitherRequiresFloat16 = (
-  t: ExperimentTable,
-): EasyEyesError[] => {
+const checkScreenDitherRequiresFloat16 = (t: ExperimentTable): Alert[] => {
   const wantsDither =
     t.colBOrDefault("_screenDitherBool").toUpperCase() === "TRUE";
   if (!wantsDither) return [];
@@ -513,14 +484,14 @@ const checkScreenDitherRequiresFloat16 = (
     t.colBOrDefault("_screenFloat16Bool").toUpperCase() === "TRUE";
   if (wantsFloat16) return [];
   return [
-    makeError({
+    makeAlert({
       name: "_screenDitherBool=TRUE requires _screenFloat16Bool=TRUE",
       message: `Noisy-bit dithering needs the full-precision (float16) drawing path. Dithering an image that has already been rounded to 8 bits adds visible noise without adding any precision, which is worse than not dithering at all.`,
-      hint: `Set ${param("_screenFloat16Bool")} to ${diagnosticValue(
+      hint: `Set ${alertParameter("_screenFloat16Bool")} to ${alertValue(
         "TRUE",
-      )} (needs Chrome or Edge version 122 or later), or set ${param(
+      )} (needs Chrome or Edge version 122 or later), or set ${alertParameter(
         "_screenDitherBool",
-      )} to ${diagnosticValue("FALSE")}.`,
+      )} to ${alertValue("FALSE")}.`,
       parameters: ["_screenDitherBool", "_screenFloat16Bool"],
     }),
   ];
@@ -536,7 +507,7 @@ const checkScreenDitherRequiresFloat16 = (
 // test2Digit/test2Digits, matching resolveScreenMeasurePrecision.)
 const checkScreenMeasurePrecisionRequiresFloat16 = (
   t: ExperimentTable,
-): EasyEyesError[] => {
+): Alert[] => {
   const mode = t.colBOrDefault("_screenMeasurePrecision").trim().toLowerCase();
   const wantsTest =
     mode.startsWith("test1digit") || mode.startsWith("test2digit");
@@ -545,14 +516,14 @@ const checkScreenMeasurePrecisionRequiresFloat16 = (
     t.colBOrDefault("_screenFloat16Bool").toUpperCase() === "TRUE";
   if (wantsFloat16) return [];
   return [
-    makeError({
+    makeAlert({
       name: "_screenMeasurePrecision test requires _screenFloat16Bool=TRUE",
       message: `The display-precision test presents digits at increments smaller than one 8-bit step and asks whether the display can show them. That needs the full-precision (float16) drawing path; on an 8-bit buffer the digits are rounded off before they reach the display, so the test would measure the browser's own buffer, not the display.`,
-      hint: `Set ${param("_screenFloat16Bool")} to ${diagnosticValue(
+      hint: `Set ${alertParameter("_screenFloat16Bool")} to ${alertValue(
         "TRUE",
-      )} (needs Chrome or Edge version 122 or later), or set ${param(
+      )} (needs Chrome or Edge version 122 or later), or set ${alertParameter(
         "_screenMeasurePrecision",
-      )} to ${diagnosticValue("assume8Bit")}.`,
+      )} to ${alertValue("assume8Bit")}.`,
       parameters: ["_screenMeasurePrecision", "_screenFloat16Bool"],
     }),
   ];
@@ -569,9 +540,7 @@ const checkScreenMeasurePrecisionRequiresFloat16 = (
 // the scientist may want exactly that for a demonstration) whenever a test
 // mode is actually requested.
 const MAX_MEASURE_PRECISION_BACKGROUND = 1 - 1 / 127;
-const checkScreenMeasurePrecisionBackground = (
-  t: ExperimentTable,
-): EasyEyesError[] => {
+const checkScreenMeasurePrecisionBackground = (t: ExperimentTable): Alert[] => {
   const raw = t.colBOrDefault("_screenMeasurePrecisionBackground").trim();
   if (raw === "") return [];
   const value = Number(raw);
@@ -581,20 +550,18 @@ const checkScreenMeasurePrecisionBackground = (
     value > MAX_MEASURE_PRECISION_BACKGROUND
   )
     return [
-      makeError({
+      makeAlert({
         name: "Invalid _screenMeasurePrecisionBackground",
-        message: `${param(
+        message: `${alertParameter(
           "_screenMeasurePrecisionBackground",
-        )} must be a number from ${diagnosticValue(
-          0,
-        )} (black) to ${diagnosticValue(
+        )} must be a number from ${alertValue(0)} (black) to ${alertValue(
           MAX_MEASURE_PRECISION_BACKGROUND.toFixed(3),
-        )}, so that the brightest digit (background + 1/127) stays within white. Got ${diagnosticValue(
+        )}, so that the brightest digit (background + 1/127) stays within white. Got ${alertValue(
           raw,
         )}.`,
-        hint: `Use the default ${diagnosticValue(
+        hint: `Use the default ${alertValue(
           0.3333,
-        )} (one third), or ${diagnosticValues([
+        )} (one third), or ${alertValues([
           0, 0.6667,
         ])} — the values on the code grid of every display bit depth.`,
         parameters: ["_screenMeasurePrecisionBackground"],
@@ -607,18 +574,19 @@ const checkScreenMeasurePrecisionBackground = (
   const onGrid = [0, 1 / 3, 2 / 3].some((g) => Math.abs(value - g) <= 5e-4);
   if (onGrid) return [];
   return [
-    makeCaution({
+    makeAlert({
+      kind: "warning",
       name: "_screenMeasurePrecisionBackground is off the display's code grid",
-      message: `A background of ${diagnosticValue(
+      message: `A background of ${alertValue(
         raw,
       )} falls between the codes of an 8-bit display (×255 = ${(
         value * 255
       ).toFixed(
         2,
       )}). Sub-8-bit digit increments can then cross a rounding boundary and appear as a whole code, so an 8-bit display can read as 10-bit: the measured precision may be overestimated.`,
-      hint: `Use ${diagnosticValue(0.3333)} (the default), ${diagnosticValue(
+      hint: `Use ${alertValue(0.3333)} (the default), ${alertValue(
         0,
-      )}, or ${diagnosticValue(
+      )}, or ${alertValue(
         0.6667,
       )} — the only values on the code grid of every bit depth — unless you are deliberately demonstrating this effect.`,
       parameters: [
@@ -635,10 +603,8 @@ const checkScreenMeasurePrecisionBackground = (
 // a 60 Hz display cannot cycle faster than 30 Hz: the rate must be a number
 // in (0, 30]. Flicker without a test mode does nothing — a caution.
 const MAX_MEASURE_PRECISION_FLICKER_HZ = 30;
-const checkScreenMeasurePrecisionFlicker = (
-  t: ExperimentTable,
-): EasyEyesError[] => {
-  const errors: EasyEyesError[] = [];
+const checkScreenMeasurePrecisionFlicker = (t: ExperimentTable): Alert[] => {
+  const errors: Alert[] = [];
   const rawHz = t.colBOrDefault("_screenMeasurePrecisionFlickerHz").trim();
   if (rawHz !== "") {
     const hz = Number(rawHz);
@@ -648,20 +614,20 @@ const checkScreenMeasurePrecisionFlicker = (
       hz > MAX_MEASURE_PRECISION_FLICKER_HZ
     )
       errors.push(
-        makeError({
+        makeAlert({
           name: "Invalid _screenMeasurePrecisionFlickerHz",
-          message: `${param(
+          message: `${alertParameter(
             "_screenMeasurePrecisionFlickerHz",
-          )} must be a number greater than ${diagnosticValue(
+          )} must be a number greater than ${alertValue(
             0,
-          )} and at most ${diagnosticValue(
+          )} and at most ${alertValue(
             MAX_MEASURE_PRECISION_FLICKER_HZ,
-          )}: a complete flicker cycle is two color swaps, and a display refreshing at 60 Hz can swap at most once per frame. Got ${diagnosticValue(
+          )}: a complete flicker cycle is two color swaps, and a display refreshing at 60 Hz can swap at most once per frame. Got ${alertValue(
             rawHz,
           )}.`,
-          hint: `Use the default ${diagnosticValue(
+          hint: `Use the default ${alertValue(
             8,
-          )}, or any rate up to ${diagnosticValue(
+          )}, or any rate up to ${alertValue(
             MAX_MEASURE_PRECISION_FLICKER_HZ,
           )} Hz.`,
           parameters: ["_screenMeasurePrecisionFlickerHz"],
@@ -677,20 +643,21 @@ const checkScreenMeasurePrecisionFlicker = (
     mode.startsWith("test1digit") || mode.startsWith("test2digit");
   if (!wantsTest)
     errors.push(
-      makeCaution({
+      makeAlert({
+        kind: "warning",
         name: "_screenMeasurePrecisionFlickerBool without a precision test",
-        message: `${param(
+        message: `${alertParameter(
           "_screenMeasurePrecisionFlickerBool",
-        )} is ${diagnosticValue("TRUE")}, but ${param(
+        )} is ${alertValue("TRUE")}, but ${alertParameter(
           "_screenMeasurePrecision",
-        )} is ${diagnosticValue(mode || "unset")} (${diagnosticValue(
+        )} is ${alertValue(mode || "unset")} (${alertValue(
           "assume8Bit",
         )}), so no display-precision test runs and the flicker has no effect.`,
-        hint: `Set ${param("_screenMeasurePrecision")} to ${diagnosticValue(
+        hint: `Set ${alertParameter("_screenMeasurePrecision")} to ${alertValue(
           "test1Digit",
-        )} or ${diagnosticValue("test2Digits")}, or set ${param(
+        )} or ${alertValue("test2Digits")}, or set ${alertParameter(
           "_screenMeasurePrecisionFlickerBool",
-        )} to ${diagnosticValue("FALSE")}.`,
+        )} to ${alertValue("FALSE")}.`,
         parameters: [
           "_screenMeasurePrecisionFlickerBool",
           "_screenMeasurePrecision",
@@ -700,10 +667,10 @@ const checkScreenMeasurePrecisionFlicker = (
   return errors;
 };
 
-const checkViewMonitorsXYDeg = (t: ExperimentTable): EasyEyesError[] => {
+const checkViewMonitorsXYDeg = (t: ExperimentTable): Alert[] => {
   const viewMonitorsXYDeg = t.conditionValues("viewMonitorsXYDeg");
   if (!viewMonitorsXYDeg.some((v) => v !== "")) return [];
-  const errorList: EasyEyesError[] = [];
+  const errorList: Alert[] = [];
   /**
    * There can be zero or more xy coordinates, separated by semicolons.
    * Each coordinate consists of two comma-separated numbers.
@@ -711,10 +678,10 @@ const checkViewMonitorsXYDeg = (t: ExperimentTable): EasyEyesError[] => {
    * Spaces between tokens are ignored, as are leading and trailing spaces.
    * Missing numbers are a fatal error.
    */
-  const invalid = (block: number): EasyEyesError =>
-    makeError({
+  const invalid = (block: number): Alert =>
+    makeAlert({
       name: "Invalid parameter value",
-      message: `The value for the parameter ${param(
+      message: `The value for the parameter ${alertParameter(
         "viewMonitorsXYDeg",
       )} in block ${block} is invalid.`,
       hint: "Please correct the value and try again.",
@@ -746,16 +713,16 @@ const checkViewMonitorsXYDeg = (t: ExperimentTable): EasyEyesError[] => {
   return errorList;
 };
 
-const checkParametersAlphabetical = (t: ExperimentTable): EasyEyesError[] => {
+const checkParametersAlphabetical = (t: ExperimentTable): Alert[] => {
   const p = t.params;
   for (let i = 1; i < p.length; i++)
     if (p[i].toLowerCase() < p[i - 1].toLowerCase())
       return [
-        makeError({
+        makeAlert({
           name: "Parameters aren't alphabetical",
           message:
             "Uh oh! Looks like your parameters are out of order. Keeping everything alphabetical will make working with your experiment file easier.",
-          hint: `Sort your parameters into alphabetical order. Try starting with ${param(
+          hint: `Sort your parameters into alphabetical order. Try starting with ${alertParameter(
             p[i],
           )} &#8212 that's the first misplaced parameter we found.`,
           parameters: [p[i]],
@@ -764,14 +731,14 @@ const checkParametersAlphabetical = (t: ExperimentTable): EasyEyesError[] => {
   return [];
 };
 
-const checkParametersDuplicated = (t: ExperimentTable): EasyEyesError[] => {
-  const e: EasyEyesError[] = [];
+const checkParametersDuplicated = (t: ExperimentTable): Alert[] => {
+  const e: Alert[] = [];
   for (const n of t.params)
     if (t.isDuplicate(n))
       e.push(
-        makeError({
+        makeAlert({
           name: "Parameter is duplicated",
-          message: `The parameter ${param(
+          message: `The parameter ${alertParameter(
             n,
           )} appears more than once! Unintended behavior lurks ahead...`,
           hint: "Each parameter may only be set once per experiment file, so there's no ambiguity in which value to use.",
@@ -814,24 +781,21 @@ const diffSuggestion = (name: string, suggestion: string): string | null => {
   // Deletions render invisible characters as plain code-point labels; the
   // struck span is already red, so nesting red-in-red would be noise.
   const struck = (t: string) =>
-    t
-      ? `<span style="color: #bb2c22; font-weight: bold; text-decoration: line-through;">${revealInvisibleCharacters(
-          t,
-        )}</span>`
-      : "";
-  const green = (t: string) =>
-    t ? `<span style="color: #147133; font-weight: bold;">${t}</span>` : "";
+    t ? alertDeleted(revealInvisibleCharacters(t)) : "";
+  const green = (t: string) => (t ? alertInserted(t) : "");
   // The parenthetical echoes the suggestion as plain text (not the
-  // error-parameter span): only the standalone suggestion above is a
+  // alert-parameter span): only the standalone suggestion above is a
   // glossary link, the diff echo must stay click-less.
-  const correctWord = `${shared0}${green(insertion)}${shared1}`;
+  const correctWord = `${escapeAlertHtml(shared0)}${green(
+    insertion,
+  )}${escapeAlertHtml(shared1)}`;
   return p === 0
     ? `${struck(deletion)}${correctWord}`
     : `${correctWord}${struck(deletion)}`;
 };
 
-const checkParametersRecognized = (t: ExperimentTable): EasyEyesError[] => {
-  const e: EasyEyesError[] = [];
+const checkParametersRecognized = (t: ExperimentTable): Alert[] => {
+  const e: Alert[] = [];
   const gl = getGlossary();
   for (const n of t.params) {
     if (gl[n]?.type === "obsolete") {
@@ -852,19 +816,19 @@ const checkParametersRecognized = (t: ExperimentTable): EasyEyesError[] => {
         )} contains an invisible character (shown in red). `
       : "";
     e.push(
-      makeError({
+      makeAlert({
         name: "Parameter is unrecognized",
         message:
           "This parameter is not defined in the Parameter Glossary." +
           (closest.length
-            ? ` The closest supported parameter is ${param(closest[0])}${
-                diff ? ` (${diff})` : ""
-              } &#8212 is that what you meant?`
+            ? ` The closest supported parameter is ${alertParameter(
+                closest[0],
+              )}${diff ? ` (${diff})` : ""} &#8212 is that what you meant?`
             : ""),
         hint: `${reveal}${
           closest.length > 1
             ? `Other similarly spelled parameters: ${verballyEnumerate(
-                closest.slice(1).map(param),
+                closest.slice(1).map((name) => alertParameter(name)),
               )}. `
             : closest.length === 0
             ? "No similarly spelled supported parameters were found. Check the parameter name in the Parameter Glossary. "
@@ -880,9 +844,7 @@ const checkParametersRecognized = (t: ExperimentTable): EasyEyesError[] => {
 // params but none are "now" (values look like defaults/descriptions), so
 // registering would emit false "not yet supported" errors for standard params.
 // TODO: register once the deployed glossary adds availability: "now".
-const checkParametersCurrentlySupported = (
-  t: ExperimentTable,
-): EasyEyesError[] =>
+const checkParametersCurrentlySupported = (t: ExperimentTable): Alert[] =>
   t.params
     .filter((n) => n in getGlossary())
     .filter((n) => {
@@ -890,9 +852,9 @@ const checkParametersCurrentlySupported = (
       return a && a !== "now";
     })
     .map((n) =>
-      makeError({
+      makeAlert({
         name: "Parameter is not yet supported",
-        message: `Apologies from the EasyEyes team! The parameter ${param(
+        message: `Apologies from the EasyEyes team! The parameter ${alertParameter(
           n,
         )} isn't supported yet. We hope to implement the parameter ${getGlossary()[
           n
@@ -902,15 +864,15 @@ const checkParametersCurrentlySupported = (
       }),
     );
 
-const checkAuthorizedEmailsValid = (t: ExperimentTable): EasyEyesError[] => {
+const checkAuthorizedEmailsValid = (t: ExperimentTable): Alert[] => {
   if (t.colB("_calibrateMicrophonesBool").toUpperCase() !== "TRUE") return [];
-  const invalid = (): EasyEyesError =>
-    makeError({
+  const invalid = (): Alert =>
+    makeAlert({
       name: "The author email is invalid",
-      message: `Each microphone calibration is stamped with ${param(
+      message: `Each microphone calibration is stamped with ${alertParameter(
         "_authorEmails",
       )}.`,
-      hint: `Include parameter ${param(
+      hint: `Include parameter ${alertParameter(
         "_authorEmails",
       )} with a valid email (or several separated by semicolon).`,
       parameters: ["_authorEmails"],
@@ -934,21 +896,21 @@ const _COMMA_PARAMS = new Map([
 // generically (preprocess/vectors.ts) — once the glossary type of
 // _needWebGL changes from `text` to `3*numerical`, delete this check.
 const NEED_WEBGL_SPEC = parseVectorType("3*numerical");
-const checkNeedWebGL = (t: ExperimentTable): EasyEyesError[] => {
+const checkNeedWebGL = (t: ExperimentTable): Alert[] => {
   if (!NEED_WEBGL_SPEC || !t.params.includes("_needWebGL")) return [];
   const value = t.colB("_needWebGL");
   if (value === "") return []; // glossary defaults apply
   const result = checkVectorValue(NEED_WEBGL_SPEC, value);
   if (result.ok) return [];
   return [
-    makeError({
+    makeAlert({
       name: "_needWebGL is not three numbers",
-      message: `${param(
+      message: `${alertParameter(
         "_needWebGL",
-      )} expects three numbers — WebGL version, textureSize, portSize — ie ${diagnosticValue(
+      )} expects three numbers — WebGL version, textureSize, portSize — ie ${alertValue(
         "2, 8192, 16384",
       )}.`,
-      hint: `The value ${diagnosticValue(
+      hint: `The value ${alertValue(
         value,
       )} is not a comma-separated list of three numbers (${diagnosticVectorReason(
         result.reason,
@@ -959,8 +921,8 @@ const checkNeedWebGL = (t: ExperimentTable): EasyEyesError[] => {
 };
 const checkCommaSeparatedStringsOfCorrectLength = (
   t: ExperimentTable,
-): EasyEyesError[] => {
-  const e: EasyEyesError[] = [];
+): Alert[] => {
+  const e: Alert[] = [];
   for (const [name, expected] of _COMMA_PARAMS) {
     if (!t.params.includes(name)) continue;
     const offenders: Array<Offender<number>> = [];
@@ -972,7 +934,7 @@ const checkCommaSeparatedStringsOfCorrectLength = (
     });
     if (offenders.length)
       e.push(
-        makeError({
+        makeAlert({
           name: "Parameter value is a comma-separated string of the incorrect length.",
           message: `${name} expects a string of ${expected} values, ie a string with ${
             expected - 1
@@ -994,9 +956,7 @@ const checkCommaSeparatedStringsOfCorrectLength = (
   return e;
 };
 
-const checkTrackingOnForMovingFixation = (
-  t: ExperimentTable,
-): EasyEyesError[] => {
+const checkTrackingOnForMovingFixation = (t: ExperimentTable): Alert[] => {
   if (!t.params.includes("markingFixationMotionRadiusDeg")) return [];
   const r = t.effectiveValues("markingFixationMotionRadiusDeg");
   const tr = t.effectiveValues("responseMustTrackContinuouslyBool");
@@ -1005,11 +965,11 @@ const checkTrackingOnForMovingFixation = (
     if (Number(r[i]) !== 0 && tr[i].toLowerCase() !== "true") off.push(i);
   return off.length
     ? [
-        makeError({
+        makeAlert({
           name: "Tracking required for moving fixation",
-          message: `When the fixation is moving, the final location is indeterminate. Set ${param(
+          message: `When the fixation is moving, the final location is indeterminate. Set ${alertParameter(
             "responseMustTrackContinuouslyBool",
-          )} to ${diagnosticValue(
+          )} to ${alertValue(
             "TRUE",
           )} to enable tracking, during which the stimulus can be pre-computed in a known location.`,
           hint: columnsHint(off),
@@ -1022,20 +982,18 @@ const checkTrackingOnForMovingFixation = (
     : [];
 };
 
-const checkConditionsBeginInSecondColumn = (
-  t: ExperimentTable,
-): EasyEyesError[] => {
+const checkConditionsBeginInSecondColumn = (t: ExperimentTable): Alert[] => {
   const off: string[] = [];
   for (const n of t.params)
     if (!n.startsWith("_") && t.colB(n) !== "") off.push(n);
   return off.length
     ? [
-        makeError({
+        makeAlert({
           name: "Non-underscore parameters provided in underscore parameter column",
           message:
             "These parameters are forbidden to use column B. Column B is reserved for underscore parameters.",
           hint: `For parameters ${limitedEnumerate(
-            off.map(param),
+            off.map((name) => alertParameter(name)),
           )}, select all the cells from column B and rightward, and shift them all one column to the right, to begin at column C.`,
           parameters: off,
         }),
@@ -1043,7 +1001,7 @@ const checkConditionsBeginInSecondColumn = (
     : [];
 };
 
-const checkUnderscoreParams = (t: ExperimentTable): EasyEyesError[] => {
+const checkUnderscoreParams = (t: ExperimentTable): Alert[] => {
   const unreg = new Set(["_about"]);
   const off: string[] = [];
   for (const n of t.params) {
@@ -1051,12 +1009,12 @@ const checkUnderscoreParams = (t: ExperimentTable): EasyEyesError[] => {
     if (t.conditionValues(n).some((v) => v !== "")) off.push(n);
   }
   return off.map((n) =>
-    makeError({
+    makeAlert({
       name: "_Underscore parameter incorrectly formatted",
-      message: `Experiment-scope parameters, such as ${param(
+      message: `Experiment-scope parameters, such as ${alertParameter(
         n,
       )}, start with an underscore and require at most one value, as they don't vary across conditions.`,
-      hint: `Make sure that you give ${param(
+      hint: `Make sure that you give ${alertParameter(
         n,
       )} a value for only the first column.`,
       parameters: [n],
@@ -1069,8 +1027,8 @@ const _languageStatement = `<br><br>This may not be your fault, as the definitio
 const checkParameterTypes = (
   t: ExperimentTable,
   sourceTable?: ExperimentTable,
-): EasyEyesError[] => {
-  const e: EasyEyesError[] = [];
+): Alert[] => {
+  const e: Alert[] = [];
   const numberOfLanguageCodes = t.glossary("_language")?.categories?.length;
   for (const n of t.params) {
     const g = t.glossary(n);
@@ -1117,7 +1075,7 @@ const checkParameterTypes = (
         }
         const resolution =
           sourceValue.includes("~") && sourceValue !== o.value
-            ? ` (resolved from ${diagnosticValue(sourceValue)})`
+            ? ` (resolved from ${alertValue(sourceValue)})`
             : "";
         const reason = vectorSpec
           ? `: ${diagnosticVectorReason(
@@ -1125,11 +1083,11 @@ const checkParameterTypes = (
             )}`
           : "";
         const instance = o.instance ? ` (instance ${o.instance})` : "";
-        return ` ${diagnosticValue(
+        return ` ${alertValue(
           o.value,
         )}${resolution} [column ${columnLabel}]${instance}${reason}`;
       });
-      const erroneousValuesLabel = diagnosticOffendingValuesLabel(
+      const erroneousValuesLabel = alertOffendingValuesLabel(
         "erroneous",
         offenders.map((o) =>
           o.block >= 1 ? conditionIndexToColumnName(o.block - 1) : "B",
@@ -1137,11 +1095,11 @@ const checkParameterTypes = (
       );
       // fontLanguage: friendlier message; codes are experimental.
       if (n === "fontLanguage") {
-        const codes = diagnosticValues(offenders.map((o) => o.value));
+        const codes = alertValues(offenders.map((o) => o.value));
         e.push(
-          makeError({
+          makeAlert({
             name: "Unsupported fontLanguage code",
-            message: `Sorry, the language code ${codes} is not yet supported by the ${param(
+            message: `Sorry, the language code ${codes} is not yet supported by the ${alertParameter(
               "fontLanguage",
             )} parameter. Write to denis.pelli@nyu.edu to ask that it be added.`,
             hint: `${erroneousValuesLabel}: ${offendingMessage}.`,
@@ -1151,17 +1109,17 @@ const checkParameterTypes = (
         continue;
       }
       let message = vectorSpec
-        ? `All values for the parameter ${param(
+        ? `All values for the parameter ${alertParameter(
             n,
-          )} must be ${describeVectorType(vectorSpec)} (type ${diagnosticValue(
+          )} must be ${describeVectorType(vectorSpec)} (type ${alertValue(
             g.type,
           )}).`
-        : `All values for the parameter ${param(n)} must be ${diagnosticValue(
-            g.type,
-          )}.`;
+        : `All values for the parameter ${alertParameter(
+            n,
+          )} must be ${alertValue(g.type)}.`;
       if (g.categories) {
         message =
-          message + ` Valid categories are: ${diagnosticValues(g.categories)}.`;
+          message + ` Valid categories are: ${alertValues(g.categories)}.`;
       }
       let languageStatement = "";
       if (n === "_language" && numberOfLanguageCodes) {
@@ -1171,7 +1129,7 @@ const checkParameterTypes = (
         );
       }
       e.push(
-        makeError({
+        makeAlert({
           name: "Parameter contains values of the wrong type",
           message,
           hint: `${erroneousValuesLabel}: ${offendingMessage}. ${languageStatement}${invisibleValueHints(
@@ -1227,12 +1185,12 @@ const colorCells = (t: ExperimentTable, name: string): ColorCell[] => {
   );
 };
 
-const checkColorRGBAValues = (t: ExperimentTable): EasyEyesError[] => {
+const checkColorRGBAValues = (t: ExperimentTable): Alert[] => {
   const standalone = t.params.filter(
     (name) => name.endsWith("ColorRGBA") && t.glossary(name),
   );
   const legacy = LEGACY_RGBA_PARAMS.filter((name) => t.params.includes(name));
-  const errors: EasyEyesError[] = [];
+  const errors: Alert[] = [];
 
   for (const name of [...standalone, ...legacy]) {
     const legacyLength = _COMMA_PARAMS.get(name);
@@ -1252,7 +1210,7 @@ const checkColorRGBAValues = (t: ExperimentTable): EasyEyesError[] => {
         const column = conditionIndexToColumnName(cell.column);
         const instance = cell.instance ? `, instance ${cell.instance}` : "";
         offenders.push(
-          `${RGBA_CHANNELS[index]}=${diagnosticValue(
+          `${RGBA_CHANNELS[index]}=${alertValue(
             raw.trim(),
           )} (column ${column}${instance})`,
         );
@@ -1260,10 +1218,12 @@ const checkColorRGBAValues = (t: ExperimentTable): EasyEyesError[] => {
     }
     if (!offenders.length) continue;
     errors.push(
-      makeError({
+      makeAlert({
         name: "ColorRGBA component out of range",
         message: `${
-          legacyLength ? `The colorRGBA portion of ${param(name)}` : param(name)
+          legacyLength
+            ? `The colorRGBA portion of ${alertParameter(name)}`
+            : alertParameter(name)
         } requires four numbers from 0 to 1, inclusive.`,
         hint: `Out-of-range components: ${verballyEnumerate(offenders)}.`,
         parameters: [name],
@@ -1273,7 +1233,7 @@ const checkColorRGBAValues = (t: ExperimentTable): EasyEyesError[] => {
   return errors;
 };
 
-const checkResponsePossible = (t: ExperimentTable): EasyEyesError[] => {
+const checkResponsePossible = (t: ExperimentTable): Alert[] => {
   const media = [
     "responseClickedBool",
     "responseTypedBool",
@@ -1295,7 +1255,7 @@ const checkResponsePossible = (t: ExperimentTable): EasyEyesError[] => {
   }
   return off.length
     ? [
-        makeError({
+        makeAlert({
           name: "Experiment lacks any response",
           message:
             "At the moment, your experiment doesn't allow any response to the stimulus, so the test would wait forever. Whether it's a simulated response or the participant typing, clicking, or tapping (their phone), the test needs some kind of response.",
@@ -1311,9 +1271,7 @@ const checkResponsePossible = (t: ExperimentTable): EasyEyesError[] => {
     : [];
 };
 
-const checkBlockUniqueValuesConsistent = (
-  t: ExperimentTable,
-): EasyEyesError[] => {
+const checkBlockUniqueValuesConsistent = (t: ExperimentTable): Alert[] => {
   const bp = [
     "viewingDistanceDesiredCm",
     "fixationLocationStrategy",
@@ -1328,7 +1286,7 @@ const checkBlockUniqueValuesConsistent = (
     "needSoundOutputKind",
     ...t.params.filter(isBlockShuffleGroupingParam),
   ];
-  const e: EasyEyesError[] = [];
+  const e: Alert[] = [];
   const blocks = t.blocks();
   for (const p of bp) {
     if (!t.params.includes(p)) continue;
@@ -1344,9 +1302,9 @@ const checkBlockUniqueValuesConsistent = (
       const badList = [...bad];
       const multiple = badList.length > 1;
       e.push(
-        makeError({
+        makeAlert({
           name: "Values are not unique within blocks",
-          message: `This parameter requires that all conditions within a ${param(
+          message: `This parameter requires that all conditions within a ${alertParameter(
             "block",
           )} have the same value. Block${
             multiple ? "s" : ""
@@ -1362,7 +1320,7 @@ const checkBlockUniqueValuesConsistent = (
   return e;
 };
 
-const checkShuffleGroupsContiguous = (t: ExperimentTable): EasyEyesError[] => {
+const checkShuffleGroupsContiguous = (t: ExperimentTable): Alert[] => {
   const gs = t.params.filter(isBlockShuffleGroupingParam);
   if (!gs.length) return [];
   const np: string[] = [];
@@ -1377,10 +1335,11 @@ const checkShuffleGroupsContiguous = (t: ExperimentTable): EasyEyesError[] => {
   if (!np.length) return [];
   const multiple = nv.length > 1 || nv[0].length > 1;
   const offendingValues = nv.map(
-    (v, i) => `${verballyEnumerate(v.map(diagnosticValue))} (${param(np[i])})`,
+    (v, i) =>
+      `${verballyEnumerate(v.map(alertValue))} (${alertParameter(np[i])})`,
   );
   return [
-    makeError({
+    makeAlert({
       name: "Block shuffle groups aren't contiguous",
       message: `The ${multiple ? "groups" : "group"} ${limitedEnumerate(
         offendingValues,
@@ -1390,7 +1349,7 @@ const checkShuffleGroupsContiguous = (t: ExperimentTable): EasyEyesError[] => {
     }),
   ];
 };
-const checkShuffleGroupsSubsets = (t: ExperimentTable): EasyEyesError[] => {
+const checkShuffleGroupsSubsets = (t: ExperimentTable): Alert[] => {
   const all = Object.keys(getGlossary()).filter(isBlockShuffleGroupingParam);
   const pres = all.filter((g) => t.params.includes(g));
   if (pres.length <= 1) return [];
@@ -1415,14 +1374,15 @@ const checkShuffleGroupsSubsets = (t: ExperimentTable): EasyEyesError[] => {
   if (!np.length) return [];
   const multiple = nv.length > 1 || nv[0].length > 1;
   const offendingValues = nv.map(
-    (l, i) => `${verballyEnumerate(l.map(diagnosticValue))} (${param(np[i])})`,
+    (l, i) =>
+      `${verballyEnumerate(l.map(alertValue))} (${alertParameter(np[i])})`,
   );
   return [
-    makeError({
+    makeAlert({
       name: "Block shuffle groups not a subset of containing groups",
-      message: `Every ${param(
+      message: `Every ${alertParameter(
         "blockShuffleGroupN",
-      )} group must belong to some ${param(
+      )} group must belong to some ${alertParameter(
         "blockShuffleGroupN-1",
       )} group. The ${multiple ? "groups" : "group"} ${limitedEnumerate(
         offendingValues,
@@ -1436,9 +1396,7 @@ const checkShuffleGroupsSubsets = (t: ExperimentTable): EasyEyesError[] => {
 };
 
 // The pair guards the two trial-initiation modes.
-const checkMutuallyExclusiveParameters = (
-  t: ExperimentTable,
-): EasyEyesError[] => {
+const checkMutuallyExclusiveParameters = (t: ExperimentTable): Alert[] => {
   const groups: string[][] = [
     ["responseMustTrackContinuouslyBool", "responseMustClickCrosshairBool"],
   ];
@@ -1464,9 +1422,9 @@ const checkMutuallyExclusiveParameters = (
     ([params, column]) => `${verballyEnumerate(params)} (column ${column})`,
   );
   return [
-    makeError({
+    makeAlert({
       name: "Multiple mutually exclusive parameters are true in the same condition",
-      message: `Certain groups of parameters can't have multiple set to ${diagnosticValue(
+      message: `Certain groups of parameters can't have multiple set to ${alertValue(
         "TRUE",
       )}. ${verballyEnumerate(
         parameterAndConditionsStrings,
@@ -1477,7 +1435,7 @@ const checkMutuallyExclusiveParameters = (
   ];
 };
 
-const checkRsvpSpeechResponseModes = (t: ExperimentTable): EasyEyesError[] => {
+const checkRsvpSpeechResponseModes = (t: ExperimentTable): Alert[] => {
   const off: number[] = [];
   for (let ci = 0; ci < t.conditionCount; ci++) {
     if (t.effectiveValue("targetKind", ci) !== "rsvpReading") continue;
@@ -1495,20 +1453,20 @@ const checkRsvpSpeechResponseModes = (t: ExperimentTable): EasyEyesError[] => {
   }
   return off.length
     ? [
-        makeError({
+        makeAlert({
           name: "Incompatible RSVP speech response modes",
-          message: `When ${param("targetKind")} is ${diagnosticValue(
+          message: `When ${alertParameter("targetKind")} is ${alertValue(
             "rsvpReading",
-          )}, ${param(
+          )}, ${alertParameter(
             "responseSpokenBool",
-          )} (automatic speech recognition) and ${param(
+          )} (automatic speech recognition) and ${alertParameter(
             "responseSpokenToExperimenterBool",
-          )} (human experimenter scoring) cannot both be ${diagnosticValue(
+          )} (human experimenter scoring) cannot both be ${alertValue(
             "TRUE",
           )} in the same condition.`,
           hint: `${columnsHint(
             off,
-          )}. Set one of the two response parameters to ${diagnosticValue(
+          )}. Set one of the two response parameters to ${alertValue(
             "FALSE",
           )}.`,
           parameters: [
@@ -1521,8 +1479,8 @@ const checkRsvpSpeechResponseModes = (t: ExperimentTable): EasyEyesError[] => {
     : [];
 };
 
-const checkCrosshairTrackingValues = (t: ExperimentTable): EasyEyesError[] => {
-  const e: EasyEyesError[] = [];
+const checkCrosshairTrackingValues = (t: ExperimentTable): Alert[] => {
+  const e: Alert[] = [];
   const neg: [string, number][] = [];
   t.effectiveValues("markingFixationStrokeThickening").forEach((v, i) => {
     if (Number(v) < 0) neg.push([v, i]);
@@ -1531,14 +1489,14 @@ const checkCrosshairTrackingValues = (t: ExperimentTable): EasyEyesError[] => {
     const offending = verballyEnumerate(
       neg.map(
         ([v, i]) =>
-          `${diagnosticValue(v)} (column ${conditionIndexToColumnName(i)})`,
+          `${alertValue(v)} (column ${conditionIndexToColumnName(i)})`,
       ),
     );
     const plural = neg.length > 1;
     e.push(
-      makeError({
+      makeAlert({
         name: "Negative marking fixation stroke thickening value",
-        message: `Values for ${param(
+        message: `Values for ${alertParameter(
           "markingFixationStrokeThickening",
         )} must be non-negative multipliers. ${offending} ${
           plural ? "are" : "is"
@@ -1563,9 +1521,9 @@ const checkCrosshairTrackingValues = (t: ExperimentTable): EasyEyesError[] => {
     );
     const plural = bad.length > 1;
     e.push(
-      makeError({
+      makeAlert({
         name: "Ill-defined fixation tracking interval",
-        message: `For each condition, it is required that ${param(
+        message: `For each condition, it is required that ${alertParameter(
           "responseMustTrackMinSec <= responseMustTrackMaxSec",
         )}. The interval${plural ? "s" : ""} ${offending} ${
           plural ? "are" : "is"
@@ -1577,7 +1535,7 @@ const checkCrosshairTrackingValues = (t: ExperimentTable): EasyEyesError[] => {
   }
   return e;
 };
-const checkFixationLocation = (t: ExperimentTable): EasyEyesError[] => {
+const checkFixationLocation = (t: ExperimentTable): Alert[] => {
   if (!t.params.includes("fixationOriginXYScreen")) return [];
   const pos = t
     .effectiveValues("fixationOriginXYScreen")
@@ -1591,11 +1549,11 @@ const checkFixationLocation = (t: ExperimentTable): EasyEyesError[] => {
   }
   return off.length
     ? [
-        makeError({
+        makeAlert({
           name: "Invalid fixation location requested",
-          message: `Fixation was requested offscreen, ie ${param(
+          message: `Fixation was requested offscreen, ie ${alertParameter(
             "fixationOriginXYScreen",
-          )} out of range [[0,0],[1,1]], where ${param(
+          )} out of range [[0,0],[1,1]], where ${alertParameter(
             "fixationRequestedOffscreenBool",
           )} is false.`,
           hint:
@@ -1616,9 +1574,7 @@ const checkFixationLocation = (t: ExperimentTable): EasyEyesError[] => {
       ]
     : [];
 };
-const checkThresholdParameterForRsvpReading = (
-  t: ExperimentTable,
-): EasyEyesError[] => {
+const checkThresholdParameterForRsvpReading = (t: ExperimentTable): Alert[] => {
   const tp = t.effectiveValues("thresholdParameter"),
     tk = t.effectiveValues("targetKind");
   const off: number[] = [];
@@ -1626,13 +1582,13 @@ const checkThresholdParameterForRsvpReading = (
     if (tk[i] === "rsvpReading" && tp[i].trim() === "") off.push(i);
   return off.length
     ? [
-        makeError({
+        makeAlert({
           name: "No thresholdParameter provided for rsvpReading task",
-          message: `A non-empty ${param(
+          message: `A non-empty ${alertParameter(
             "thresholdParameter",
-          )} must be provided when ${param("targetKind")} = ${diagnosticValue(
-            "rsvpReading",
-          )}.`,
+          )} must be provided when ${alertParameter(
+            "targetKind",
+          )} = ${alertValue("rsvpReading")}.`,
           hint: columnsHint(off) + ".",
           parameters: ["thresholdParameter", "targetKind"],
         }),
@@ -1641,7 +1597,7 @@ const checkThresholdParameterForRsvpReading = (
 };
 const checkThresholdParameterForDetectOrIdentify = (
   t: ExperimentTable,
-): EasyEyesError[] => {
+): Alert[] => {
   const tp = t.effectiveValues("thresholdParameter"),
     tt = t.effectiveValues("targetTask"),
     tsl = t.effectiveValues("targetSoundList");
@@ -1652,24 +1608,24 @@ const checkThresholdParameterForDetectOrIdentify = (
   }
   return off.length
     ? [
-        makeError({
+        makeAlert({
           name: "No thresholdParameter provided for detect or identify task",
-          message: `When ${param("targetTask")} is ${diagnosticValue(
+          message: `When ${alertParameter("targetTask")} is ${alertValue(
             "detect",
-          )} or ${diagnosticValue("identify")}, ${param(
+          )} or ${alertValue("identify")}, ${alertParameter(
             "thresholdParameter",
-          )} must specify a target metric: ${diagnosticValueHtml(
-            param("targetSizeDeg"),
-          )}, ${diagnosticValueHtml(
-            param("spacingDeg"),
-          )}, ${diagnosticValueHtml(param("targetSoundDBSPL"))}, etc.`,
+          )} must specify a target metric: ${alertValueHtml(
+            alertParameter("targetSizeDeg"),
+          )}, ${alertValueHtml(alertParameter("spacingDeg"))}, ${alertValueHtml(
+            alertParameter("targetSoundDBSPL"),
+          )}, etc.`,
           hint: columnsHint(off) + ".",
           parameters: ["thresholdParameter", "targetTask"],
         }),
       ]
     : [];
 };
-const checkTargetTaskPresent = (t: ExperimentTable): EasyEyesError[] => {
+const checkTargetTaskPresent = (t: ExperimentTable): Alert[] => {
   const tt = t.effectiveValues("targetTask");
   const qa = t.params.filter(isQuestionParam);
   const off: number[] = [];
@@ -1683,39 +1639,41 @@ const checkTargetTaskPresent = (t: ExperimentTable): EasyEyesError[] => {
   if (!off.length) return [];
   const plural = off.length > 1;
   return [
-    makeError({
+    makeAlert({
       name: "No targetTask provided",
-      message: `Lacking a ${param(
+      message: `Lacking a ${alertParameter(
         "targetTask",
       )}, EasyEyes cannot determine the purpose of ${
-        plural ? `these ${param("block")}s` : `this ${param("block")}`
-      }. Every ${param("block")} needs a ${param(
+        plural
+          ? `these ${alertParameter("block")}s`
+          : `this ${alertParameter("block")}`
+      }. Every ${alertParameter("block")} needs a ${alertParameter(
         "targetTask",
       )} so EasyEyes knows what to do: present a task, ask a question, or display text.`,
-      hint: `Set ${param("targetTask")} to one of: ${diagnosticValues([
+      hint: `Set ${alertParameter("targetTask")} to one of: ${alertValues([
         "identify",
         "detect",
         "questionAnswer",
         "questionAndAnswer",
         "adjust",
-      ])}. To display a page of text (e.g. reading or a beauty rating), use ${param(
+      ])}. To display a page of text (e.g. reading or a beauty rating), use ${alertParameter(
         "targetTask",
-      )}=${diagnosticValue("identify")} with ${param(
+      )}=${alertValue("identify")} with ${alertParameter(
         "targetKind",
-      )}=${diagnosticValue("reading")} and ${param(
+      )}=${alertValue("reading")} and ${alertParameter(
         "thresholdParameter",
-      )}=${diagnosticValueHtml(
-        param("targetDurationSec"),
-      )}.<br/>Note: ${diagnosticValue(
+      )}=${alertValueHtml(
+        alertParameter("targetDurationSec"),
+      )}.<br/>Note: ${alertValue(
         "questionAnswer",
-      )} is the newer version and will eventually replace ${diagnosticValue(
+      )} is the newer version and will eventually replace ${alertValue(
         "questionAndAnswer",
       )}.<br/>${columnsHint(off) + "."}`,
       parameters: ["targetTask"],
     }),
   ];
 };
-const checkTargetKindPresent = (t: ExperimentTable): EasyEyesError[] => {
+const checkTargetKindPresent = (t: ExperimentTable): Alert[] => {
   const tk = t.effectiveValues("targetKind");
   const tt = t.effectiveValues("targetTask");
   const off: number[] = [];
@@ -1731,14 +1689,14 @@ const checkTargetKindPresent = (t: ExperimentTable): EasyEyesError[] => {
   if (!off.length) return [];
   const plural = off.length > 1;
   return [
-    makeError({
+    makeAlert({
       name: "No targetKind provided",
-      message: `Lacking a ${param(
+      message: `Lacking a ${alertParameter(
         "targetKind",
-      )}, EasyEyes cannot determine what stimulus to present for the given ${param(
+      )}, EasyEyes cannot determine what stimulus to present for the given ${alertParameter(
         "targetTask",
       )} (${plural ? "conditions" : "condition"}). `,
-      hint: `An empty ${param(
+      hint: `An empty ${alertParameter(
         "targetKind",
       )} is only defined for questionAndAnswer conditions.<br/>${
         columnsHint(off) + "."
@@ -1747,7 +1705,7 @@ const checkTargetKindPresent = (t: ExperimentTable): EasyEyesError[] => {
     }),
   ];
 };
-const checkRsvpReadingWordsMultiple = (t: ExperimentTable): EasyEyesError[] => {
+const checkRsvpReadingWordsMultiple = (t: ExperimentTable): Alert[] => {
   const tk = t.effectiveValues("targetKind"),
     nw = t.effectiveValues("rsvpReadingNumberOfWords"),
     wps = t.effectiveValues("rsvpReadingWordsPerScreen");
@@ -1758,11 +1716,11 @@ const checkRsvpReadingWordsMultiple = (t: ExperimentTable): EasyEyesError[] => {
   }
   return off.length
     ? [
-        makeError({
+        makeAlert({
           name: "rsvpReadingNumberOfWords is not a multiple of rsvpReadingWordsPerScreen",
-          message: `${param(
+          message: `${alertParameter(
             "rsvpReadingNumberOfWords",
-          )} must be a multiple of ${param(
+          )} must be a multiple of ${alertParameter(
             "rsvpReadingWordsPerScreen",
           )} so that each screen displays the same number of words.`,
           hint: columnsHint(off) + ".",
@@ -1771,9 +1729,7 @@ const checkRsvpReadingWordsMultiple = (t: ExperimentTable): EasyEyesError[] => {
       ]
     : [];
 };
-const checkFlankerTypeDefinedAtLocation = (
-  t: ExperimentTable,
-): EasyEyesError[] => {
+const checkFlankerTypeDefinedAtLocation = (t: ExperimentTable): Alert[] => {
   const tk = t.effectiveValues("targetKind"),
     tt = t.effectiveValues("targetTask"),
     tp = t.effectiveValues("thresholdParameter");
@@ -1792,7 +1748,7 @@ const checkFlankerTypeDefinedAtLocation = (
   }
   return off.length
     ? [
-        makeError({
+        makeAlert({
           name: "Requested flanker type is undefined at requested eccentricity",
           message:
             "Horizontal and vertical flankers are only defined at the fovea; radial and tangential flankers are only defined at the periphery.",
@@ -1811,7 +1767,7 @@ const checkFlankerTypeDefinedAtLocation = (
 // readingPages is the number of pages to read, or -1 to read to the end of
 // the corpus. No other negative value, and no fraction, has a meaning; the
 // runtime would silently make a strange number of pages.
-const checkReadingPagesValid = (t: ExperimentTable): EasyEyesError[] => {
+const checkReadingPagesValid = (t: ExperimentTable): Alert[] => {
   const tk = t.effectiveValues("targetKind"),
     pages = t.effectiveValues("readingPages"),
     endless = t.effectiveValues("readingCorpusEndlessBool");
@@ -1827,14 +1783,14 @@ const checkReadingPagesValid = (t: ExperimentTable): EasyEyesError[] => {
     else if (n === -1 && endless[i].toLowerCase() === "true")
       endlessConflict.push(i);
   }
-  const e: EasyEyesError[] = [];
+  const e: Alert[] = [];
   if (invalid.length)
     e.push(
-      makeError({
+      makeAlert({
         name: "Invalid readingPages",
-        message: `${param(
+        message: `${alertParameter(
           "readingPages",
-        )} must be a whole number of pages (0 or more), or -1 to read to the end of ${param(
+        )} must be a whole number of pages (0 or more), or -1 to read to the end of ${alertParameter(
           "readingCorpus",
         )}.`,
         hint: `Found ${valuesAtColumns(invalid)}.`,
@@ -1843,22 +1799,24 @@ const checkReadingPagesValid = (t: ExperimentTable): EasyEyesError[] => {
     );
   if (endlessConflict.length)
     e.push(
-      makeError({
+      makeAlert({
         name: "readingPages=-1 conflicts with readingCorpusEndlessBool",
-        message: `Setting ${param(
+        message: `Setting ${alertParameter(
           "readingCorpusEndlessBool",
-        )}=${diagnosticValue("TRUE")} is incompatible with setting ${param(
+        )}=${alertValue("TRUE")} is incompatible with setting ${alertParameter(
           "readingPages",
-        )}=${diagnosticValue(-1)}; the compiler will throw a fatal error.`,
-        hint: `Set ${param("readingCorpusEndlessBool")} to ${diagnosticValue(
+        )}=${alertValue(-1)}; the compiler will throw a fatal error.`,
+        hint: `Set ${alertParameter(
+          "readingCorpusEndlessBool",
+        )} to ${alertValue(
           "FALSE",
-        )}, or ask for a specific number of pages by setting ${param(
+        )}, or ask for a specific number of pages by setting ${alertParameter(
           "readingPages",
-        )} to ${diagnosticValue(0)} or more. ${param(
+        )} to ${alertValue(0)} or more. ${alertParameter(
           "readingPages",
-        )} is ${diagnosticValue(
+        )} is ${alertValue(
           -1,
-        )} unless you say otherwise, so you may see this even with an empty ${param(
+        )} unless you say otherwise, so you may see this even with an empty ${alertParameter(
           "readingPages",
         )} row. ${columnsHint(endlessConflict)}.`,
         parameters: ["readingPages", "readingCorpusEndlessBool"],
@@ -1873,9 +1831,7 @@ const checkReadingPagesValid = (t: ExperimentTable): EasyEyesError[] => {
 // typing nor anything else reaches that screen, so responseClickedBool
 // FALSE with no keypad in use is an illegal state: unanswerable, the run
 // would wait forever.
-const checkReadingQuestionsAreAnswerable = (
-  t: ExperimentTable,
-): EasyEyesError[] => {
+const checkReadingQuestionsAreAnswerable = (t: ExperimentTable): Alert[] => {
   // Disabled conditions never run — don't check them.
   const enabled = t.params.includes("conditionEnabledBool")
     ? t
@@ -1900,20 +1856,20 @@ const checkReadingQuestionsAreAnswerable = (
   if (!off.length) return [];
   const plural = off.length > 1;
   return [
-    makeError({
+    makeAlert({
       name: "Reading questions cannot be answered",
-      message: `Reading questions (${param(
+      message: `Reading questions (${alertParameter(
         "readingNumberOfQuestions",
-      )}) are answered only by clicking the answer words on screen or by the EasyEyes keypad (when ${param(
+      )}) are answered only by clicking the answer words on screen or by the EasyEyes keypad (when ${alertParameter(
         "viewingDistanceDesiredCm",
-      )} exceeds ${param(
+      )} exceeds ${alertParameter(
         "needKeypadBeyondCm",
-      )}). Typing cannot answer them, so with ${param(
+      )}). Typing cannot answer them, so with ${alertParameter(
         "responseClickedBool",
-      )} ${diagnosticValue(
+      )} ${alertValue(
         "FALSE",
       )} and no keypad in use the participant could never answer and the experiment would wait forever.`,
-      hint: `Set ${param("responseClickedBool")} ${diagnosticValue(
+      hint: `Set ${alertParameter("responseClickedBool")} ${alertValue(
         "TRUE",
       )} for ${
         plural ? "these reading conditions" : "this reading condition"
@@ -1929,24 +1885,20 @@ const checkReadingQuestionsAreAnswerable = (
     }),
   ];
 };
-const checkCorpusSpecifiedForReadingTasks = (
-  t: ExperimentTable,
-): EasyEyesError[] => {
+const checkCorpusSpecifiedForReadingTasks = (t: ExperimentTable): Alert[] => {
   const tk = t.effectiveValues("targetKind"),
     rc = t.effectiveValues("readingCorpus");
-  const e: EasyEyesError[] = [];
+  const e: Alert[] = [];
   const off: number[] = [];
   for (let i = 0; i < t.conditionCount; i++)
     if (tk[i].includes("eading") && rc[i] === "") off.push(i);
   if (off.length)
     e.push(
-      makeError({
+      makeAlert({
         name: "No corpus specified for reading task",
-        message: `A source text file, or corpus, must be provided when ${param(
+        message: `A source text file, or corpus, must be provided when ${alertParameter(
           "targetKind",
-        )} is ${diagnosticValue("reading")} or ${diagnosticValue(
-          "rsvpReading",
-        )}.`,
+        )} is ${alertValue("reading")} or ${alertValue("rsvpReading")}.`,
         hint: columnsHint(off),
         parameters: ["readingCorpus", "targetKind"],
       }),
@@ -1958,13 +1910,13 @@ const checkCorpusSpecifiedForReadingTasks = (
       if (foils[i] !== "" && tk[i] !== "rsvpReading") foilsOff.push(i);
     if (foilsOff.length)
       e.push(
-        makeError({
+        makeAlert({
           name: "Invalid reading corpus foils",
-          message: `At the moment, ${param(
+          message: `At the moment, ${alertParameter(
             "readingCorpusFoils",
-          )} is only allowed when ${param("targetKind")} is ${diagnosticValue(
-            "rsvpReading",
-          )}.`,
+          )} is only allowed when ${alertParameter(
+            "targetKind",
+          )} is ${alertValue("rsvpReading")}.`,
           hint: columnsHint(foilsOff),
           parameters: ["readingCorpusFoils", "targetKind"],
         }),
@@ -1974,7 +1926,7 @@ const checkCorpusSpecifiedForReadingTasks = (
 };
 const checkThresholdAllowedTrialsOverRequested = (
   t: ExperimentTable,
-): EasyEyesError[] => {
+): Alert[] => {
   if (!t.params.includes("thresholdAllowedTrialRatio")) return [];
   const off: [string, number][] = [];
   t.effectiveValues("thresholdAllowedTrialRatio").forEach((v, i) => {
@@ -1982,18 +1934,18 @@ const checkThresholdAllowedTrialsOverRequested = (
   });
   return off.length
     ? [
-        makeError({
+        makeAlert({
           name: "thresholdAllowedTrialRatio is less than one",
-          message: `${param(
+          message: `${alertParameter(
             "thresholdAllowedTrialRatio",
-          )} must be greater than or equal to ${diagnosticValue(1)}.`,
+          )} must be greater than or equal to ${alertValue(1)}.`,
           hint: columnsHint(off.map(([_, i]) => i)),
           parameters: ["thresholdAllowedTrialRatio"],
         }),
       ]
     : [];
 };
-const checkCalibrationTimesNotZero = (t: ExperimentTable): EasyEyesError[] => {
+const checkCalibrationTimesNotZero = (t: ExperimentTable): Alert[] => {
   if (!t.params.includes("calibrateScreenSizeTimes")) return [];
   const off: number[] = [];
   t.effectiveValues("calibrateScreenSizeTimes").forEach((v, i) => {
@@ -2001,11 +1953,11 @@ const checkCalibrationTimesNotZero = (t: ExperimentTable): EasyEyesError[] => {
   });
   return off.length
     ? [
-        makeError({
+        makeAlert({
           name: "Calibration times cannot be zero",
-          message: `${param(
+          message: `${alertParameter(
             "calibrateScreenSizeTimes",
-          )} cannot be ${diagnosticValue(
+          )} cannot be ${alertValue(
             0,
           )}. Please set it to a positive integer value.`,
           hint: columnsHint(off),
@@ -2014,9 +1966,7 @@ const checkCalibrationTimesNotZero = (t: ExperimentTable): EasyEyesError[] => {
       ]
     : [];
 };
-const checkImageTargetKindParametersValid = (
-  t: ExperimentTable,
-): EasyEyesError[] => {
+const checkImageTargetKindParametersValid = (t: ExperimentTable): Alert[] => {
   if (
     !t.params.includes("targetKind") ||
     !t.params.includes("targetImageFolder") ||
@@ -2026,16 +1976,16 @@ const checkImageTargetKindParametersValid = (
   const tk = t.effectiveValues("targetKind"),
     tif = t.effectiveValues("targetImageFolder"),
     tt = t.effectiveValues("targetTask");
-  const e: EasyEyesError[] = [];
+  const e: Alert[] = [];
   for (let i = 0; i < t.conditionCount; i++) {
     if (tk[i] !== "image") continue;
     if (!tif[i])
       e.push(
-        makeError({
+        makeAlert({
           name: "Image folder is not specified",
-          message: `When ${param("targetKind")} is ${diagnosticValue(
+          message: `When ${alertParameter("targetKind")} is ${alertValue(
             "image",
-          )}, then ${param("targetImageFolder")} must be present.`,
+          )}, then ${alertParameter("targetImageFolder")} must be present.`,
           hint: "Please check the targetKind and targetImageFolder parameters.",
           parameters: ["targetImageFolder"],
         }),
@@ -2046,13 +1996,15 @@ const checkImageTargetKindParametersValid = (
       tt[i] !== "adjust"
     )
       e.push(
-        makeError({
+        makeAlert({
           name: "Invalid target task",
-          message: `When ${param("targetKind")} is ${diagnosticValue(
+          message: `When ${alertParameter("targetKind")} is ${alertValue(
             "image",
-          )}, then ${param("targetTask")} should either be ${diagnosticValue(
-            "identify",
-          )} or ${diagnosticValue("questionAndAnswer")}.`,
+          )}, then ${alertParameter(
+            "targetTask",
+          )} should either be ${alertValue("identify")} or ${alertValue(
+            "questionAndAnswer",
+          )}.`,
           hint: "Please check the targetKind and targetTask parameters.",
           parameters: ["targetTask"],
         }),
@@ -2062,7 +2014,7 @@ const checkImageTargetKindParametersValid = (
 };
 const checkShowImageSpareFractionForQuestionAnswer = (
   t: ExperimentTable,
-): EasyEyesError[] => {
+): Alert[] => {
   if (!t.params.includes("showImage")) return [];
   const qa = t.params.filter(isQuestionParam);
   if (!qa.length) return [];
@@ -2078,11 +2030,13 @@ const checkShowImageSpareFractionForQuestionAnswer = (
   if (!off.length) return [];
   const plural = off.length > 1;
   return [
-    makeError({
+    makeAlert({
       name: "showImageSpareFraction must be > 0 when combining showImage with questionAnswer",
-      message: `When ${param("showImage")} is set and a ${param(
+      message: `When ${alertParameter(
+        "showImage",
+      )} is set and a ${alertParameter(
         "questionAnswer",
-      )} parameter is also provided, ${param(
+      )} parameter is also provided, ${alertParameter(
         "showImageSpareFraction",
       )} must be greater than 0 to leave room for the question.`,
       hint: `The offending ${
@@ -2092,9 +2046,7 @@ const checkShowImageSpareFractionForQuestionAnswer = (
     }),
   ];
 };
-const checkTargetImageSpareFractionRange = (
-  t: ExperimentTable,
-): EasyEyesError[] => {
+const checkTargetImageSpareFractionRange = (t: ExperimentTable): Alert[] => {
   if (!t.params.includes("targetImageSpareFraction")) return [];
   const sf = t.effectiveValues("targetImageSpareFraction");
   const off: number[] = [];
@@ -2105,9 +2057,9 @@ const checkTargetImageSpareFractionRange = (
   if (!off.length) return [];
   const plural = off.length > 1;
   return [
-    makeError({
+    makeAlert({
       name: "targetImageSpareFraction must be at least 0 and less than 1",
-      message: `${param(
+      message: `${alertParameter(
         "targetImageSpareFraction",
       )} is the fraction of the screen reserved for the question, so it must be at least 0 and less than 1.`,
       hint: `The offending ${
@@ -2119,9 +2071,7 @@ const checkTargetImageSpareFractionRange = (
 };
 // Warn only where it matters: image/reading shown with a questionAndAnswer,
 // whose question sits in the spare section. ≤0.2 (incl. default 0) risks overlap.
-const checkTargetImageSpareFractionTooSmall = (
-  t: ExperimentTable,
-): EasyEyesError[] => {
+const checkTargetImageSpareFractionTooSmall = (t: ExperimentTable): Alert[] => {
   if (!t.params.includes("targetImageSpareFraction")) return [];
   if (!t.params.includes("targetKind")) return [];
 
@@ -2146,19 +2096,22 @@ const checkTargetImageSpareFractionTooSmall = (
   if (!off.length) return [];
   const plural = off.length > 1;
   return [
-    makeCaution({
+    makeAlert({
+      kind: "warning",
       name: "targetImageSpareFraction caution",
-      message: `When an image (${param("targetKind")}=${diagnosticValue(
+      message: `When an image (${alertParameter("targetKind")}=${alertValue(
         "image",
-      )}) or a page of text (${param("targetKind")}=${diagnosticValue(
+      )}) or a page of text (${alertParameter("targetKind")}=${alertValue(
         "reading",
-      )}) is shown together with a ${param("questionAndAnswer")}, ${param(
+      )}) is shown together with a ${alertParameter(
+        "questionAndAnswer",
+      )}, ${alertParameter(
         "targetImageSpareFraction",
-      )} is the fraction of the screen reserved for the question. A value at or below ${diagnosticValue(
+      )} is the fraction of the screen reserved for the question. A value at or below ${alertValue(
         0.2,
-      )} (including the default ${diagnosticValue(
+      )} (including the default ${alertValue(
         0,
-      )}) leaves little or no room, so the question may overlap the target. We suggest about ${diagnosticValue(
+      )}) leaves little or no room, so the question may overlap the target. We suggest about ${alertValue(
         0.3,
       )}.`,
       hint: `The offending ${
@@ -2168,10 +2121,8 @@ const checkTargetImageSpareFractionTooSmall = (
     }),
   ];
 };
-const checkScreenSizeParametersValid = (
-  t: ExperimentTable,
-): EasyEyesError[] => {
-  const e: EasyEyesError[] = [];
+const checkScreenSizeParametersValid = (t: ExperimentTable): Alert[] => {
+  const e: Alert[] = [];
   const chk = (p: string, name: string, pred: (n: number) => boolean) => {
     if (!t.params.includes(p)) return;
     const off: number[] = [];
@@ -2180,7 +2131,7 @@ const checkScreenSizeParametersValid = (
     });
     if (off.length)
       e.push(
-        makeError({
+        makeAlert({
           name,
           message: "Screen size parameters must be positive.",
           hint: columnsHint(off),
@@ -2210,9 +2161,7 @@ const checkScreenSizeParametersValid = (
   );
   return e;
 };
-const checkVernierUsingCorrectThreshold = (
-  t: ExperimentTable,
-): EasyEyesError[] => {
+const checkVernierUsingCorrectThreshold = (t: ExperimentTable): Alert[] => {
   if (
     !t.params.includes("thresholdParameter") ||
     !t.params.includes("targetKind")
@@ -2220,20 +2169,20 @@ const checkVernierUsingCorrectThreshold = (
     return [];
   const tp = t.effectiveValues("thresholdParameter"),
     tk = t.effectiveValues("targetKind");
-  const errors: EasyEyesError[] = [];
+  const errors: Alert[] = [];
   for (let i = 0; i < t.conditionCount; i++) {
     if (tp[i] === "targetOffsetDeg" && tk[i] !== "vernier")
       errors.push(
-        makeError({
+        makeAlert({
           name: "thresholdParameter=targetOffsetDeg requires targetKind=vernier",
-          message: `By setting ${param(
+          message: `By setting ${alertParameter(
             "thresholdParameter",
-          )} = ${diagnosticValueHtml(
-            param("targetOffsetDeg"),
-          )}, you must set ${param("targetKind")} = ${diagnosticValue(
+          )} = ${alertValueHtml(
+            alertParameter("targetOffsetDeg"),
+          )}, you must set ${alertParameter("targetKind")} = ${alertValue(
             "vernier",
           )}.`,
-          hint: `The erroneous value is ${diagnosticValue(
+          hint: `The erroneous value is ${alertValue(
             tk[i],
           )} at column ${conditionIndexToColumnName(i)}`,
           parameters: ["targetKind"],
@@ -2241,14 +2190,14 @@ const checkVernierUsingCorrectThreshold = (
       );
     else if (tp[i] !== "targetOffsetDeg" && tk[i] === "vernier")
       errors.push(
-        makeError({
+        makeAlert({
           name: "vernier targetKind requires thresholdParameter=targetOffsetDeg",
-          message: `By setting ${param("targetKind")} = ${diagnosticValue(
+          message: `By setting ${alertParameter("targetKind")} = ${alertValue(
             "vernier",
-          )}, you must set ${param(
+          )}, you must set ${alertParameter(
             "thresholdParameter",
-          )} = ${diagnosticValueHtml(param("targetOffsetDeg"))}.`,
-          hint: `The erroneous value is ${diagnosticValue(
+          )} = ${alertValueHtml(alertParameter("targetOffsetDeg"))}.`,
+          hint: `The erroneous value is ${alertValue(
             tp[i],
           )} at column ${conditionIndexToColumnName(i)}`,
           parameters: ["thresholdParameter"],
@@ -2260,7 +2209,7 @@ const checkVernierUsingCorrectThreshold = (
 
 const checkQuestionsProvidedForQuestionAndAnswer = (
   t: ExperimentTable,
-): EasyEyesError[] => {
+): Alert[] => {
   const qa = t.params.filter(isQuestionParam);
   if (!qa.length) return [];
   const tt = t.effectiveValues("targetTask"),
@@ -2278,15 +2227,15 @@ const checkQuestionsProvidedForQuestionAndAnswer = (
   if (!off.length) return [];
   const plural = off.length > 1;
   return [
-    makeError({
+    makeAlert({
       name: "questionAndAnswer parameters not allowed",
-      message: `questionAndAnswer parameters are only allowed when ${param(
+      message: `questionAndAnswer parameters are only allowed when ${alertParameter(
         "targetTask",
-      )} is empty, when ${param("targetTask")} = ${diagnosticValue(
+      )} is empty, when ${alertParameter("targetTask")} = ${alertValue(
         "questionAndAnswer",
-      )}, or when ${param("targetTask")} = ${diagnosticValue(
+      )}, or when ${alertParameter("targetTask")} = ${alertValue(
         "identify",
-      )} AND ${param("targetKind")} = ${diagnosticValue("image")}.`,
+      )} AND ${alertParameter("targetKind")} = ${alertValue("image")}.`,
       hint: `The erroneous ${
         plural ? "columns are" : "column is"
       }: ${verballyEnumerate(
@@ -2304,9 +2253,7 @@ const checkQuestionsProvidedForQuestionAndAnswer = (
 // incompatible targetTask — is checkQuestionsProvidedForQuestionAndAnswer.)
 // Only real question parameters (questionAnswer01...99, questionAndAnswer01
 // ...99) count; option parameters like questionAnswerLayout do not.
-const checkQuestionAnswerTaskHasQuestions = (
-  t: ExperimentTable,
-): EasyEyesError[] => {
+const checkQuestionAnswerTaskHasQuestions = (t: ExperimentTable): Alert[] => {
   const questionParams = t.params.filter(isQuestionParam);
   const tt = t.effectiveValues("targetTask");
   const off: number[] = [];
@@ -2318,22 +2265,22 @@ const checkQuestionAnswerTaskHasQuestions = (
   }
   if (!off.length) return [];
   return [
-    makeError({
+    makeAlert({
       name: "questionAnswer condition without questions",
-      message: `When ${param("targetTask")} is ${diagnosticValue(
+      message: `When ${alertParameter("targetTask")} is ${alertValue(
         "questionAnswer",
-      )} (or ${diagnosticValue(
+      )} (or ${alertValue(
         "questionAndAnswer",
-      )}), the condition must provide at least one question, e.g. ${param(
+      )}), the condition must provide at least one question, e.g. ${alertParameter(
         "questionAnswer01",
       )}. A question-and-answer condition runs one trial per question, so without questions the block would show nothing.`,
-      hint: `Provide at least one question, or change ${param(
+      hint: `Provide at least one question, or change ${alertParameter(
         "targetTask",
-      )}. For a plain reading block use ${param(
+      )}. For a plain reading block use ${alertParameter(
         "targetTask",
-      )} = ${diagnosticValue("identify")} with ${param(
+      )} = ${alertValue("identify")} with ${alertParameter(
         "targetKind",
-      )} = ${diagnosticValue("reading")}.<br/>${columnsHint(off) + "."}`,
+      )} = ${alertValue("reading")}.<br/>${columnsHint(off) + "."}`,
       parameters: ["targetTask"],
     }),
   ];
@@ -2348,9 +2295,7 @@ const checkQuestionAnswerTaskHasQuestions = (
 // cannot reach this check or the runtime: ExperimentTable.conditionValue
 // trims each cell, and the compiled block files are built from those trimmed
 // values, so leading/trailing blank lines are silently repaired.
-const checkQuestionAndAnswerNicknamePresent = (
-  t: ExperimentTable,
-): EasyEyesError[] => {
+const checkQuestionAndAnswerNicknamePresent = (t: ExperimentTable): Alert[] => {
   const qa = t.params.filter(isQuestionParam);
   if (!qa.length) return [];
   const off: number[] = [];
@@ -2369,14 +2314,16 @@ const checkQuestionAndAnswerNicknamePresent = (
   if (!off.length) return [];
   const uniqueOff = [...new Set(off)];
   return [
-    makeError({
+    makeAlert({
       name: "questionAndAnswer nickname missing",
-      message: `Every ${param("questionAndAnswer")} (and ${param(
+      message: `Every ${alertParameter(
+        "questionAndAnswer",
+      )} (and ${alertParameter(
         "questionAnswer",
-      )}) must begin with a nonempty nickname. The nickname (with ${param(
+      )}) must begin with a nonempty nickname. The nickname (with ${alertParameter(
         "conditionName",
       )}) names the responses in the saved data, so without it EasyEyes cannot name the results column.`,
-      hint: `An empty nickname means the cell begins with a separator (a leading vertical bar ${diagnosticValue(
+      hint: `An empty nickname means the cell begins with a separator (a leading vertical bar ${alertValue(
         "|",
       )}), which shifts every field (nickname, correctAnswer, question, answers) out of place. Remove the leading separator so the nickname comes first.<br/>${
         columnsHint(uniqueOff) + "."
@@ -2391,9 +2338,7 @@ const checkQuestionAndAnswerNicknamePresent = (
 // is chosen. A value may be empty (defaults to zero) but otherwise must be
 // numeric. Only the NEW questionAnswer format has values; the old
 // questionAndAnswer format has none, so it is excluded here.
-const checkQuestionAnswerValuesNumeric = (
-  t: ExperimentTable,
-): EasyEyesError[] => {
+const checkQuestionAnswerValuesNumeric = (t: ExperimentTable): Alert[] => {
   const qa = t.params.filter(isNewFormatQuestionParam);
   if (!qa.length) return [];
   const off: number[] = [];
@@ -2418,9 +2363,9 @@ const checkQuestionAnswerValuesNumeric = (
   if (!off.length) return [];
   const uniqueOff = [...new Set(off)];
   return [
-    makeError({
+    makeAlert({
       name: "questionAnswer values must be numeric",
-      message: `In ${param(
+      message: `In ${alertParameter(
         "questionAnswer",
       )}, each answer may be preceded by a value (nickname|question|value1|answer1|value2|answer2|...): the number reported in the results when the participant chooses that answer. A value may be left empty, which defaults to zero, but otherwise must be numeric.`,
       hint: `Fix the non-numeric value. To accept an answer with zero value, leave its value field empty (two adjacent separators).<br/>${
@@ -2437,9 +2382,7 @@ const checkQuestionAnswerValuesNumeric = (
 // answer to declare a type). Applies to both questionAnswer (answers are the
 // even-numbered fields after nickname|question) and the old questionAndAnswer
 // (answers follow nickname|correctAnswer|question).
-const checkQuestionAnswerSingleAnswer = (
-  t: ExperimentTable,
-): EasyEyesError[] => {
+const checkQuestionAnswerSingleAnswer = (t: ExperimentTable): Alert[] => {
   const qa = t.params.filter(isQuestionParam);
   if (!qa.length) return [];
   const off: number[] = [];
@@ -2464,9 +2407,9 @@ const checkQuestionAnswerSingleAnswer = (
   if (!off.length) return [];
   const uniqueOff = [...new Set(off)];
   return [
-    makeError({
+    makeAlert({
       name: "questionAnswer with just one answer",
-      message: `A ${param("questionAnswer")} (or ${param(
+      message: `A ${alertParameter("questionAnswer")} (or ${alertParameter(
         "questionAndAnswer",
       )}) question offering just one answer is an error. Provide no answers to accept a free-form text response, or at least two answers for multiple choice.`,
       hint: `Add at least one more answer, or remove the only answer to make the question free-form.<br/>${
@@ -2479,28 +2422,28 @@ const checkQuestionAnswerSingleAnswer = (
 
 const checkEasyEyesLettersVersionParametersValid = (
   t: ExperimentTable,
-): EasyEyesError[] => {
+): Alert[] => {
   if (!t.params.includes("EasyEyesLettersVersion")) return [];
   const ev = t.effectiveValues("EasyEyesLettersVersion"),
     sr = t.effectiveValues("spacingRelationToSize");
   const sd = t.effectiveValues("spacingDirection"),
     ss = t.effectiveValues("spacingSymmetry");
   const tk = t.effectiveValues("targetKind");
-  const errors: EasyEyesError[] = [];
+  const errors: Alert[] = [];
   for (let i = 0; i < t.conditionCount; i++) {
     if (tk[i] !== "letter") continue;
     if (ev[i] !== "2" || sr[i] !== "ratio") continue;
     if (ss[i] !== "screen") {
       errors.push(
-        makeError({
+        makeAlert({
           name: "Unsupported combination of parameters",
-          message: `Using ${param("EasyEyesLettersVersion")}=${diagnosticValue(
-            2,
-          )} and ${param("spacingRelationToSize")}=${diagnosticValue(
-            "ratio",
-          )}, currently ${param("spacingSymmetry")} must be ${diagnosticValue(
-            "screen",
-          )}.`,
+          message: `Using ${alertParameter(
+            "EasyEyesLettersVersion",
+          )}=${alertValue(2)} and ${alertParameter(
+            "spacingRelationToSize",
+          )}=${alertValue("ratio")}, currently ${alertParameter(
+            "spacingSymmetry",
+          )} must be ${alertValue("screen")}.`,
           hint: "",
           parameters: [
             "spacingSymmetry",
@@ -2512,19 +2455,17 @@ const checkEasyEyesLettersVersionParametersValid = (
     }
     if (sd[i] === "horizontalAndVertical" || sd[i] === "radialAndTangential") {
       errors.push(
-        makeError({
+        makeAlert({
           name: "Unsupported combination of parameters",
-          message: `Using ${param("EasyEyesLettersVersion")}=${diagnosticValue(
-            2,
-          )} and ${param("spacingRelationToSize")}=${diagnosticValue(
-            "ratio",
-          )}, currently ${param(
+          message: `Using ${alertParameter(
+            "EasyEyesLettersVersion",
+          )}=${alertValue(2)} and ${alertParameter(
+            "spacingRelationToSize",
+          )}=${alertValue("ratio")}, currently ${alertParameter(
             "spacingDirection",
-          )} cannot be ${diagnosticValue(
-            "horizontalAndVertical",
-          )} or ${diagnosticValue(
+          )} cannot be ${alertValue("horizontalAndVertical")} or ${alertValue(
             "radialAndTangential",
-          )}. Use ${diagnosticValues([
+          )}. Use ${alertValues([
             "horizontal",
             "vertical",
             "radial",
@@ -2546,7 +2487,7 @@ const checkEasyEyesLettersVersionParametersValid = (
 // vertical-rl/vertical-lr are valid glossary categories (pass type check) but
 // vertical layout is unimplemented; the runtime would silently fall back to
 // horizontal. Remove this check once vertical layout ships.
-const checkFontDirectionVertical = (t: ExperimentTable): EasyEyesError[] => {
+const checkFontDirectionVertical = (t: ExperimentTable): Alert[] => {
   if (!t.params.includes("fontDirection")) return [];
   const vals = t.effectiveValues("fontDirection");
   const offending = vals
@@ -2555,26 +2496,26 @@ const checkFontDirectionVertical = (t: ExperimentTable): EasyEyesError[] => {
   if (!offending.length) return [];
   const offendingMessage = offending.map(
     (o) =>
-      ` ${diagnosticValue(o.value)} [column ${conditionIndexToColumnName(
+      ` ${alertValue(o.value)} [column ${conditionIndexToColumnName(
         o.block - 1,
       )}]`,
   );
-  const values = diagnosticValues(offending.map((o) => o.value));
-  const unimplementedValuesLabel = diagnosticOffendingValuesLabel(
+  const values = alertValues(offending.map((o) => o.value));
+  const unimplementedValuesLabel = alertOffendingValuesLabel(
     "unimplemented",
     offending.map((o) => conditionIndexToColumnName(o.block - 1)),
   );
   return [
-    makeError({
+    makeAlert({
       name: "fontDirection vertical not yet implemented",
       message:
-        `${param(
+        `${alertParameter(
           "fontDirection",
         )} ${values} is not yet implemented. Vertical text ` +
         `layout (writing-mode) is planned, primarily to support Japanese, but is ` +
-        `not available yet. Please use ${diagnosticValue(
-          "ltr",
-        )} or ${diagnosticValue("rtl")}.`,
+        `not available yet. Please use ${alertValue("ltr")} or ${alertValue(
+          "rtl",
+        )}.`,
       hint: `${unimplementedValuesLabel}: ${offendingMessage}. Write to denis.pelli@nyu.edu to ask about vertical support.`,
       parameters: ["fontDirection"],
     }),
@@ -2585,7 +2526,7 @@ const checkFontDirectionVertical = (t: ExperimentTable): EasyEyesError[] => {
 // unimplemented: the Dec 2024 attempt was reverted because its re-render
 // path still re-rasterized. The runtime silently treats cache as none.
 // Remove this check once cache ships.
-const checkFontPreRenderCache = (t: ExperimentTable): EasyEyesError[] => {
+const checkFontPreRenderCache = (t: ExperimentTable): Alert[] => {
   if (!t.params.includes("fontPreRender")) return [];
   const vals = t.effectiveValues("fontPreRender");
   const offending = vals
@@ -2594,25 +2535,25 @@ const checkFontPreRenderCache = (t: ExperimentTable): EasyEyesError[] => {
   if (!offending.length) return [];
   const offendingMessage = offending.map(
     (o) =>
-      ` ${diagnosticValue(o.value)} [column ${conditionIndexToColumnName(
+      ` ${alertValue(o.value)} [column ${conditionIndexToColumnName(
         o.block - 1,
       )}]`,
   );
-  const unimplementedValuesLabel = diagnosticOffendingValuesLabel(
+  const unimplementedValuesLabel = alertOffendingValuesLabel(
     "unimplemented",
     offending.map((o) => conditionIndexToColumnName(o.block - 1)),
   );
   return [
-    makeError({
+    makeAlert({
       name: "fontPreRender cache not yet implemented",
       message:
-        `${param("fontPreRender")} ${diagnosticValue(
+        `${alertParameter("fontPreRender")} ${alertValue(
           "cache",
         )} is not yet implemented. ` +
-        `Use ${diagnosticValue(
+        `Use ${alertValue(
           "buffer",
         )} to render the text stimulus once and copy it thereafter ` +
-        `(faster under a moving fixation), or ${diagnosticValue(
+        `(faster under a moving fixation), or ${alertValue(
           "none",
         )} (the default) to render ` +
         `freshly every time.`,
@@ -2624,7 +2565,7 @@ const checkFontPreRenderCache = (t: ExperimentTable): EasyEyesError[] => {
 
 // The Canvas API has no font-feature-settings; values are baked into the font
 // by the Rust GSUB baker, so invalid strings must be caught at compile time.
-const checkFontFeatureSettings = (t: ExperimentTable): EasyEyesError[] => {
+const checkFontFeatureSettings = (t: ExperimentTable): Alert[] => {
   if (!t.params.includes("fontFeatureSettings")) return [];
   const vals = t.effectiveValues("fontFeatureSettings");
   const offending: {
@@ -2644,32 +2585,30 @@ const checkFontFeatureSettings = (t: ExperimentTable): EasyEyesError[] => {
   const hintBlob = offending
     .map((o) => {
       const col = conditionIndexToColumnName(o.block - 1);
-      const where = `${diagnosticValue(o.tag)} [column ${col}]`;
+      const where = `${alertValue(o.tag)} [column ${col}]`;
       if (o.reason === "unknown-tag") {
         return o.suggestion
-          ? `• ${where}: unknown tag. Did you mean ${diagnosticValue(
-              o.suggestion,
-            )}?`
+          ? `• ${where}: unknown tag. Did you mean ${alertValue(o.suggestion)}?`
           : `• ${where}: unknown tag.`;
       }
       if (o.reason === "malformed-tag") {
         return `• ${where}: a tag must be 1–4 letters or digits.`;
       }
-      return `• ${where}: value must be ${diagnosticValue(
-        "on",
-      )}, ${diagnosticValue("off")}, or an integer.`;
+      return `• ${where}: value must be ${alertValue("on")}, ${alertValue(
+        "off",
+      )}, or an integer.`;
     })
     .join("<br/>");
   return [
-    makeError({
+    makeAlert({
       name: "Invalid fontFeatureSettings",
-      message: `${param(
+      message: `${alertParameter(
         "fontFeatureSettings",
-      )} has invalid entries. Each is a 1–4 letter/digit OpenType tag, optionally followed by a value (${diagnosticValue(
+      )} has invalid entries. Each is a 1–4 letter/digit OpenType tag, optionally followed by a value (${alertValue(
         "on",
-      )}, ${diagnosticValue("off")}, or integer), e.g. ${diagnosticValue(
+      )}, ${alertValue("off")}, or integer), e.g. ${alertValue(
         "calt",
-      )} ${diagnosticValue(1)}.`,
+      )} ${alertValue(1)}.`,
       hint: hintBlob,
       parameters: ["fontFeatureSettings"],
     }),
@@ -2678,7 +2617,7 @@ const checkFontFeatureSettings = (t: ExperimentTable): EasyEyesError[] => {
 
 // The generic multicategorical check can't see keyword contradictions, and
 // the runtime's last-wins rule would silently pick one.
-const checkFontVariantLigatures = (t: ExperimentTable): EasyEyesError[] => {
+const checkFontVariantLigatures = (t: ExperimentTable): Alert[] => {
   if (!t.params.includes("fontVariantLigatures")) return [];
   const vals = t.effectiveValues("fontVariantLigatures");
   const offending: { value: string; block: number }[] = [];
@@ -2690,21 +2629,19 @@ const checkFontVariantLigatures = (t: ExperimentTable): EasyEyesError[] => {
   const hintBlob = offending
     .map(
       (o) =>
-        `• ${diagnosticValue(o.value)} [column ${conditionIndexToColumnName(
+        `• ${alertValue(o.value)} [column ${conditionIndexToColumnName(
           o.block - 1,
         )}]`,
     )
     .join("<br/>");
   return [
-    makeError({
+    makeAlert({
       name: "Contradictory fontVariantLigatures",
-      message: `${param(
+      message: `${alertParameter(
         "fontVariantLigatures",
-      )} has contradictory keywords: ${diagnosticValue(
-        "normal",
-      )} and ${diagnosticValue(
+      )} has contradictory keywords: ${alertValue("normal")} and ${alertValue(
         "none",
-      )} must appear alone, and each keyword conflicts with its ${diagnosticValue(
+      )} must appear alone, and each keyword conflicts with its ${alertValue(
         "no-",
       )} form.`,
       hint: hintBlob,
@@ -2715,7 +2652,7 @@ const checkFontVariantLigatures = (t: ExperimentTable): EasyEyesError[] => {
 
 // Feature baking needs the font bytes; browser fonts can't be fetched, so
 // any feature setting on fontSource=browser would be a silent no-op.
-const checkFontFeatureBrowserGate = (t: ExperimentTable): EasyEyesError[] => {
+const checkFontFeatureBrowserGate = (t: ExperimentTable): Alert[] => {
   const hasFfs = t.params.includes("fontFeatureSettings");
   const hasSs = t.params.includes("fontStylisticSets");
   const hasLig = t.params.includes("fontVariantLigatures");
@@ -2749,11 +2686,11 @@ const checkFontFeatureBrowserGate = (t: ExperimentTable): EasyEyesError[] => {
     )
     .join("<br/>");
   return [
-    makeError({
+    makeAlert({
       name: "fontSource=browser does not support font features",
-      message: `Font features cannot be baked into browser fonts. Use ${param(
+      message: `Font features cannot be baked into browser fonts. Use ${alertParameter(
         "fontSource",
-      )} ${diagnosticValues(["file", "google", "adobe"])}.`,
+      )} ${alertValues(["file", "google", "adobe"])}.`,
       hint: hintBlob,
       parameters: [...new Set(offending.flatMap((o) => o.params))],
     }),
@@ -2763,7 +2700,7 @@ const checkFontFeatureBrowserGate = (t: ExperimentTable): EasyEyesError[] => {
 // typeSquare is gated behind _typeSquareDistributionKey (pending glossary
 // add); until then ALL typeSquare use is rejected. Once the param exists,
 // make this conditional: key required iff typeSquare used.
-const checkTypeSquareGate = (t: ExperimentTable): EasyEyesError[] => {
+const checkTypeSquareGate = (t: ExperimentTable): Alert[] => {
   if (!t.params.includes("fontSource")) return [];
   const fontSources = t.effectiveValues("fontSource");
   const offenders: { block: number; value: string }[] = [];
@@ -2773,19 +2710,19 @@ const checkTypeSquareGate = (t: ExperimentTable): EasyEyesError[] => {
   });
   if (offenders.length === 0) return [];
   return [
-    makeError({
+    makeAlert({
       name: "typeSquare support is in progress",
       message:
-        `${param("fontSource")}=${diagnosticValue(
+        `${alertParameter("fontSource")}=${alertValue(
           "typeSquare",
         )} is not yet supported — the experimenter must add ` +
-        `the <span class="error-parameter">_typeSquareDistributionKey</span> ` +
+        `the ${alertParameter("_typeSquareDistributionKey")} ` +
         `underscore param to enable typeSquare. Until then, please use ` +
-        `${param("fontSource")}=${diagnosticValue("file")} instead. ` +
+        `${alertParameter("fontSource")}=${alertValue("file")} instead. ` +
         `(Affected blocks: ${offenders.map((o) => o.block).join(", ")}.)`,
-      hint: `Change ${param("fontSource")}=${diagnosticValue(
+      hint: `Change ${alertParameter("fontSource")}=${alertValue(
         "typeSquare",
-      )} to ${param("fontSource")}=${diagnosticValue(
+      )} to ${alertParameter("fontSource")}=${alertValue(
         "file",
       )}, or contact the EasyEyes team to enable typeSquare support.`,
       parameters: ["fontSource"],
@@ -2793,7 +2730,7 @@ const checkTypeSquareGate = (t: ExperimentTable): EasyEyesError[] => {
   ];
 };
 
-type TableCheck = (t: ExperimentTable) => EasyEyesError[];
+type TableCheck = (t: ExperimentTable) => Alert[];
 
 /**
  * Runs one check; a crash becomes a reportable error instead of silently
@@ -2803,14 +2740,14 @@ export const runSafely = (
   check: TableCheck,
   t: ExperimentTable,
   sourceTable?: ExperimentTable,
-): EasyEyesError[] => {
+): Alert[] => {
   try {
     return check === checkParameterTypes
       ? checkParameterTypes(t, sourceTable)
       : check(t);
   } catch (e) {
     return [
-      makeError({
+      makeAlert({
         name: `Compiler bug in table check ${check.name}`,
         message: `The EasyEyes compiler itself hit an unexpected error while checking your experiment table: ${
           e instanceof Error ? e.message : String(e)
@@ -2893,7 +2830,7 @@ export const TABLE_CHECKS: ReadonlyArray<TableCheck> = [
 export const validateExperimentTable = (
   t: ExperimentTable,
   sourceTable?: ExperimentTable,
-): EasyEyesError[] =>
+): Alert[] =>
   TABLE_CHECKS.flatMap((check) => runSafely(check, t, sourceTable)).sort(
     (a, b) =>
       // Tie order is snapshot-pinned — keep this exact comparator.

@@ -84,7 +84,7 @@ describe("checkReadingCorpusLength — readingPages = -1", () => {
     expect(errors[0].parameters).toContain("readingPages");
     // The error points the scientist at the new option.
     expect(errors[0].hint).toContain(
-      '<span class="error-parameter">readingPages</span>=<code class="error-value">-1</code>',
+      '<span class="alert-parameter">readingPages</span>=<code class="alert-value">-1</code>',
     );
   });
 

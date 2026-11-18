@@ -23,7 +23,7 @@ import { getGlossary } from "../parameters/glossaryRegistry";
 import { loadGlossaryForTests } from "./helpers/glossary";
 import { loadPhrasesForTests } from "./helpers/phrases";
 import { compileExperimentTableLocally } from "../examples/localCompile";
-import { diagnosticValue } from "../preprocess/diagnosticHtml";
+import { alertValue } from "../preprocess/alertHtml";
 
 jest.setTimeout(300_000);
 
@@ -215,7 +215,7 @@ describe("RED: invisible corruption in values is explained, not just rejected", 
     const err = wrongTypeError(result, "zzTestVectorParam");
     expect(err).toBeDefined();
     expect(err.hint).toContain("U+200B");
-    expect(err.hint).toContain(`the number ${diagnosticValue(42)}`);
+    expect(err.hint).toContain(`the number ${alertValue(42)}`);
     expect(err.hint.toLowerCase()).toContain("invisible");
   });
 
@@ -238,8 +238,8 @@ describe("RED: invisible corruption in values is explained, not just rejected", 
       zzTestVectorParam: "1\u200b1, 2, 3\u200b3",
     });
     const err = wrongTypeError(result, "zzTestVectorParam");
-    expect(err.hint).toContain(`the number ${diagnosticValue(11)}`);
-    expect(err.hint).toContain(`the number ${diagnosticValue(33)}`);
+    expect(err.hint).toContain(`the number ${alertValue(11)}`);
+    expect(err.hint).toContain(`the number ${alertValue(33)}`);
   });
 
   it("ADV control: matrix elements are diagnosed too", async () => {
@@ -249,7 +249,7 @@ describe("RED: invisible corruption in values is explained, not just rejected", 
     const err = wrongTypeError(result, "zzTestMatrixParam");
     expect(err).toBeDefined();
     expect(err.hint).toContain("U+200B");
-    expect(err.hint).toContain(`the number ${diagnosticValue(42)}`);
+    expect(err.hint).toContain(`the number ${alertValue(42)}`);
   });
 
   it("ADV control: empty or blank-only vector cell requests the default, no error", async () => {

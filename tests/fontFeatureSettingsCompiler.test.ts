@@ -14,7 +14,7 @@ import { loadGlossaryForTests } from "./helpers/glossary";
 import { ExperimentTable } from "../preprocess/experimentTable";
 import { validateExperimentTable } from "../preprocess/validateExperimentTable";
 import { validateFeatureSettingsString } from "../preprocess/opentypeFeatures";
-import type { EasyEyesError } from "../preprocess/errorMessages";
+import type { Alert } from "../preprocess/alerts";
 
 function parse(csv: string): ExperimentTable {
   const p = Papa.parse(csv, { skipEmptyLines: true });
@@ -43,7 +43,7 @@ fontFeatureSettings,,${featureValues.map(csvField).join(",")}`;
   return parse(csv);
 }
 
-function featureErrors(t: ExperimentTable): EasyEyesError[] {
+function featureErrors(t: ExperimentTable): Alert[] {
   return validateExperimentTable(t).filter((e) =>
     e.parameters.includes("fontFeatureSettings"),
   );

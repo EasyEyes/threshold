@@ -14,7 +14,7 @@
  */
 
 // ── Binary readers ──────────────────────────────────────────────────────────
-import { diagnosticValue } from "./diagnosticHtml";
+import { alertValue } from "./alertHtml";
 
 function readU16(data: Uint8Array, offset: number): number {
   return (data[offset] << 8) | data[offset + 1];
@@ -189,7 +189,7 @@ export function analyzeFontFeatureSettings(
       warnings.push({
         tag,
         kind: "not-in-font",
-        message: `This font does not contain the ${diagnosticValue(
+        message: `This font does not contain the ${alertValue(
           tag,
         )} feature. It will have no effect.`,
       });
@@ -201,7 +201,7 @@ export function analyzeFontFeatureSettings(
       warnings.push({
         tag,
         kind: "empty-lookups",
-        message: `${diagnosticValue(
+        message: `${alertValue(
           tag,
         )} exists in this font but has no lookups. It will have no effect.`,
       });
@@ -221,7 +221,7 @@ export function analyzeFontFeatureSettings(
           warnings.push({
             tag,
             kind: "empty-subtables",
-            message: `${diagnosticValue(
+            message: `${alertValue(
               tag,
             )} references a lookup with no subtable data. It may not take full effect.`,
           });
@@ -240,7 +240,7 @@ export function analyzeFontFeatureSettings(
         warnings.push({
           tag,
           kind: "has-alternate",
-          message: `${diagnosticValue(
+          message: `${alertValue(
             tag,
           )} uses alternate substitution. The first available alternate will be used.`,
         });

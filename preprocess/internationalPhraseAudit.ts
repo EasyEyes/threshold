@@ -2,9 +2,14 @@ import {
   loadInternationalPhraseRows,
   internationalPhraseUrl,
 } from "./internationalPhraseLink";
-import type { EasyEyesError } from "./errorMessages";
+import type { Alert } from "./alerts";
 import { getEasyEyesBaseUrl } from "../components/easyeyesBaseUrl";
-import { diagnosticValue, diagnosticValueHtml } from "./diagnosticHtml";
+import {
+  alertParameter,
+  alertValue,
+  alertValueHtml,
+  escapeAlertHtml,
+} from "./alertHtml";
 
 type Reference = { key: string; parameter: string; column: number };
 type Audit = {
@@ -32,15 +37,6 @@ type Audit = {
     }[];
   };
 };
-const escape = (value: string) =>
-  String(value).replace(
-    /[&<>"']/g,
-    (c) =>
-      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[
-        c
-      ]!,
-  );
-
 // Inspect source cells before substitution: custom values are literal text,
 // not International Phrase references. Never infer aliases by removing prefixes.
 export function collectInternationalPhraseReferences(
@@ -69,7 +65,7 @@ export function validateInternationalPhraseAudit(
   refs: Reference[],
   audit: Audit,
   phraseRows = new Map<string, number>(),
-): EasyEyesError[] {
+): Alert[] {
   if (
     !audit?.id ||
     !audit.generatedAt ||
@@ -103,20 +99,20 @@ export function validateInternationalPhraseAudit(
       ];
       return {
         name: "International phrase not audited as used",
-        message: `Phrase ${diagnosticValueHtml(
+        message: `Phrase ${alertValueHtml(
           `<a href="${internationalPhraseUrl(
             ref.key,
             phraseRows,
-          )}" target="_blank" rel="noopener noreferrer">${escape(ref.key)}</a>`,
-        )} in <span class="error-parameter">${escape(
-          ref.parameter,
-        )}</span> (column ${
+          )}" target="_blank" rel="noopener noreferrer">${escapeAlertHtml(
+            ref.key,
+          )}</a>`,
+        )} in ${alertParameter(ref.parameter)} (column ${
           ref.column + 1
-        }) is absent from the used keys in audit ${diagnosticValue(
+        }) is absent from the used keys in audit ${alertValue(
           audit.id,
-        )} (${diagnosticValue(audit.generatedAt)}).`,
+        )} (${alertValue(audit.generatedAt)}).`,
         hint: evidence.length
-          ? evidence.map(escape).join("<br/>")
+          ? evidence.map(escapeAlertHtml).join("<br/>")
           : "No source or removal evidence is available for this key. Check the phrase name and the latest International Phrases audit.",
         context: "preprocessor",
         kind: "error",
@@ -127,7 +123,7 @@ export function validateInternationalPhraseAudit(
 
 export async function checkInternationalPhraseAudit(
   rows: readonly (readonly string[])[],
-): Promise<EasyEyesError[]> {
+): Promise<Alert[]> {
   const refs = collectInternationalPhraseReferences(rows);
   if (!refs.length) return [];
   try {

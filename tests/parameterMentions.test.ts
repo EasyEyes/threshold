@@ -2,7 +2,7 @@
  * @jest-environment node
  *
  * Future-proofing: every parameter name referenced in an error's message or
- * hint must carry the standard `<span class="error-parameter">` markup, so it
+ * hint must carry the standard `<span class="alert-parameter">` markup, so it
  * renders bold and links to its glossary entry. A bare mention (plain text)
  * looks like prose and is not clickable — the "Text file is missing" family
  * shipped that way for readingCorpus/readingCorpusFoils.
@@ -12,17 +12,17 @@
  * the day they are written. Table-level checks (validateExperimentTable) are
  * scanned too, via the example-table corpus.
  *
- * The error NAME is not scanned: names render through .error-name, where
+ * The error NAME is not scanned: names render through .alert-name, where
  * links are not applied and nested emphasis is invisible.
  *
- * The same audit also requires VALUES to use code.error-value, without
+ * The same audit also requires VALUES to use code.alert-value, without
  * delimiter quotes or ad-hoc strong/em/b styling; quotes inside an
  * already-marked value are data and remain allowed.
  */
 import * as fs from "fs";
 import * as path from "path";
 import Papa from "papaparse";
-import * as ErrorMessages from "../preprocess/errorMessages";
+import * as Alerts from "../preprocess/alerts";
 import * as ExportErrors from "../preprocess/exportBeforeCompile";
 import { loadGlossaryForTests } from "./helpers/glossary";
 import { getGlossary } from "../parameters/glossaryRegistry";
@@ -161,10 +161,16 @@ const EXPORT_FACTORY_ARGS: Record<string, unknown[]> = {
  */
 const stripParamSpans = (html: string): string => {
   let out = html;
-  let next = out.replace(/<span class="error-parameter">[^<]*<\/span>/g, " ");
+  let next = out.replace(
+    /<span class="alert-parameter"(?: data-glossary-key="[^"]*")?>[^<]*<\/span>/g,
+    " ",
+  );
   while (next !== out) {
     out = next;
-    next = out.replace(/<span class="error-parameter">[^<]*<\/span>/g, " ");
+    next = out.replace(
+      /<span class="alert-parameter"(?: data-glossary-key="[^"]*")?>[^<]*<\/span>/g,
+      " ",
+    );
   }
   return out;
 };
@@ -230,13 +236,14 @@ const endsLikeSentence = (html: string): boolean => {
   return /[.?!)]$/.test(t);
 };
 
-/** Values use code.error-value. Quotes inside an already-marked value are
+/** Values use code.alert-value. Quotes inside an already-marked value are
  * data, not delimiters; everywhere else, straight quotes and ad-hoc emphasis
  * indicate an unstandardized value. */
 const hasUnstandardizedValuePresentation = (html: string): boolean => {
+  if (/\bstyle=/.test(html)) return true;
   if (/<(?:strong|b|em)(?:\s|>)/.test(html)) return true;
   const withoutMarkedValues = html.replace(
-    /<code class="error-value">[\s\S]*?<\/code>/g,
+    /<code class="alert-value">[\s\S]*?<\/code>/g,
     " ",
   );
   const text = withoutMarkedValues.replace(/<[^>]+>/g, " ");
@@ -244,8 +251,31 @@ const hasUnstandardizedValuePresentation = (html: string): boolean => {
 };
 
 describe("factory registry completeness", () => {
+  it("keeps markup primitives in alertHtml.ts", () => {
+    for (const file of [
+      "alerts.ts",
+      "validateExperimentTable.ts",
+      "main.ts",
+      "experimentFileChecks.ts",
+      "exportBeforeCompile.ts",
+      "glossaryAudit.ts",
+      "internationalPhraseAudit.ts",
+      "studyPhraseAnalysis.ts",
+      "parameterName.ts",
+      "repoName.ts",
+    ]) {
+      const text = fs.readFileSync(
+        path.join(__dirname, "..", "preprocess", file),
+        "utf8",
+      );
+      expect(text).not.toContain('<span class="alert-parameter">');
+      expect(text).not.toContain('<code class="alert-value">');
+      expect(text).not.toContain("style=");
+    }
+  });
+
   it("NO_BLOCK_PARAMETER follows the same conventions", () => {
-    const error = ErrorMessages.NO_BLOCK_PARAMETER;
+    const error = Alerts.NO_BLOCK_PARAMETER;
     expect(error.hint).not.toContain("blockblock");
     for (const field of ["message", "hint"] as const) {
       expect(endsLikeSentence(error[field])).toBe(true);
@@ -255,7 +285,7 @@ describe("factory registry completeness", () => {
 
   it("every exported error factory has registered args (and none are stale)", () => {
     const modules = [
-      [ErrorMessages, FACTORY_ARGS],
+      [Alerts, FACTORY_ARGS],
       [ExportErrors, EXPORT_FACTORY_ARGS],
     ] as const;
     for (const [module, registry] of modules) {
@@ -277,7 +307,7 @@ describe("factory registry completeness", () => {
 
 describe("parameter references in error text are param-spanned", () => {
   const allFactories = [
-    [ErrorMessages, FACTORY_ARGS],
+    [Alerts, FACTORY_ARGS],
     [ExportErrors, EXPORT_FACTORY_ARGS],
   ] as const;
 

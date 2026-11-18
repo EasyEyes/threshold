@@ -6,7 +6,7 @@ import Papa from "papaparse";
 import { loadGlossaryForTests } from "./helpers/glossary";
 import { ExperimentTable } from "../preprocess/experimentTable";
 import { validateExperimentTable } from "../preprocess/validateExperimentTable";
-import type { EasyEyesError } from "../preprocess/errorMessages";
+import type { Alert } from "../preprocess/alerts";
 
 function parse(csv: string): ExperimentTable {
   const p = Papa.parse(csv, { skipEmptyLines: true });
@@ -501,10 +501,8 @@ spacingDirection,,horizontalAndVertical,horizontalAndVertical`;
 });
 
 describe("validateExperimentTable: targetKind/targetTask emptiness", () => {
-  const isTargetTaskError = (e: EasyEyesError) =>
-    e.name === "No targetTask provided";
-  const isTargetKindError = (e: EasyEyesError) =>
-    e.name === "No targetKind provided";
+  const isTargetTaskError = (e: Alert) => e.name === "No targetTask provided";
+  const isTargetKindError = (e: Alert) => e.name === "No targetKind provided";
 
   it("empty targetTask + Q&A values → no targetTask error (Q&A-only is legal)", () => {
     const csv = `_about,test,
@@ -608,10 +606,8 @@ targetKind,,letter,`;
 });
 
 describe("validateExperimentTable: task/kind emptiness — edge cases", () => {
-  const isTargetTaskError = (e: EasyEyesError) =>
-    e.name === "No targetTask provided";
-  const isTargetKindError = (e: EasyEyesError) =>
-    e.name === "No targetKind provided";
+  const isTargetTaskError = (e: Alert) => e.name === "No targetTask provided";
+  const isTargetKindError = (e: Alert) => e.name === "No targetKind provided";
 
   it("mixed: flags only the empty-task condition lacking Q&A", () => {
     const csv = `_about,test,,
@@ -664,7 +660,7 @@ questionAndAnswer01,,hello?`;
 });
 
 describe("needSoundOutput within-block consistency", () => {
-  const isBlockUniqueError = (e: EasyEyesError) =>
+  const isBlockUniqueError = (e: Alert) =>
     /not unique within blocks/i.test(e.name);
 
   it("reports mixed needSoundOutput values within a block", () => {

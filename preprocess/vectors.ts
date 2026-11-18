@@ -1,7 +1,7 @@
 // Compiler-side face of vector/matrix parameter types. All parsing logic
 // lives in components/vectorParsing.ts — shared with the runtime so that
 // "compiler-accepted" ≡ "runtime-parses". This module adds compiler-only
-// error-message wording and re-exports the shared API for existing callers.
+// alert-message wording and re-exports the shared API for existing callers.
 //
 // Type specifiers (in the glossary; no spaces or commas allowed):
 //   *numerical, *integer     comma-separated list, any nonzero length
@@ -14,7 +14,7 @@
 
 import { plural } from "../components/vectorParsing";
 import type { VectorTypeSpec } from "../components/vectorParsing";
-import { diagnosticValue } from "./diagnosticHtml";
+import { alertValue } from "./alertHtml";
 
 export {
   parseVectorType,
@@ -25,9 +25,7 @@ export {
 
 /** The shared parser quotes illegal elements; render those values canonically. */
 export const diagnosticVectorReason = (reason: string | undefined): string =>
-  (reason ?? "").replace(/"([^"]*)"/g, (_match, value) =>
-    diagnosticValue(value),
-  );
+  (reason ?? "").replace(/"([^"]*)"/g, (_match, value) => alertValue(value));
 
 /** Human-readable description of the type, for error messages. */
 export const describeVectorType = (spec: VectorTypeSpec): string => {

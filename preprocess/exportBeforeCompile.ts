@@ -31,7 +31,7 @@ import { read, utils } from "xlsx";
 import Swal from "sweetalert2";
 import * as sentry from "../components/sentry";
 
-import type { EasyEyesError } from "./errorMessages";
+import type { Alert } from "./alerts";
 import { resourcesFileTypes, resourcesRepoName } from "./constants";
 import {
   getBase64FileDataFromGitLab,
@@ -48,30 +48,25 @@ import {
   parsePhraseFile,
   type PhraseTable,
 } from "../../source/components/parsePhraseFile";
-import { diagnosticValue, diagnosticValues } from "./diagnosticHtml";
+import { alertValue, alertValues, escapeAlertHtml } from "./alertHtml";
 
 /* -------------------------------- Errors --------------------------------- */
-// Download source errors reuse the compiler's EasyEyesError shape so Table.js can show
+// Download source errors reuse the compiler's Alert shape so Table.js can show
 // them in the same list as compiler errors. context === "export" marks their
 // provenance for any consumer that needs to distinguish them.
 
-const escapeHtml = (text: string): string =>
-  text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
-export const NO_SPREADSHEET_TO_EXPORT = (
-  fileNames: string[],
-): EasyEyesError => ({
+export const NO_SPREADSHEET_TO_EXPORT = (fileNames: string[]): Alert => ({
   name: "No spreadsheet selected",
   message: `Download source packages your experiment spreadsheet, together with every resource it mentions (fonts, forms, texts, sounds, images, code), into one raw.source.zip file that is easy to share. ${
     fileNames.length
-      ? `None of the selected files (${diagnosticValues(
+      ? `None of the selected files (${alertValues(
           fileNames,
         )}) is an experiment spreadsheet.`
       : "No file was selected."
   }`,
-  hint: `Click Select file to download raw source and choose your experiment spreadsheet (a ${diagnosticValue(
+  hint: `Click Select file to download raw source and choose your experiment spreadsheet (a ${alertValue(
     ".csv",
-  )} or ${diagnosticValue(".xlsx")} file).`,
+  )} or ${alertValue(".xlsx")} file).`,
   context: "export",
   kind: "error",
   parameters: [],
@@ -80,14 +75,14 @@ export const NO_SPREADSHEET_TO_EXPORT = (
 export const UNREADABLE_SPREADSHEET_FOR_EXPORT = (
   fileName: string,
   details: string,
-): EasyEyesError => ({
+): Alert => ({
   name: "Cannot read spreadsheet",
-  message: `EasyEyes cannot read ${diagnosticValue(
+  message: `EasyEyes cannot read ${alertValue(
     fileName,
   )} as a spreadsheet, so it cannot work out which resources your experiment uses.`,
   hint: `${
-    details ? escapeHtml(details) + "<br/>" : ""
-  }Try re-saving the file as ${diagnosticValue(".xlsx")} or ${diagnosticValue(
+    details ? escapeAlertHtml(details) + "<br/>" : ""
+  }Try re-saving the file as ${alertValue(".xlsx")} or ${alertValue(
     ".csv",
   )}, then download the source again.`,
   context: "export",
@@ -95,14 +90,11 @@ export const UNREADABLE_SPREADSHEET_FOR_EXPORT = (
   parameters: [],
 });
 
-export const EXPORT_FAILED = (
-  fileName: string,
-  details: string,
-): EasyEyesError => ({
+export const EXPORT_FAILED = (fileName: string, details: string): Alert => ({
   name: "Download source failed",
-  message: `Something went wrong while downloading the source for ${diagnosticValue(
+  message: `Something went wrong while downloading the source for ${alertValue(
     fileName,
-  )}.${details ? ` ${escapeHtml(details)}` : ""}`,
+  )}.${details ? ` ${escapeAlertHtml(details)}` : ""}`,
   hint: "Please try again. If the problem persists, refresh the page, log in again, and retry.",
   context: "export",
   kind: "error",
@@ -248,7 +240,7 @@ export const findPhrasesSpreadsheetName = (
 export const exportStudyBeforeCompiling = async (
   user: any,
   droppedFiles: File[],
-): Promise<EasyEyesError[]> => {
+): Promise<Alert[]> => {
   // Redirects to OAuth when the session cannot be recovered, like compiling.
   if (!(await ensureValidToken(redirectToOauth2))) return [];
 

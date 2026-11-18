@@ -1,5 +1,8 @@
-import type { EasyEyesError } from "../preprocess/errorMessages";
-import { GLOSSARY_SHEET_URL } from "../parameters/glossaryLink";
+import type { Alert } from "../preprocess/alerts";
+import {
+  GLOSSARY_SHEET_URL,
+  linkGlossaryParameters,
+} from "../parameters/glossaryLink";
 import { INTERNATIONAL_PHRASES_SHEET } from "../preprocess/internationalPhraseLink";
 import {
   color,
@@ -69,13 +72,15 @@ const guidance = new Map<string, AuditGuidance>([
 
 /** Add terminal references only for audit diagnostics; ordinary errors stay unchanged. */
 export function formatAuditDetails(
-  error: EasyEyesError,
+  error: Alert,
   colors = colorsEnabledByDefault(),
 ): string[] {
   const audit = guidance.get(error.code ?? "") ?? guidance.get(error.name);
   if (!audit || error.kind !== (audit.warning ? "warning" : "error")) return [];
   const references = new Map<string, string>();
-  for (const fragment of [error.message, error.hint]) {
+  for (const fragment of [error.message, error.hint].map(
+    linkGlossaryParameters,
+  )) {
     for (const match of fragment.matchAll(
       /<a\b[^>]*\bhref\s*=\s*(["'])(.*?)\1[^>]*>([\s\S]*?)<\/a>/gi,
     )) {

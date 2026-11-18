@@ -1,8 +1,8 @@
 import {
   FONT_READING_CORPUS_CHARACTERS_MISSING,
   FONT_WRONG_LANGUAGE,
-  type EasyEyesError,
-} from "./errorMessages";
+  type Alert,
+} from "./alerts";
 import { getGlossary } from "../parameters/glossaryRegistry";
 import { getColumnValuesOrDefaults } from "./utils";
 import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
@@ -97,8 +97,8 @@ export const validateFontLanguageSupport = async (
     textDirectory?: string;
     fontCache?: FontDataCache;
   } = {},
-): Promise<EasyEyesError[]> => {
-  const errors: EasyEyesError[] = [];
+): Promise<Alert[]> => {
+  const errors: Alert[] = [];
   try {
     const wasm = await initEasyEyesWasm();
     if (!wasm) return errors;

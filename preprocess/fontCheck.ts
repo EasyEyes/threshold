@@ -4,7 +4,7 @@ import {
   GOOGLE_FONT_VARIABLE_SETTINGS_INVALID,
   TYPEKIT_FONT_ONLY_AVAILABLE_WITH_SUBSCRIPTION,
   TYPEKIT_FONTS_MISSING,
-} from "./errorMessages";
+} from "./alerts";
 import { getGlossary } from "../parameters/glossaryRegistry";
 import { typekit } from "./global";
 

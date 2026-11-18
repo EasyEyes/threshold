@@ -12,7 +12,7 @@ import { getFontNameListBySource } from "../preprocess/utils";
 import { validateExperimentTable } from "../preprocess/validateExperimentTable";
 import type { PhraseTable } from "../../source/components/parsePhraseFile";
 import { loadGlossaryForTests } from "./helpers/glossary";
-import { diagnosticValue } from "../preprocess/diagnosticHtml";
+import { alertValue } from "../preprocess/alertHtml";
 
 beforeAll(async () => {
   await loadGlossaryForTests();
@@ -202,9 +202,9 @@ describe("resolveTildeValues — blank translation", () => {
     );
 
     expect(error?.hint).toContain(
-      `${diagnosticValue(
+      `${alertValue(
         "missingCharacters, wrongLanguageTypo",
-      )} (resolved from ${diagnosticValue(
+      )} (resolved from ${alertValue(
         "missingCharacters, ~EnglishIsWrongLanguage",
       )}) [column C]`,
     );

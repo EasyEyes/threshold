@@ -9,7 +9,7 @@ import * as XLSX from "xlsx";
 import Papa from "papaparse";
 
 import {
-  EasyEyesError,
+  Alert,
   NO_BLOCK_PARAMETER,
   INVALID_STARTING_BLOCK,
   NONSEQUENTIAL_BLOCK_VALUE,
@@ -39,7 +39,8 @@ import {
   AxisValueError,
   PHRASE_FILE_MISSING,
   FONT_FEATURE_ANALYSIS_ERROR,
-} from "./errorMessages";
+  makeAlert,
+} from "./alerts";
 import { parseFontVariableSettings } from "./fontCheck";
 import {
   getGlossary,
@@ -60,8 +61,7 @@ import { analyzeFontFeatureSettings } from "./fontFeatureAnalysis";
 import { fetchAdobeFontBytes, fetchGoogleFontBytes } from "./fontFetch";
 import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
 import { ExperimentTable } from "./experimentTable";
-import { makeError } from "./validateExperimentTable";
-import { diagnosticValue } from "./diagnosticHtml";
+import { alertParameter, alertValue } from "./alertHtml";
 
 import {
   folderStructureCheckImage,
@@ -99,7 +99,7 @@ export const _superMatching = (parameter: string): boolean => {
   return false;
 };
 
-export const isBlockPresentAndProper = (df: any): EasyEyesError[] => {
+export const isBlockPresentAndProper = (df: any): Alert[] => {
   // Can't do other checks when "block" isn't even present
   const blockPresent: boolean = df.listColumns().includes("block");
   if (!blockPresent) return [NO_BLOCK_PARAMETER];
@@ -108,7 +108,7 @@ export const isBlockPresentAndProper = (df: any): EasyEyesError[] => {
   const blockValues = getColumnValues(df, "block").slice(1); // Drop the first (ie underscore) column
 
   // Array to accumulate the errors we encounter; to be returned
-  const blockValueErrors: EasyEyesError[] = [];
+  const blockValueErrors: Alert[] = [];
 
   // Check the first value
   if (blockValues[0] !== "1") {
@@ -154,8 +154,8 @@ export const isFormMissing = (
   requestedForm: string,
   existingFormList: string[],
   formType: string,
-): EasyEyesError[] => {
-  const errorList: EasyEyesError[] = [];
+): Alert[] => {
+  const errorList: Alert[] = [];
   if (!existingFormList.includes(requestedForm)) {
     errorList.push(FORM_FILES_MISSING(formType, [requestedForm]));
   }
@@ -166,8 +166,8 @@ export const isFormMissing = (
 export const isImageMissing = (
   requestedImageList: string[],
   existingImageList: string[],
-): EasyEyesError[] => {
-  const errorList: EasyEyesError[] = [];
+): Alert[] => {
+  const errorList: Alert[] = [];
   const missingImageList: string[] = [];
   for (let i = 0; i < requestedImageList.length; i++) {
     if (
@@ -188,8 +188,8 @@ export const isTextMissing = (
   requestedTextList: string[],
   existingTextList: string[],
   parameter: string = "readingCorpus",
-): EasyEyesError[] => {
-  const errorList: EasyEyesError[] = [];
+): Alert[] => {
+  const errorList: Alert[] = [];
   const missingText = new Set();
 
   for (const requested of requestedTextList) {
@@ -208,8 +208,8 @@ export const isTextMissing = (
 export const isCodeMissing = (
   requestedCodeList: string[],
   existingCodeList: string[],
-): EasyEyesError[] => {
-  const errorList: EasyEyesError[] = [];
+): Alert[] => {
+  const errorList: Alert[] = [];
   const missingCode = new Set();
 
   for (const requested of requestedCodeList) {
@@ -230,8 +230,8 @@ export const isImageFolderMissing = async (
   existingFolderList: string[],
   gitlabOAuthClient: GitLabOAuthClient,
   fetchImageFiles?: (folderNamesObjectList: any[]) => Promise<any[]>,
-): Promise<EasyEyesError[]> => {
-  const errorList: EasyEyesError[] = [];
+): Promise<Alert[]> => {
+  const errorList: Alert[] = [];
   const missingFolderList: string[] = [];
   const targetImageFolderList = imageFoldersObject.targetImageFolderList;
 
@@ -265,8 +265,8 @@ export const isImageFolderMissing = async (
 export const isSoundFolderMissing = (
   requestedFolderList: any,
   existingFolderList: string[],
-): EasyEyesError[] => {
-  const errorList: EasyEyesError[] = [];
+): Alert[] => {
+  const errorList: Alert[] = [];
 
   const keys = Object.keys(requestedFolderList);
   const missingFolderList: any[] = [];
@@ -287,8 +287,8 @@ export const isSoundFolderMissing = (
 export const isFontMissing = (
   requestedFontList: string[],
   existingFontList: string[],
-): EasyEyesError[] => {
-  const errorList: EasyEyesError[] = [];
+): Alert[] => {
+  const errorList: Alert[] = [];
   const missingFontList: string[] = [];
   for (let i = 0; i < requestedFontList.length; i++) {
     if (
@@ -309,7 +309,7 @@ export const isPhraseFileMissing = (
   requestedPhraseFile: string,
   existingPhraseFileList: string[],
   parameter = "_languagePhrasesSpreadsheet",
-): EasyEyesError[] => {
+): Alert[] => {
   if (!requestedPhraseFile) return [];
   if (existingPhraseFileList.includes(requestedPhraseFile)) return [];
   return [PHRASE_FILE_MISSING(parameter, requestedPhraseFile)];
@@ -333,7 +333,7 @@ interface stringToString {
 export const checkReadingCorpusLength = (
   df: any,
   corpusContents: Record<string, string> = {},
-): EasyEyesError[] => {
+): Alert[] => {
   const targetKinds = getColumnValuesOrDefaults(df, "targetKind");
   const readingPages = getColumnValuesOrDefaults(df, "readingPages");
   const readingLinesPerPage = getColumnValuesOrDefaults(
@@ -482,7 +482,7 @@ const uniqueFoilEligibleWords = (text: string): Set<string> => {
 export const checkReadingFoils = (
   df: any,
   corpusContents: Record<string, string> = {},
-): EasyEyesError[] => {
+): Alert[] => {
   const targetKinds = getColumnValuesOrDefaults(df, "targetKind");
   const readingCorpuses = getColumnValuesOrDefaults(df, "readingCorpus");
   const numberOfQuestions = getColumnValuesOrDefaults(
@@ -677,8 +677,8 @@ export const isImpulseResponseMissing = (
   requestedImpulseResponseList: string[],
   existingImpulseResponseList: string[],
   parameter: string,
-): EasyEyesError[] => {
-  const errors: EasyEyesError[] = [];
+): Alert[] => {
+  const errors: Alert[] = [];
   const missingFileNames: string[] = [];
 
   if (requestedImpulseResponseList.length === 0) {
@@ -718,14 +718,14 @@ export const isImpulseResponseMissing = (
 export const validateImpulseResponseFile = async (
   file: any,
   desiredSamplingRate: number = 48000,
-): Promise<EasyEyesError | null> => {
+): Promise<Alert | null> => {
   try {
     // Parse the impulse response file to get sampling rate and validate format
     const result = await parseImpulseResponseFile(file);
     const samplingRate = result.samplingRate;
     const errors = result.errors;
     if (errors.length > 0) {
-      return makeError({
+      return makeAlert({
         name: "Impulse response file validation error",
         message: errors.join("\n"),
         hint: "Please check the impulse response file format and try again.",
@@ -742,16 +742,18 @@ export const validateImpulseResponseFile = async (
       const upperBound = desiredSamplingRate + tolerance;
 
       if (fileSamplingRate < lowerBound || fileSamplingRate > upperBound) {
-        return makeError({
+        return makeAlert({
           name: "Sampling rate mismatch",
-          message: `The impulse response file ${diagnosticValue(
+          message: `The impulse response file ${alertValue(
             file.name,
-          )} has a sampling rate of ${diagnosticValue(
+          )} has a sampling rate of ${alertValue(
             fileSamplingRate,
-          )} Hz, but <span class="error-parameter">_calibrateSoundSamplingDesiredHz</span> specifies ${diagnosticValue(
-            desiredSamplingRate,
-          )} Hz.`,
-          hint: `Please provide a file with the correct sampling rate or adjust the <span class="error-parameter">_calibrateSoundSamplingDesiredHz</span> parameter.`,
+          )} Hz, but ${alertParameter(
+            "_calibrateSoundSamplingDesiredHz",
+          )} specifies ${alertValue(desiredSamplingRate)} Hz.`,
+          hint: `Please provide a file with the correct sampling rate or adjust the ${alertParameter(
+            "_calibrateSoundSamplingDesiredHz",
+          )} parameter.`,
           parameters: ["_calibrateSoundSamplingDesiredHz"],
         });
       }
@@ -778,8 +780,8 @@ export const isFrequencyResponseMissing = (
   requestedFrequencyResponseList: string[],
   existingFrequencyResponseList: string[],
   parameter: string,
-): EasyEyesError[] => {
-  const errors: EasyEyesError[] = [];
+): Alert[] => {
+  const errors: Alert[] = [];
   const missingFileNames: string[] = [];
 
   if (requestedFrequencyResponseList.length === 0) {
@@ -817,13 +819,13 @@ export const isFrequencyResponseMissing = (
 
 export const validateFrequencyResponseFile = async (
   file: any,
-): Promise<EasyEyesError | null> => {
+): Promise<Alert | null> => {
   try {
     // Parse the frequency response file to validate format
     const result = await parseFrequencyResponseFile(file);
     const errors = result.errors;
     if (errors.length > 0) {
-      return makeError({
+      return makeAlert({
         name: "Frequency response file validation error",
         message: errors.join("\n"),
         hint: "Please check the frequency response file format and try again.",
@@ -858,8 +860,8 @@ export const isTargetSoundListMissing = async (
   targetSoundFoldersFiles: any,
   gitlabOAuthClient: GitLabOAuthClient,
   fetchTargetSoundListFiles?: (names: string[]) => Promise<any[]>,
-): Promise<EasyEyesError[]> => {
-  const errors: EasyEyesError[] = [];
+): Promise<Alert[]> => {
+  const errors: Alert[] = [];
   const missingFileNames: string[] = [];
   const missingColumns: string[] = [];
   if (requestedTargetSoundListList.length === 0) {
@@ -934,7 +936,7 @@ export const isTargetSoundListMissing = async (
           );
         if (targetSoundListErrors.length > 0) {
           errors.push(
-            makeError({
+            makeAlert({
               name: "Target sound list file validation error",
               message: targetSoundListErrors.join("\n"),
               hint: "Please check the target sound list file format and try again.",
@@ -945,7 +947,7 @@ export const isTargetSoundListMissing = async (
       }
     } catch (error: unknown) {
       errors.push(
-        makeError({
+        makeAlert({
           name: "Target sound list file validation error",
           message: `Failed to parse file`,
           hint: "Please check the target sound list file format and try again.",
@@ -988,8 +990,8 @@ export const validateVariableFontSettings = async (
   fontDirectory?: string,
   gitlabOAuthClient?: GitLabOAuthClient,
   fontCache?: FontDataCache,
-): Promise<EasyEyesError[]> => {
-  const errors: EasyEyesError[] = [];
+): Promise<Alert[]> => {
+  const errors: Alert[] = [];
   const presentParameters: string[] = df.listColumns();
 
   const hasFontVariableSettings = presentParameters.includes(
@@ -1306,7 +1308,7 @@ export const validateFontFeatureAnalysis = async (
   fontDirectory?: string,
   gitlabOAuthClient?: GitLabOAuthClient,
   fontCache?: FontDataCache,
-): Promise<EasyEyesError[]> => {
+): Promise<Alert[]> => {
   const presentParameters: string[] = df.listColumns();
   const hasFeatures = presentParameters.includes("fontFeatureSettings");
   const hasSets = presentParameters.includes("fontStylisticSets");

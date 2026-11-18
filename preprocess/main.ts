@@ -22,7 +22,7 @@ import {
   checkReadingFoils,
   isPhraseFileMissing,
 } from "./experimentFileChecks";
-import { diagnosticValue } from "./diagnosticHtml";
+import { alertParameter, alertValue } from "./alertHtml";
 import { validateExperimentTable } from "./validateExperimentTable";
 import { validateFontShaping } from "./fontShapingCheck";
 import { validateFontLanguageSupport } from "./fontLanguageCheck";
@@ -48,14 +48,14 @@ import {
 } from "./utils";
 import { normalizeExperimentDfShape } from "./transformExperimentTable";
 import {
-  EasyEyesError,
+  Alert,
   PROLIFIC_TITLE_TOO_LONG,
   PROLIFIC_CURRENCY_NOT_SUPPORTED,
   PROLIFIC_PARTICIPANT_GROUP_NOT_FOUND,
   PROLIFIC_API_ERROR,
   LOGGING_REQUIRES_AUTHOR_EMAIL,
   LOGGING_CAUTION,
-} from "./errorMessages";
+} from "./alerts";
 import { splitIntoBlockFiles } from "./blockGen";
 import {
   processTypekitFonts,
@@ -98,7 +98,7 @@ import {
 export const preprocessExperimentFile = async (
   file: File,
   user: any,
-  errors: EasyEyesError[],
+  errors: Alert[],
   easyeyesResources: any,
   isCompiledFromArchiveBool: boolean,
   callback: any,
@@ -307,7 +307,7 @@ const getFormspreeQuota = async (): Promise<
 const checkLoggingParameters = async (
   parsed: Papa.ParseResult<any>,
   user: any,
-  errors: EasyEyesError[],
+  errors: Alert[],
 ): Promise<void> => {
   const isTrue = (value: any): boolean =>
     typeof value === "string" && value.trim().toUpperCase() === "TRUE";
@@ -438,10 +438,12 @@ export const prepareExperimentFileForThreshold = async (
     if (namedPhraseColumns && !namedPhraseColumns.includes(namedColumn)) {
       errors.push({
         name: "Phrase column not found",
-        message: `Column ${diagnosticValue(
-          namedColumn,
-        )} is not in <span class="error-parameter">_phrasesSpreadsheet</span>.`,
-        hint: `Set <span class="error-parameter">_phrasesColumnName</span> to a column name in the first row.`,
+        message: `Column ${alertValue(namedColumn)} is not in ${alertParameter(
+          "_phrasesSpreadsheet",
+        )}.`,
+        hint: `Set ${alertParameter(
+          "_phrasesColumnName",
+        )} to a column name in the first row.`,
         context: "preprocessor",
         kind: "error",
         parameters: ["_phrasesColumnName"],
@@ -852,9 +854,15 @@ export const prepareExperimentFileForThreshold = async (
       if (!hasEmails) falultyParameters.push("_authorEmails");
       errors.push({
         name: "_calibrateMicrophonesBool", // which field triggered
-        message: `In order to set <span class="error-parameter">_calibrateMicrophonesBool</span>=${diagnosticValue(
+        message: `In order to set ${alertParameter(
+          "_calibrateMicrophonesBool",
+        )}=${alertValue(
           "TRUE",
-        )} (which allows you to calibrate microphones), you must also specify <span class="error-parameter">_authors</span>, <span class="error-parameter">_authorAffiliations</span>, and <span class="error-parameter">_authorEmails</span>.`,
+        )} (which allows you to calibrate microphones), you must also specify ${alertParameter(
+          "_authors",
+        )}, ${alertParameter("_authorAffiliations")}, and ${alertParameter(
+          "_authorEmails",
+        )}.`,
         hint: "",
         context: "prepareExperimentFileForThreshold", // where the check lives
         kind: "error", // severity
@@ -880,23 +888,23 @@ export const prepareExperimentFileForThreshold = async (
       errors.push({
         name: "_stepperBool requires compatible _calibrateDistance",
         message:
-          `Setting <span class="error-parameter">_stepperBool</span>=${diagnosticValue(
+          `Setting ${alertParameter("_stepperBool")}=${alertValue(
             "FALSE",
-          )} requires <span class="error-parameter">_calibrateDistance</span> to be ${diagnosticValue(
-            "object",
-          )} or ${diagnosticValue("blindspot")} (not ${diagnosticValue(
-            "paper",
-          )} or ${diagnosticValue("paperOrRuler")}). ` +
-          `Current <span class="error-parameter">_calibrateDistance</span> value is ${diagnosticValue(
-            calibrateDistanceValue,
-          )}.`,
-        hint: `Either set <span class="error-parameter">_stepperBool</span>=${diagnosticValue(
+          )} requires ${alertParameter(
+            "_calibrateDistance",
+          )} to be ${alertValue("object")} or ${alertValue(
+            "blindspot",
+          )} (not ${alertValue("paper")} or ${alertValue("paperOrRuler")}). ` +
+          `Current ${alertParameter(
+            "_calibrateDistance",
+          )} value is ${alertValue(calibrateDistanceValue)}.`,
+        hint: `Either set ${alertParameter("_stepperBool")}=${alertValue(
           "TRUE",
-        )}, or change <span class="error-parameter">_calibrateDistance</span> to ${diagnosticValue(
+        )}, or change ${alertParameter("_calibrateDistance")} to ${alertValue(
           "object",
-        )} or ${diagnosticValue("blindspot")} (not ${diagnosticValue(
+        )} or ${alertValue("blindspot")} (not ${alertValue(
           "paper",
-        )} or ${diagnosticValue("paperOrRuler")}).`,
+        )} or ${alertValue("paperOrRuler")}).`,
         context: "prepareExperimentFileForThreshold",
         kind: "error",
         parameters: ["_stepperBool", "_calibrateDistance"],

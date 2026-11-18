@@ -2,7 +2,7 @@
  * Terminal formatting for `npm run examples` CLI output.
  *
  * Compiler error messages contain HTML meant for the web compiler page
- * (<span class="error-parameter">, <br/>, <ul><li>, <b>, styled spans).
+ * (<span class="alert-parameter">, <br/>, <ul><li>, <b>, styled spans).
  * htmlToTerminal renders those fragments as ANSI-colored plain text.
  * Colors are disabled when stdout is not a TTY or NO_COLOR is set.
  */
@@ -27,7 +27,7 @@ export const color = {
   boldYellow: wrap("1;33"),
   boldCyan: wrap("1;36"),
   // git-diff suggestion colors: bold struck deletion, bold green insertion
-  // (same weight as the surrounding error-parameter name)
+  // (same weight as the surrounding alert-parameter name)
   redStrike: wrap("1;31;9"),
   boldGreen: wrap("1;32"),
 };
@@ -53,28 +53,22 @@ export const htmlToTerminal = (
 ): string => {
   let s = html;
   // Known semantic spans → colored text
-  s = s.replace(/<span class="error-parameter">([\s\S]*?)<\/span>/g, (_m, p1) =>
-    color.boldYellow(String(p1), colors),
+  s = s.replace(
+    /<span class="alert-parameter"(?: data-glossary-key="[^"]*")?>([\s\S]*?)<\/span>/g,
+    (_m, p1) => color.boldYellow(String(p1), colors),
   );
   // Literal parameter values → cyan, distinct from yellow parameter names.
-  s = s.replace(/<code class="error-value">([\s\S]*?)<\/code>/g, (_m, p1) =>
+  s = s.replace(/<code class="alert-value">([\s\S]*?)<\/code>/g, (_m, p1) =>
     color.boldCyan(String(p1), colors),
   );
-  // Red marker span (empty one marks a position in a list) → red text/marker.
-  // Struck variant (diff deletions) must run first → bold red + strikethrough.
-  // Property order in the style attribute varies, so match flexibly.
-  s = s.replace(
-    /<span style="[^"]*#bb2c22[^"]*line-through[^"]*">([\s\S]*?)<\/span>/g,
-    (_m, p1) => color.redStrike(String(p1), colors),
+  s = s.replace(/<span class="alert-deleted">([\s\S]*?)<\/span>/g, (_m, p1) =>
+    color.redStrike(String(p1), colors),
   );
-  s = s.replace(
-    /<span style="[^"]*#bb2c22[^"]*">([\s\S]*?)<\/span>/g,
-    (_m, p1) => color.red(String(p1) || "◆", colors),
+  s = s.replace(/<span class="alert-invalid">([\s\S]*?)<\/span>/g, (_m, p1) =>
+    color.red(String(p1) || "◆", colors),
   );
-  // Green insertion span (git-diff suggestions) → bold green
-  s = s.replace(
-    /<span style="[^"]*#147133[^"]*">([\s\S]*?)<\/span>/g,
-    (_m, p1) => color.boldGreen(String(p1), colors),
+  s = s.replace(/<span class="alert-inserted">([\s\S]*?)<\/span>/g, (_m, p1) =>
+    color.boldGreen(String(p1), colors),
   );
   // Bold
   s = s.replace(/<b>([\s\S]*?)<\/b>/g, (_m, p1) =>

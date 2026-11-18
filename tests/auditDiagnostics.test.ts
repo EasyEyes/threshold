@@ -1,8 +1,8 @@
 /** @jest-environment node */
 import { formatAuditDetails } from "../examples/auditDiagnostics";
-import type { EasyEyesError } from "../preprocess/errorMessages";
+import type { Alert } from "../preprocess/alerts";
 
-const diagnostic = (overrides: Partial<EasyEyesError> = {}): EasyEyesError => ({
+const diagnostic = (overrides: Partial<Alert> = {}): Alert => ({
   name: "Glossary parameter not audited as used",
   message:
     'Parameter <a href="https://example.org/glossary?key=font&amp;row=2"><strong>font</strong></a> is unused.',

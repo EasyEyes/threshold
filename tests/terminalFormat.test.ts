@@ -1,7 +1,7 @@
 /**
  * Terminal formatting for `npm run examples` output.
  * The compiler's error messages contain HTML meant for the web page
- * (<span class="error-parameter">, <br/>, <ul><li>, <b>, …); the CLI must
+ * (<span class="alert-parameter">, <br/>, <ul><li>, <b>, …); the CLI must
  * render them as ANSI-colored plain text instead of literal tags.
  *
  * @jest-environment node
@@ -16,9 +16,9 @@ import {
 const C = true; // force colors on
 
 describe("htmlToTerminal", () => {
-  it("strips error-parameter spans, colorizing the parameter name", () => {
+  it("strips alert-parameter spans, colorizing the parameter name", () => {
     const out = htmlToTerminal(
-      'A valid <span class="error-parameter">block</span> value must be provided.',
+      'A valid <span class="alert-parameter">block</span> value must be provided.',
       C,
     );
     expect(out).not.toContain("<span");
@@ -48,38 +48,38 @@ describe("htmlToTerminal", () => {
     );
   });
 
-  it("distinguishes error-value code from parameter names", () => {
+  it("distinguishes alert-value code from parameter names", () => {
     expect(
-      htmlToTerminal('Use <code class="error-value">Chrome Mobile</code>.', C),
+      htmlToTerminal('Use <code class="alert-value">Chrome Mobile</code>.', C),
     ).toBe(`Use ${color.boldCyan("Chrome Mobile", C)}.`);
     expect(
       htmlToTerminal(
-        'Use <code class="error-value">Chrome Mobile</code>.',
+        'Use <code class="alert-value">Chrome Mobile</code>.',
         false,
       ),
     ).toBe("Use Chrome Mobile.");
   });
 
-  it("converts red styled spans to red text, marking empty ones", () => {
-    expect(htmlToTerminal('<span style="color: #bb2c22;">bad</span>', C)).toBe(
+  it("converts invalid spans to red text, marking empty ones", () => {
+    expect(htmlToTerminal('<span class="alert-invalid">bad</span>', C)).toBe(
       color.red("bad", C),
     );
     // empty span marks a position — keep a visible marker
-    const out = htmlToTerminal('1,2,<span style="color: #bb2c22;"></span>,', C);
+    const out = htmlToTerminal('1,2,<span class="alert-invalid"></span>,', C);
     expect(out).not.toContain("<span");
     expect(out).toContain(color.red("◆", C));
   });
 
   it("renders diff-colored suggestions: bold green additions, bold struck deletions", () => {
     // The suggestion token from "Parameter is unrecognized": shared part in
-    // error-parameter bold-yellow, deletion bold red+strikethrough, insertion
+    // alert-parameter bold-yellow, deletion bold red+strikethrough, insertion
     // bold green — same weight as the surrounding name.
     const html =
       "The closest supported parameter is " +
-      '<span class="error-parameter">targe</span>' +
-      '<span style="color: #bb2c22; font-weight: bold; text-decoration: line-through;">r</span>' +
-      '<span style="color: #147133; font-weight: bold;">t</span>' +
-      '<span class="error-parameter">Kind</span>.';
+      '<span class="alert-parameter">targe</span>' +
+      '<span class="alert-deleted">r</span>' +
+      '<span class="alert-inserted">t</span>' +
+      '<span class="alert-parameter">Kind</span>.';
     expect(htmlToTerminal(html, C)).toBe(
       `The closest supported parameter is ${color.boldYellow("targe", C)}` +
         `${C ? "\u001b[1;31;9mr\u001b[0m" : "r"}` +
@@ -96,7 +96,7 @@ describe("htmlToTerminal", () => {
 
   it("produces plain text when colors are disabled", () => {
     const out = htmlToTerminal(
-      'A valid <span class="error-parameter">block</span> <b>value</b>.',
+      'A valid <span class="alert-parameter">block</span> <b>value</b>.',
       false,
     );
     expect(out).toBe("A valid block value.");
