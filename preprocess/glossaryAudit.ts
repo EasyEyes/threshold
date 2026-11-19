@@ -86,25 +86,18 @@ export function validateGlossaryAudit(
     );
 
   return refs
-    .filter(
-      (ref) =>
-        getGlossary()[ref.key]?.type === "obsolete" || unused.has(ref.key),
-    )
-    .map((ref) => {
-      if (getGlossary()[ref.key]?.type === "obsolete")
-        return OBSOLETE_PARAMETER(ref.parameter, ref.key);
-      return {
-        name: "Glossary parameter not audited as used",
-        message: `Parameter ${alertParameter(
-          ref.parameter,
-          ref.key,
-        )} is defined in the Parameter Glossary, but no source usage was detected.`,
-        hint: "No source usage was detected in the completed glossary audit. Check the Glossary entry and remove this parameter if it is not needed. If it is required, report it to the EasyEyes team. This finding does not establish that the parameter is obsolete.",
-        context: "preprocessor",
-        kind: "error",
-        parameters: [ref.parameter],
-      };
-    });
+    .filter((ref) => unused.has(ref.key))
+    .map((ref) => ({
+      name: "Glossary parameter not audited as used",
+      message: `Parameter ${alertParameter(
+        ref.parameter,
+        ref.key,
+      )} is defined in the Parameter Glossary, but no source usage was detected.`,
+      hint: "Review the Glossary entry and remove this parameter if it is unnecessary. If it is required, report it to the EasyEyes team.",
+      context: "preprocessor",
+      kind: "warning",
+      parameters: [ref.parameter],
+    }));
 }
 
 export async function checkGlossaryAudit(
@@ -113,6 +106,15 @@ export async function checkGlossaryAudit(
 ): Promise<Alert[]> {
   const refs = collectStudyGlossaryReferences(rows);
   if (!refs.length) return [];
+
+  // Numbered parameters can inherit an obsolete Glossary definition.
+  const glossary = getGlossary();
+  const obsolete = refs.filter(({ key }) => glossary[key]?.type === "obsolete");
+  if (obsolete.length)
+    return obsolete.map(({ parameter, key }) =>
+      OBSOLETE_PARAMETER(parameter, key),
+    );
+
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 15000);
   try {
@@ -126,8 +128,8 @@ export async function checkGlossaryAudit(
       audit = await response.json();
     }
     if (!audit) throw new Error("Audit missing");
-    const errors = validateGlossaryAudit(refs, audit);
-    if (!errors.length) return errors;
+    const warnings = validateGlossaryAudit(refs, audit);
+    if (!warnings.length) return warnings;
     await loadGlossaryRows();
     return validateGlossaryAudit(refs, audit);
   } catch (error) {
@@ -138,13 +140,11 @@ export async function checkGlossaryAudit(
         ...(mismatch ? { code: "glossary_audit_version_mismatch" } : {}),
         message: mismatch
           ? error.message
-          : "A complete glossary usage audit matching the loaded glossary could not be loaded. Compilation cannot validate the study's glossary parameters.",
-        hint: mismatch
-          ? "Refresh the local catalogs and retry. If the versions still differ, run a matching Glossary audit from the Glossary spreadsheet's EasyEyes menu."
-          : "Try again when the audit service is available. Run a new glossary audit if the glossary version has changed.",
+          : "A complete usage audit for the loaded Glossary version could not be loaded.",
+        hint: "Compilation can continue. The Compiler checks the latest completed audit on each attempt.",
         context: "preprocessor",
-        kind: "error",
-        parameters: refs.map((ref) => ref.parameter),
+        kind: "warning",
+        parameters: [],
       },
     ];
   } finally {

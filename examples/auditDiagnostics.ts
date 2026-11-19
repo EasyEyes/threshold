@@ -33,8 +33,9 @@ const guidance = new Map<string, AuditGuidance>([
   [
     "Glossary audit unavailable",
     {
+      warning: true,
       action:
-        "Retry if the audit service is unavailable. If no matching completed audit exists, use EasyEyes > Run Glossary audit in the editable Glossary spreadsheet, check View Glossary audit report, and rerun the examples command after completion.",
+        "Compilation can continue. To review or request an audit, use the EasyEyes menu in the editable Glossary spreadsheet.",
       references: [
         ["Published Glossary reference", GLOSSARY_SHEET_URL],
         ["Glossary audit instructions", glossaryGuide],
@@ -44,6 +45,7 @@ const guidance = new Map<string, AuditGuidance>([
   [
     "Glossary parameter not audited as used",
     {
+      warning: true,
       action:
         "Review the affected parameter and the completed audit evidence. Correct the study if the parameter is unintended; if it is required, investigate its source references and rerun the audit after correcting the cause.",
       references: [["Glossary audit instructions", glossaryGuide]],

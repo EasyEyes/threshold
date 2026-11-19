@@ -176,14 +176,16 @@ it("warns about a missing source candidate without blocking a defined study key"
   );
 });
 
-function mockGlossaryAudit(available: boolean) {
+function mockGlossaryAudit(state: "matching" | "unavailable" | "stale") {
   const requests: string[] = [];
   jest.spyOn(global, "fetch").mockImplementation(async (input, init) => {
     if (String(input).includes("/glossary-audit-compiler")) {
       requests.push(String(input));
-      return available
-        ? new Response(JSON.stringify(glossaryAuditFixture()))
-        : new Response("Audit unavailable", { status: 503 });
+      if (state === "unavailable")
+        return new Response("Audit unavailable", { status: 503 });
+      const audit = glossaryAuditFixture();
+      if (state === "stale") audit.glossaryVersion = "previous-version";
+      return new Response(JSON.stringify(audit));
     }
     return originalFetch(input, init);
   });
@@ -197,7 +199,7 @@ it.each([
 ])(
   "reports invalid input before requesting a glossary audit: %j",
   async (overrides) => {
-    const requests = mockGlossaryAudit(false);
+    const requests = mockGlossaryAudit("unavailable");
     const result = await compile("EE_Translator", "en", sourceIndex, {
       overrides,
       remoteGlossaryAudit: true,
@@ -218,47 +220,55 @@ it.each([
   },
 );
 
-it("requests the audit after input is corrected and still blocks when it is unavailable", async () => {
-  const requests = mockGlossaryAudit(false);
-  const invalid = await compile(
-    "EE_Translator",
-    "not-a-language",
-    sourceIndex,
-    {
+it.each(["unavailable", "stale"] as const)(
+  "A2/A3/A5 compiles corrected input with a %s audit, then clears the warning when it recovers",
+  async (state) => {
+    const requests = mockGlossaryAudit(state);
+    const invalid = await compile(
+      "EE_Translator",
+      "not-a-language",
+      sourceIndex,
+      {
+        remoteGlossaryAudit: true,
+      },
+    );
+    expect(
+      invalid.blockingErrors.some((error) =>
+        error.parameters.includes("_language"),
+      ),
+    ).toBe(true);
+    expect(requests).toEqual([]);
+
+    const corrected = await compile("EE_Translator", "en", sourceIndex, {
       remoteGlossaryAudit: true,
-    },
-  );
-  expect(
-    invalid.blockingErrors.some((error) =>
-      error.parameters.includes("_language"),
-    ),
-  ).toBe(true);
-  expect(requests).toEqual([]);
+    });
+    expect(requests).toHaveLength(1);
+    expect(corrected.blockingErrors).toEqual([]);
+    expect(corrected.fileStringList.length).toBeGreaterThan(0);
+    expect(corrected.warnings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          name: "Glossary audit unavailable",
+          kind: "warning",
+        }),
+      ]),
+    );
 
-  const corrected = await compile("EE_Translator", "en", sourceIndex, {
-    remoteGlossaryAudit: true,
-  });
-  expect(requests).toHaveLength(1);
-  expect(corrected.blockingErrors).toEqual(
-    expect.arrayContaining([
-      expect.objectContaining({
-        name: "Glossary audit unavailable",
-        kind: "error",
-      }),
-    ]),
-  );
-
-  const recoveredRequests = mockGlossaryAudit(true);
-  const recovered = await compile("EE_Translator", "en", sourceIndex, {
-    remoteGlossaryAudit: true,
-  });
-  expect(recoveredRequests).toHaveLength(1);
-  expect(recovered.blockingErrors).toEqual([]);
-  expect(recovered.fileStringList.length).toBeGreaterThan(0);
-});
+    const recoveredRequests = mockGlossaryAudit("matching");
+    const recovered = await compile("EE_Translator", "en", sourceIndex, {
+      remoteGlossaryAudit: true,
+    });
+    expect(recoveredRequests).toHaveLength(1);
+    expect(recovered.blockingErrors).toEqual([]);
+    expect(recovered.warnings.map((warning) => warning.name)).not.toContain(
+      "Glossary audit unavailable",
+    );
+    expect(recovered.fileStringList.length).toBeGreaterThan(0);
+  },
+);
 
 it("does not skip the glossary audit for a nonblocking input warning", async () => {
-  const requests = mockGlossaryAudit(false);
+  const requests = mockGlossaryAudit("unavailable");
   const result = await compile("EE_Translator", "en", sourceIndex, {
     remoteGlossaryAudit: true,
     overrides: {
@@ -273,11 +283,12 @@ it("does not skip the glossary audit for a nonblocking input warning", async () 
       warning.name.includes("off the display's code grid"),
     ),
   ).toBe(true);
-  expect(result.blockingErrors).toEqual(
+  expect(result.blockingErrors).toEqual([]);
+  expect(result.warnings).toEqual(
     expect.arrayContaining([
       expect.objectContaining({
         name: "Glossary audit unavailable",
-        kind: "error",
+        kind: "warning",
       }),
     ]),
   );

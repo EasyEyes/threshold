@@ -231,8 +231,8 @@ const constructForEXperiment = async (
 
   let result = await compile();
   if (
-    result.blockingErrors.some(
-      (error) => error.code === "glossary_audit_version_mismatch",
+    result.warnings.some(
+      (warning) => warning.code === "glossary_audit_version_mismatch",
     ) &&
     (await refreshCatalogsOnce())
   ) {

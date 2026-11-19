@@ -192,42 +192,44 @@ const runExample = (mode: string) =>
     },
   );
 
-it("A5/A6/A8 blocks failed audits while preserving the command's original exit code and previous output", () => {
-  for (const mode of ["unavailable", "stale", "incomplete", "unused"]) {
-    const valid = runExample("matching");
-    expect(valid.error).toBeUndefined();
-    expect(valid.stdout).toContain("SUCCESS");
-    expect(valid.status).toBe(0);
-    expect(fs.existsSync(path.join(output, "index.html"))).toBe(true);
-    const previous = fs.readFileSync(path.join(output, "index.html"));
-
-    const blocked = runExample(mode);
-    expect(blocked.error).toBeUndefined();
-    expect(blocked.stdout).toContain(
+it.each(["unavailable", "stale", "incomplete", "unused"])(
+  "A2/A3/A4 compiles with audit warnings when the report is %s",
+  (mode) => {
+    fs.rmSync(output, { recursive: true, force: true });
+    const result = runExample(mode);
+    expect(result.error).toBeUndefined();
+    expect(result.status).toBe(0);
+    expect(result.stdout).toContain("WARNINGS");
+    expect(result.stdout).toContain(
       mode === "unused"
         ? "Glossary parameter not audited as used"
         : "Glossary audit unavailable",
     );
-    expect(blocked.stdout).not.toContain("SUCCESS");
-    expect(blocked.stdout).toContain("audit guidance:");
-    expect(blocked.stdout).toContain(
+    expect(result.stdout).toContain("SUCCESS");
+    expect(result.stdout).toContain("audit guidance:");
+    expect(result.stdout).toContain(
       "https://github.com/EasyEyes/website/blob/main/scripts/glossary-audit/README.md",
     );
     if (mode === "unused")
-      expect(blocked.stdout).toContain("https://docs.google.com/spreadsheets/");
-    expect(blocked.status).toBe(0);
-    expect(fs.readFileSync(path.join(output, "index.html"))).toEqual(previous);
+      expect(result.stdout).toContain("https://docs.google.com/spreadsheets/");
+    expect(fs.existsSync(path.join(output, "index.html"))).toBe(true);
     expect(
       fs.readFileSync(path.join(otherOutput, "preserved.txt"), "utf8"),
     ).toBe("other example");
-  }
-  expect(runExample("matching").status).toBe(0);
+  },
+);
+
+it("preserves existing output when the source-index build fails", () => {
+  const valid = runExample("matching");
+  expect(valid.status).toBe(0);
+  expect(valid.stdout).toContain("SUCCESS");
+  const previous = fs.readFileSync(path.join(output, "index.html"));
   const failedBuild = runExample("builder-failure");
   expect(failedBuild.error).toBeUndefined();
   expect(failedBuild.status).toBe(1);
   expect(failedBuild.stderr).toContain("Local source analysis unavailable");
   expect(failedBuild.stdout).not.toContain("SUCCESS");
-  expect(fs.existsSync(path.join(output, "index.html"))).toBe(true);
+  expect(fs.readFileSync(path.join(output, "index.html"))).toEqual(previous);
   expect(fs.existsSync(path.join(otherOutput, "preserved.txt"))).toBe(true);
 });
 
@@ -309,34 +311,35 @@ it("R2 refreshes mismatched cached catalogs once and reuses the refreshed cache 
   expect(auditGets()).toHaveLength(3);
 });
 
-it("R3 retries a persistent mismatch only once and preserves earlier output", () => {
+it("R3 retries a persistent mismatch only once and compiles with a warning", () => {
   seedOldGlossaryCache();
   fs.mkdirSync(output, { recursive: true });
   fs.writeFileSync(
     path.join(output, "index.html"),
     "previous generated output",
   );
-  const previous = fs.readFileSync(path.join(output, "index.html"));
-  const blocked = runExample("refresh-still-stale");
-  expect(blocked.error).toBeUndefined();
-  expect(blocked.status).toBe(0);
-  expect(blocked.stdout).not.toContain("SUCCESS");
-  expect(blocked.stdout).toContain("Glossary audit unavailable");
+  const result = runExample("refresh-still-stale");
+  expect(result.error).toBeUndefined();
+  expect(result.status).toBe(0);
+  expect(result.stdout).toContain("SUCCESS");
+  expect(result.stdout).toContain("Glossary audit unavailable");
   expect(catalogGets()).toHaveLength(2);
   expect(auditGets()).toHaveLength(2);
-  expect(blocked.stdout).toContain(
+  expect(result.stdout).toContain(
     "does not match completed audit version hosted-audit-behind",
   );
-  expect(fs.readFileSync(path.join(output, "index.html"))).toEqual(previous);
+  expect(fs.readFileSync(path.join(output, "index.html"), "utf8")).not.toBe(
+    "previous generated output",
+  );
 });
 
 it.each(["refresh-unavailable", "refresh-incomplete"])(
   "R4 does not refresh catalogs for %s",
   (mode) => {
     seedOldGlossaryCache();
-    const blocked = runExample(mode);
-    expect(blocked.stdout).toContain("Glossary audit unavailable");
-    expect(blocked.stdout).not.toContain("SUCCESS");
+    const result = runExample(mode);
+    expect(result.stdout).toContain("Glossary audit unavailable");
+    expect(result.stdout).toContain("SUCCESS");
     expect(catalogGets()).toHaveLength(0);
     expect(auditGets()).toHaveLength(1);
   },
@@ -347,10 +350,10 @@ it("R5 shares the one-refresh limit across all tables in a batch", () => {
   const secondTable = path.join(examples, "tables", `${name}-other.csv`);
   fs.writeFileSync(secondTable, validTable);
   try {
-    const blocked = runExample("refresh-batch-still-stale");
-    expect(blocked.error).toBeUndefined();
-    expect(blocked.status).toBe(0);
-    expect(blocked.stdout).not.toContain("SUCCESS");
+    const result = runExample("refresh-batch-still-stale");
+    expect(result.error).toBeUndefined();
+    expect(result.status).toBe(0);
+    expect(result.stdout).toContain("SUCCESS");
     expect(catalogGets()).toHaveLength(2);
     expect(auditGets()).toHaveLength(3);
   } finally {
@@ -358,36 +361,34 @@ it("R5 shares the one-refresh limit across all tables in a batch", () => {
   }
 });
 
-it("R6 stops a failed automatic catalog fetch without looping or replacing output", () => {
+it("R6 compiles with a warning when the one automatic catalog refresh fails", () => {
   seedOldGlossaryCache();
   fs.mkdirSync(output, { recursive: true });
   fs.writeFileSync(
     path.join(output, "index.html"),
     "previous generated output",
   );
-  const previous = fs.readFileSync(path.join(output, "index.html"));
-  const blocked = runExample("refresh-fetch-failure");
-  expect(blocked.error).toBeUndefined();
-  expect(blocked.status).toBe(0);
-  expect(blocked.stdout).not.toContain("SUCCESS");
-  expect(blocked.stderr).toContain("Local catalog refresh failed");
+  const result = runExample("refresh-fetch-failure");
+  expect(result.error).toBeUndefined();
+  expect(result.status).toBe(0);
+  expect(result.stdout).toContain("SUCCESS");
+  expect(result.stderr).toContain("Local catalog refresh failed");
   expect(catalogGets()).toHaveLength(1);
   expect(auditGets()).toHaveLength(1);
-  expect(fs.readFileSync(path.join(output, "index.html"))).toEqual(previous);
+  expect(fs.readFileSync(path.join(output, "index.html"), "utf8")).not.toBe(
+    "previous generated output",
+  );
 });
 
-it("colors complete audit errors red and source-analysis warnings yellow in a terminal", () => {
+it("colors complete Glossary audit and phrase source-analysis warnings yellow", () => {
   fs.writeFileSync(table, validTable);
   const result = runExample("color-unused");
   if (!result.stdout) throw new Error(result.stderr || String(result.error));
   expect(result.stdout).toContain(
-    "\x1b[31m[1/1] Glossary parameter not audited as used",
+    "\x1b[33m[1/1] ⚠️ Glossary parameter not audited as used",
   );
   expect(result.stdout).toContain("audit references:");
-  const errorBlock = result.stdout.slice(
-    result.stdout.indexOf("\x1b[31m[1/1] Glossary"),
-  );
-  expect(errorBlock).not.toContain("\x1b[33m");
+  expect(result.stdout).toContain("SUCCESS");
   const warning = runExample("color-matching");
   expect(warning.stdout).toContain("\x1b[33m[1/1] ⚠️ Warning:");
   expect(warning.stdout).toContain("SUCCESS");
