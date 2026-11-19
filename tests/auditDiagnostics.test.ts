@@ -7,7 +7,7 @@ const diagnostic = (overrides: Partial<Alert> = {}): Alert => ({
   message:
     'Parameter <a href="https://example.org/glossary?key=font&amp;row=2"><strong>font</strong></a> is unused.',
   hint: "Review the completed audit.",
-  kind: "error",
+  kind: "warning",
   context: "preprocessor",
   parameters: ["font"],
   ...overrides,
@@ -26,11 +26,11 @@ it.each([
   "Parameter contains values of the wrong type",
   "International phrase not defined",
 ])("adds nothing to the existing compiler error %s", (name) => {
-  expect(formatAuditDetails(diagnostic({ name }))).toEqual([]);
+  expect(formatAuditDetails(diagnostic({ name, kind: "error" }))).toEqual([]);
 });
 
-it("does not alter warnings or turn them into errors", () => {
-  expect(formatAuditDetails(diagnostic({ kind: "warning" }))).toEqual([]);
+it("does not add audit guidance to unrelated warnings", () => {
+  expect(formatAuditDetails(diagnostic({ name: "Other warning" }))).toEqual([]);
 });
 
 it("discards invalid or unsafe links while preserving valid references once", () => {
@@ -48,7 +48,9 @@ it.each([
   "Study phrase analysis unavailable",
   "Study glossary analysis unavailable",
 ])("explains local index recovery for %s", (name) => {
-  const text = formatAuditDetails(diagnostic({ name })).join("\n");
+  const text = formatAuditDetails(diagnostic({ name, kind: "error" })).join(
+    "\n",
+  );
   expect(text).toContain("Fix source-index build or parse errors");
   expect(text).toContain("scripts/phrase-analysis/build.mjs");
 });
@@ -79,16 +81,13 @@ it("retains every phrase label when several keys share the same sheet link", () 
   expect(text).toContain("EE_first, RC_second: https://example.org/sheet");
 });
 
-it("renders audit failures red and source-analysis warnings yellow when colors are enabled", () => {
-  const failure = formatAuditDetails(diagnostic(), true).join("\n");
-  expect(failure).toContain("\x1b[31m");
-  const warning = formatAuditDetails(
-    diagnostic({
-      code: "study_phrase_candidates_missing",
-      kind: "warning",
-    }),
+it("renders diagnostic details using their severity colors", () => {
+  const failure = formatAuditDetails(
+    diagnostic({ name: "Study glossary analysis unavailable", kind: "error" }),
     true,
   ).join("\n");
+  expect(failure).toContain("\x1b[31m");
+  const warning = formatAuditDetails(diagnostic(), true).join("\n");
   expect(warning).toContain("\x1b[33m");
   expect(warning).not.toContain("\x1b[31m");
   expect(formatAuditDetails(diagnostic(), false).join("\n")).not.toContain(

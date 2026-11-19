@@ -1,8 +1,12 @@
-import { getGlossary, initGlossary } from "../parameters/glossaryRegistry";
+import {
+  getGlossary,
+  getSuperMatchingParams,
+  initGlossary,
+} from "../parameters/glossaryRegistry";
 import { linkGlossaryParameters } from "../parameters/glossaryLink";
 import { ExperimentTable } from "../preprocess/experimentTable";
 import { validateExperimentTable } from "../preprocess/validateExperimentTable";
-import { validateGlossaryAudit } from "../preprocess/glossaryAudit";
+import { checkGlossaryAudit } from "../preprocess/glossaryAudit";
 import type { GlossaryEntry } from "../../source/components/types";
 
 const entry = (
@@ -70,7 +74,7 @@ it.each([
 
 it.each([true, false])(
   "uses the same obsolete error when the audit reports used=%s",
-  (used) => {
+  async (used) => {
     const name = "fontLeftToRightBool";
     const audit = {
       id: "internal-audit-id",
@@ -85,14 +89,29 @@ it.each([true, false])(
         },
       ],
     };
-    const errors = validateGlossaryAudit(
-      [{ parameter: name, key: name }],
-      audit,
-    );
+    const errors = await checkGlossaryAudit([[name, "", "TRUE"]], audit);
     expect(errors).toHaveLength(1);
     expect(errors).toEqual(errorsFor(name));
   },
 );
+
+it("rejects numbered members of an obsolete Glossary family before fetching an audit", async () => {
+  getGlossary()["retiredFont@@"] = entry("retiredFont@@", "obsolete");
+  getSuperMatchingParams().push("retiredFont@@");
+  const fetchAudit = jest.spyOn(globalThis, "fetch");
+  try {
+    expect(await checkGlossaryAudit([["retiredFont01", "", "Arial"]])).toEqual([
+      expect.objectContaining({
+        name: "Parameter is obsolete",
+        kind: "error",
+        parameters: ["retiredFont01"],
+      }),
+    ]);
+    expect(fetchAudit).not.toHaveBeenCalled();
+  } finally {
+    fetchAudit.mockRestore();
+  }
+});
 
 it("does not invent a replacement when the Glossary has none", () => {
   expect(errorsFor("retiredWithoutReplacement")[0].hint).toContain(

@@ -401,23 +401,24 @@ describe("glossary usage compiler integration", () => {
       }
     },
   );
-  it("C2 blocks a known unused study parameter before generating condition files", async () => {
-    const table = writeTable("unused-font.csv", makeTable({ font: "Arial" }));
+  it("A4 warns about a known unused study parameter and generates condition files", async () => {
+    const table = writeTable("unused-parameter.csv", makeTable());
     const result = await compileExperimentTableLocally(
       table,
       localCompileTestOptions({
         resourcesRoot: tmpRoot,
-        glossaryAudit: glossaryAuditFixture(["font"]),
+        glossaryAudit: glossaryAuditFixture(["conditionTrials"]),
       }),
     );
     expect(
-      result.blockingErrors.some(
-        (error) =>
-          error.name === "Glossary parameter not audited as used" &&
-          error.parameters.includes("font"),
+      result.warnings.some(
+        (warning) =>
+          warning.name === "Glossary parameter not audited as used" &&
+          warning.parameters.includes("conditionTrials"),
       ),
     ).toBe(true);
-    expect(result.fileStringList).toEqual([]);
+    expect(result.blockingErrors).toEqual([]);
+    expect(result.fileStringList.length).toBeGreaterThan(0);
   });
   it("C7 ignores a value supplied only in a disabled condition", async () => {
     const rows = makeTable()
