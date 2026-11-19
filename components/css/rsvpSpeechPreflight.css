@@ -1,20 +1,25 @@
 .rsvp-speech-preflight {
   position: fixed;
   z-index: 999998;
-  left: 50%;
-  bottom: 5rem;
-  width: min(42rem, calc(100vw - 4rem));
-  transform: translateX(-50%);
+  inset: auto 0 clamp(1rem, 10vh, 6rem);
+  margin-inline: auto;
+  box-sizing: border-box;
+  width: min(34rem, calc(100vw - 2rem));
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  background: #fff;
+  border: 1px solid #cdd6df;
+  border-radius: 0.9rem;
+  box-shadow: 0 10px 30px rgb(15 23 42 / 16%);
+  color: #17212b;
   text-align: center;
   font-family: inherit;
 }
 
 .rsvp-speech-preflight__message {
   margin: 0;
-  padding: 0.8rem 1rem;
-  border-radius: 0.5rem;
-  background: rgb(255 255 255 / 92%);
-  color: #111;
   font-size: 1.1rem;
   line-height: 1.4;
 }
@@ -25,6 +30,55 @@
 }
 
 .rsvp-speech-preflight__button {
-  left: 50%;
-  transform: translateX(-50%);
+  padding: 0.65rem 1.1rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: #18568a;
+  color: #fff;
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.rsvp-speech-preflight__button:focus-visible {
+  outline: 2px solid #18568a;
+  outline-offset: 3px;
+}
+
+.rsvp-speech-preflight--success {
+  background: #ecfdf3;
+  border-color: #81c69c;
+  color: #14532d;
+}
+
+.rsvp-speech-preflight--success .rsvp-speech-preflight__message {
+  font-weight: 650;
+}
+
+.rsvp-speech-preflight--preparing {
+  inset: 0;
+  margin: auto;
+  height: fit-content;
+  pointer-events: none;
+}
+
+.rsvp-speech-preflight--preparing::before {
+  content: "";
+  width: 1.2rem;
+  height: 1.2rem;
+  border: 2px solid #cdd6df;
+  border-top-color: #18568a;
+  border-radius: 50%;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .rsvp-speech-preflight--preparing::before {
+    animation: rsvp-speech-preflight-spin 0.8s linear infinite;
+  }
+}
+
+@keyframes rsvp-speech-preflight-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }

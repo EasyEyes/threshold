@@ -1,5 +1,6 @@
 import { rsvpSpeechPreflight } from "../global";
 import { readi18nPhrases } from "../readPhrases";
+import { getPhrases } from "../../parameters/phrasesRegistry";
 import { calculateAudioSignalMetrics } from "./audioSignal";
 import {
   MicrophoneError,
@@ -389,6 +390,26 @@ interface ActivePreflightController {
 
 let activeController: ActivePreflightController | undefined;
 
+const CONFIRMATION_MS = 1200;
+
+export const showRsvpSpeechPreparation = (language: string): (() => void) => {
+  const panel = document.createElement("section");
+  panel.className = "rsvp-speech-preflight rsvp-speech-preflight--preparing";
+  panel.setAttribute("role", "status");
+  panel.textContent =
+    getPhrases().T_rsvpSpeechPreparingTrial?.[language] ??
+    "Preparing the first trial…";
+  // Don't flash the panel when preparation is fast.
+  const timer = window.setTimeout(() => document.body.append(panel), 350);
+  const close = (): void => {
+    window.clearTimeout(timer);
+    panel.remove();
+    window.removeEventListener("pagehide", close);
+  };
+  window.addEventListener("pagehide", close, { once: true });
+  return close;
+};
+
 const setMessage = (
   element: HTMLElement,
   message: string,
@@ -421,8 +442,7 @@ export const mountRsvpSpeechPreflight = ({
 
   const button = document.createElement("button");
   button.type = "button";
-  button.className =
-    "threshold-button threshold-proceed-button rsvp-speech-preflight__button";
+  button.className = "rsvp-speech-preflight__button";
   button.textContent = copy.startButton;
 
   container.append(message, button);
@@ -434,6 +454,7 @@ export const mountRsvpSpeechPreflight = ({
   rsvpSpeechPreflight.lastFailureCode = undefined;
 
   let runAbortController: AbortController | undefined;
+  let confirmationTimer: number | undefined;
   let cancelled = false;
   const handlePageHide = (): void => controller.cancel();
 
@@ -442,6 +463,7 @@ export const mountRsvpSpeechPreflight = ({
       if (cancelled) return;
       cancelled = true;
       runAbortController?.abort();
+      window.clearTimeout(confirmationTimer);
       window.removeEventListener("pagehide", handlePageHide);
       container.remove();
       if (!rsvpSpeechPreflight.completed) {
@@ -458,7 +480,7 @@ export const mountRsvpSpeechPreflight = ({
     event.preventDefault();
     event.stopImmediatePropagation();
     event.stopPropagation();
-    if (cancelled || rsvpSpeechPreflight.status === "running") return;
+    if (cancelled || button.disabled) return;
 
     runAbortController = new AbortController();
     rsvpSpeechPreflight.status = "running";
@@ -490,14 +512,19 @@ export const mountRsvpSpeechPreflight = ({
         return;
       }
 
-      rsvpSpeechPreflight.completed = true;
-      rsvpSpeechPreflight.required = false;
-      rsvpSpeechPreflight.status = "passed";
       setMessage(message, copy.success);
-      window.removeEventListener("pagehide", handlePageHide);
-      container.remove();
-      activeController = undefined;
-      onPassed();
+      container.classList.add("rsvp-speech-preflight--success");
+      button.hidden = true;
+      confirmationTimer = window.setTimeout(() => {
+        if (cancelled) return;
+        rsvpSpeechPreflight.completed = true;
+        rsvpSpeechPreflight.required = false;
+        rsvpSpeechPreflight.status = "passed";
+        window.removeEventListener("pagehide", handlePageHide);
+        container.remove();
+        activeController = undefined;
+        onPassed();
+      }, CONFIRMATION_MS);
     } catch (error) {
       if (error instanceof SpeechPreflightCancelledError || cancelled) return;
       rsvpSpeechPreflight.status = "failed";

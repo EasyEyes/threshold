@@ -19,10 +19,15 @@ import {
   isRsvpSpeechPreflightBlocking,
   mountRsvpSpeechPreflight,
   runSpeechPreflight,
+  showRsvpSpeechPreparation,
   type SpeechPreflightCopy,
   type SpeechPreflightPhase,
   type SpeechPreflightResult,
 } from "../components/speech/speechPreflight";
+import { getPhrases } from "../parameters/phrasesRegistry";
+jest.mock("../parameters/phrasesRegistry", () => ({
+  getPhrases: jest.fn(() => ({})),
+}));
 import type {
   MicrophoneHealth,
   MicrophoneSession,
@@ -254,6 +259,7 @@ describe("runSpeechPreflight", () => {
 
 describe("mountRsvpSpeechPreflight", () => {
   beforeEach(() => {
+    jest.useFakeTimers();
     cancelActiveRsvpSpeechPreflight();
     document.body.innerHTML = "";
     rsvpSpeechPreflight.completed = false;
@@ -265,6 +271,7 @@ describe("mountRsvpSpeechPreflight", () => {
 
   afterEach(() => {
     cancelActiveRsvpSpeechPreflight();
+    jest.useRealTimers();
   });
 
   it("advances only after a successful check", async () => {
@@ -295,6 +302,14 @@ describe("mountRsvpSpeechPreflight", () => {
     await Promise.resolve();
     await Promise.resolve();
 
+    expect(onPassed).not.toHaveBeenCalled();
+    expect(isRsvpSpeechPreflightBlocking()).toBe(true);
+    expect(
+      document.querySelector(".rsvp-speech-preflight--success")?.textContent,
+    ).toContain(copy.success);
+    expect(document.querySelector("button")?.hidden).toBe(true);
+    jest.advanceTimersByTime(1200);
+
     expect(onPassed).toHaveBeenCalledTimes(1);
     expect(rsvpSpeechPreflight).toMatchObject({
       completed: true,
@@ -302,6 +317,32 @@ describe("mountRsvpSpeechPreflight", () => {
       status: "passed",
       block: 2,
     });
+    expect(document.getElementById("rsvp-speech-preflight")).toBeNull();
+  });
+
+  it("cancels the confirmation without advancing when the page is hidden", async () => {
+    const onPassed = jest.fn();
+    mountRsvpSpeechPreflight({
+      block: 1,
+      language: "en",
+      copy,
+      onPassed,
+      runPreflight: async () => ({
+        ok: true,
+        sampleRate: 48000,
+        frameDurationMs: 20,
+        noiseFloorAcRms: 0.001,
+        detectedVoiceAcRms: 0.05,
+      }),
+    });
+    document.querySelector("button")?.click();
+    await Promise.resolve();
+    expect(
+      document.querySelector(".rsvp-speech-preflight--success"),
+    ).not.toBeNull();
+    window.dispatchEvent(new Event("pagehide"));
+    jest.advanceTimersByTime(1200);
+    expect(onPassed).not.toHaveBeenCalled();
     expect(document.getElementById("rsvp-speech-preflight")).toBeNull();
   });
 
@@ -362,6 +403,36 @@ describe("mountRsvpSpeechPreflight", () => {
     expect(isRsvpSpeechPreflightBlocking()).toBe(false);
     expect(rsvpSpeechPreflight.status).toBe("cancelled");
     expect(document.getElementById("rsvp-speech-preflight")).toBeNull();
+  });
+});
+
+describe("first speech trial preparation indicator", () => {
+  beforeEach(() => jest.useFakeTimers());
+  afterEach(() => jest.useRealTimers());
+
+  it("never appears when preparation finishes quickly", () => {
+    const close = showRsvpSpeechPreparation("en");
+    close();
+    jest.advanceTimersByTime(350);
+    expect(
+      document.querySelector(".rsvp-speech-preflight--preparing"),
+    ).toBeNull();
+  });
+
+  it("uses the localized text when available and cleans up after navigation", () => {
+    jest.mocked(getPhrases).mockReturnValueOnce({
+      T_rsvpSpeechPreparingTrial: { fr: "Préparation du premier essai…" },
+    });
+    const close = showRsvpSpeechPreparation("fr");
+    jest.advanceTimersByTime(350);
+    expect(
+      document.querySelector(".rsvp-speech-preflight--preparing")?.textContent,
+    ).toBe("Préparation du premier essai…");
+    window.dispatchEvent(new Event("pagehide"));
+    expect(
+      document.querySelector(".rsvp-speech-preflight--preparing"),
+    ).toBeNull();
+    close();
   });
 });
 
