@@ -387,6 +387,25 @@ thresholdParameter,,targetSizeDeg`,
         /vernier targetKind requires thresholdParameter=targetOffsetDeg/i,
     },
     {
+      label: "fontTransparencyRange",
+      csv: `${BASE}
+fontTransparency,,1.5
+readingCorpus,,words.txt
+targetKind,,rsvpReading
+targetTask,,identify
+thresholdParameter,,targetDurationSec`,
+      expectName: /fontTransparency must be from 0 to 1/i,
+    },
+    {
+      label: "fontTransparencyUsable",
+      csv: `${BASE}
+fontTransparency,,0.2
+targetKind,,letter
+targetTask,,identify
+thresholdParameter,,targetSizeDeg`,
+      expectName: /fontTransparency requires targetKind=rsvpReading/i,
+    },
+    {
       label: "questionsProvidedForQA",
       csv: `${BASE}
 questionAndAnswer01,,NICK||Q?

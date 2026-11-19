@@ -301,6 +301,8 @@ exports[`Part A: example tables rsvpReading-percentcorrect-sim.csv — error out
 
 exports[`Part A: example tables rsvpReading-tracking-sim.csv — error output is unchanged 1`] = `[]`;
 
+exports[`Part A: example tables rsvpReading-transparency-sim.csv — error output is unchanged 1`] = `[]`;
+
 exports[`Part A: example tables short.csv — error output is unchanged 1`] = `[]`;
 
 exports[`Part A: example tables showimage-recalibrate-sim.csv — error output is unchanged 1`] = `
@@ -973,6 +975,38 @@ exports[`Part B: per-check trigger scenarios fontPreRenderCache — fires its ch
     "name": "No targetTask provided",
     "parameters": [
       "targetTask",
+    ],
+  },
+]
+`;
+
+exports[`Part B: per-check trigger scenarios fontTransparencyRange — fires its check, output unchanged 1`] = `
+[
+  {
+    "context": "preprocessor",
+    "hint": "Out-of-range values: <code class="alert-value">1.5</code> (column C).",
+    "kind": "error",
+    "message": "<span class="alert-parameter">fontTransparency</span> multiplies the transparency of <span class="alert-parameter">fontColorRGBA</span>, so it must be a number from <code class="alert-value">0</code> (invisible) to <code class="alert-value">1</code> (the font color as specified).",
+    "name": "fontTransparency must be from 0 to 1",
+    "parameters": [
+      "fontTransparency",
+    ],
+  },
+]
+`;
+
+exports[`Part B: per-check trigger scenarios fontTransparencyUsable — fires its check, output unchanged 1`] = `
+[
+  {
+    "context": "preprocessor",
+    "hint": "Check column C. Set <span class="alert-parameter">targetKind</span> to <code class="alert-value">rsvpReading</code>, or leave <span class="alert-parameter">fontTransparency</span> at <code class="alert-value">1</code> and choose another <span class="alert-parameter">thresholdParameter</span>.",
+    "kind": "error",
+    "message": "<span class="alert-parameter">fontTransparency</span> is implemented only for <span class="alert-parameter">targetKind</span> = <code class="alert-value">rsvpReading</code> so far. With any other <span class="alert-parameter">targetKind</span> the text would be shown at full strength.",
+    "name": "fontTransparency requires targetKind=rsvpReading",
+    "parameters": [
+      "fontTransparency",
+      "thresholdParameter",
+      "targetKind",
     ],
   },
 ]

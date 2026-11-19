@@ -43,6 +43,8 @@ export interface RepeatedLettersState {
 export interface RsvpReadingState {
   thisTrialWords: rsvpReadingTrialWords;
   durationSec: number;
+  /** Effective transparency of the text (fontTransparency.ts). Default 1. */
+  fontOpacity?: number;
 }
 export interface VernierState {
   proposedLevel: number;

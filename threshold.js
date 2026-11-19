@@ -532,6 +532,12 @@ import {
   undrawAllRSVPReadingStims,
 } from "./components/rsvpReading.js";
 import {
+  constrainFontTransparencyLevel,
+  getFontOpacity,
+  isFontTransparencyThreshold,
+  readFontTransparency,
+} from "./components/fontTransparency.ts";
+import {
   isRsvpReadingAutomaticSpeechResponseMode,
   resolveRsvpReadingBlockResponseModes,
   resolveRsvpReadingResponseMode,
@@ -6708,6 +6714,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             screensPerTrial * rsvpReadingWordsTestedPerScreen;
 
           let durationSec;
+          // The condition's fixed fontTransparency, unless QUEST controls it.
+          let fontTransparency = readFontTransparency(paramReader, BC);
           if (
             paramReader.read("thresholdParameter", BC) === "targetDurationSec"
           ) {
@@ -6717,15 +6725,31 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             );
             psychoJS.experiment.addData("level", level);
             durationSec = Math.pow(10, level);
+          } else if (isFontTransparencyThreshold(paramReader, BC)) {
+            // QUEST measures a transparency threshold at fixed duration.
+            level = constrainFontTransparencyLevel(proposedLevel);
+            psychoJS.experiment.addData("level", level);
+            fontTransparency = Math.pow(10, level);
+            durationSec = paramReader.read("targetDurationSec", BC);
           } else {
             durationSec = paramReader.read("targetDurationSec", BC);
           }
+          // Effective transparency: fontTransparency times fontColorRGBA's A.
+          const fontOpacity = getFontOpacity(font.colorRGBA, fontTransparency);
 
           psychoJS.experiment.addData(
             "rsvpReadingWordDurationSec",
             durationSec,
           );
           psychoJS.experiment.addData("rsvpWordDurationSec", durationSec);
+          psychoJS.experiment.addData(
+            "actualFontTransparency",
+            fontTransparency,
+          );
+          psychoJS.experiment.addData(
+            "actualFontEffectiveTransparency",
+            fontOpacity,
+          );
 
           // Get the words
           const thisTrialWords =
@@ -6753,6 +6777,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             const stimulusState = {
               thisTrialWords,
               durationSec,
+              fontOpacity,
             };
             const stimulusResults = getStimulus(
               status.block_condition,
@@ -6872,6 +6897,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             {
               filename: thisExperimentInfo.experimentFilename,
               targetWordDurationSec: durationSec,
+              fontTransparency: Number(fontTransparency.toPrecision(4)),
               rsvpReadingNumberOfWords: rsvpReadingNumberOfWords,
               rsvpReadingResponseModality: rsvpReadingResponse.responseType,
             },

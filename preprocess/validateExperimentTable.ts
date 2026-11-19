@@ -2207,6 +2207,76 @@ const checkVernierUsingCorrectThreshold = (t: ExperimentTable): Alert[] => {
   return errors;
 };
 
+// fontTransparency scales the "A" of fontColorRGBA, so it is a proportion:
+// a number from 0 (invisible) to 1 (font color shown faithfully).
+const checkFontTransparencyRange = (t: ExperimentTable): Alert[] => {
+  if (!t.params.includes("fontTransparency")) return [];
+  const values = t.effectiveValues("fontTransparency");
+  const off: [string, number][] = [];
+  for (let i = 0; i < t.conditionCount; i++) {
+    // Non-numeric cells belong to the type checks.
+    if (!isNumeric(values[i])) continue;
+    const v = Number(values[i]);
+    if (!(v >= 0 && v <= 1)) off.push([values[i], i]);
+  }
+  if (!off.length) return [];
+  return [
+    makeAlert({
+      name: "fontTransparency must be from 0 to 1",
+      message: `${alertParameter(
+        "fontTransparency",
+      )} multiplies the transparency of ${alertParameter(
+        "fontColorRGBA",
+      )}, so it must be a number from ${alertValue(
+        0,
+      )} (invisible) to ${alertValue(1)} (the font color as specified).`,
+      hint: `Out-of-range values: ${valuesAtColumns(off)}.`,
+      parameters: ["fontTransparency"],
+    }),
+  ];
+};
+
+// A condition "uses" fontTransparency when QUEST controls it
+// (thresholdParameter=fontTransparency) or when it is fixed below 1.
+// Only rsvpReading draws its text with fontTransparency so far. On any other
+// targetKind the value would be silently ignored and the text shown at full
+// strength — the wrong stimulus — so refuse to compile.
+const checkFontTransparencyUsable = (t: ExperimentTable): Alert[] => {
+  const hasThreshold = t.params.includes("thresholdParameter");
+  const hasFixed = t.params.includes("fontTransparency");
+  if (!hasThreshold && !hasFixed) return [];
+  const tp = t.effectiveValues("thresholdParameter"),
+    tk = t.effectiveValues("targetKind"),
+    fixed = t.effectiveValues("fontTransparency");
+  const wrongKind: number[] = [];
+  for (let i = 0; i < t.conditionCount; i++) {
+    const isThreshold = tp[i] === "fontTransparency";
+    const isFixed = isNumeric(fixed[i]) && Number(fixed[i]) !== 1;
+    if ((isThreshold || isFixed) && tk[i] !== "rsvpReading") wrongKind.push(i);
+  }
+  if (!wrongKind.length) return [];
+  return [
+    makeAlert({
+      name: "fontTransparency requires targetKind=rsvpReading",
+      message: `${alertParameter(
+        "fontTransparency",
+      )} is implemented only for ${alertParameter("targetKind")} = ${alertValue(
+        "rsvpReading",
+      )} so far. With any other ${alertParameter(
+        "targetKind",
+      )} the text would be shown at full strength.`,
+      hint: `${columnsHint(wrongKind)}. Set ${alertParameter(
+        "targetKind",
+      )} to ${alertValue("rsvpReading")}, or leave ${alertParameter(
+        "fontTransparency",
+      )} at ${alertValue(1)} and choose another ${alertParameter(
+        "thresholdParameter",
+      )}.`,
+      parameters: ["fontTransparency", "thresholdParameter", "targetKind"],
+    }),
+  ];
+};
+
 const checkQuestionsProvidedForQuestionAndAnswer = (
   t: ExperimentTable,
 ): Alert[] => {
@@ -2807,6 +2877,8 @@ export const TABLE_CHECKS: ReadonlyArray<TableCheck> = [
   checkTargetImageSpareFractionTooSmall,
   checkScreenSizeParametersValid,
   checkVernierUsingCorrectThreshold,
+  checkFontTransparencyRange,
+  checkFontTransparencyUsable,
   checkQuestionsProvidedForQuestionAndAnswer,
   checkQuestionAnswerTaskHasQuestions,
   checkQuestionAndAnswerNicknamePresent,

@@ -79,8 +79,11 @@ export class RSVPReadingTargetSet {
     paramReader,
     BC,
     displayText,
+    // Effective transparency of the text (see fontTransparency.ts).
+    opacity = 1.0,
   ) {
     this.word = word;
+    this.opacity = opacity;
     this.displayText = displayText || word;
     this.foilWords = foilWords;
     this.position = position;
@@ -158,6 +161,7 @@ export class RSVPReadingTargetSet {
         `topFlanker-${this.orderNumber}`,
         this.BC,
         this.paramReader,
+        this.opacity,
       );
       const targetRowLetters = _generateLetterStimsForWord(
         strings[1],
@@ -167,6 +171,7 @@ export class RSVPReadingTargetSet {
         `middleRow-${this.orderNumber}`,
         this.BC,
         this.paramReader,
+        this.opacity,
       );
       const bottomRowFlankerLetters = _generateLetterStimsForWord(
         strings[2],
@@ -176,6 +181,7 @@ export class RSVPReadingTargetSet {
         `bottomFlanker-${this.orderNumber}`,
         this.BC,
         this.paramReader,
+        this.opacity,
       );
       return [
         ...topRowFlankerLetters,
@@ -191,6 +197,7 @@ export class RSVPReadingTargetSet {
         `middleRow-${this.orderNumber}`,
         this.BC,
         this.paramReader,
+        this.opacity,
       );
     }
   }
@@ -209,7 +216,7 @@ export class RSVPReadingTargetSet {
       wrapWidth: window.innerWidth * 2,
       ori: 0.0,
       color: colorRGBASnippetToRGBA(font.colorRGBA),
-      opacity: 1.0,
+      opacity: this.opacity,
       depth: 999999,
       padding: this.paramReader.read("fontPadding", this.BC),
       characterSet: readFontMetricsCharacterSet(this.paramReader, this.BC),
@@ -398,6 +405,7 @@ export const getThisBlockRSVPReadingWords = (reader, block) => {
  * @param {number} durationSec
  * @param {Reader} paramReader
  * @param {string} BC
+ * @param {number} [fontOpacity=1] effective transparency of the text
  * @returns {{ displaySets: RSVPReadingTargetSet[], identificationSets: RSVPReadingTargetSet[] }}
  */
 export const generateRSVPReadingTargetSets = (
@@ -405,6 +413,7 @@ export const generateRSVPReadingTargetSets = (
   durationSec,
   paramReader,
   BC,
+  fontOpacity = 1.0,
 ) => {
   const position = XYPxOfDeg(0, [
     targetEccentricityDeg.x,
@@ -423,6 +432,7 @@ export const generateRSVPReadingTargetSets = (
         paramReader,
         BC,
         screen.displayText,
+        fontOpacity,
       ),
   );
 
@@ -438,6 +448,7 @@ export const generateRSVPReadingTargetSets = (
         paramReader,
         BC,
         wordsForThisTrial.displayTexts[i],
+        fontOpacity,
       ),
   );
 
@@ -452,6 +463,7 @@ const _generateLetterStimsForWord = (
   name,
   BC,
   reader,
+  opacity = 1.0,
 ) => {
   const letterOffsets = getEvenlySpacedValues(word.length, spacingPx);
   const letterPositions = letterOffsets.map((xOffset) => [
@@ -474,7 +486,7 @@ const _generateLetterStimsForWord = (
       wrapWidth: undefined,
       ori: 0.0,
       color: colorRGBASnippetToRGBA(font.colorRGBA),
-      opacity: 1.0,
+      opacity,
       depth: 999999,
       padding: reader.read("fontPadding", BC),
       characterSet: metricsCharacterSet,

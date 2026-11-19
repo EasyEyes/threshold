@@ -462,6 +462,12 @@ const buildProbe = (psychoJS) => ({
    * Ink is linear in the stim color, so comparing the ink of two colors that
    * differ by less than one 8-bit step is a direct test of whether float
    * color survives to the framebuffer.
+   *
+   * `opacity` is the stim's opacity (what fontTransparency sets). Ink is
+   * linear in it too, and a fully covered pixel should read
+   * opacity * rgb + (1 - opacity) * backgroundRgb. (`peak` is that pixel
+   * only in channels where the glyph is brighter than the background; use
+   * the per-frame min where it is darker.)
    */
   measureTextInk: ({
     text = "H",
@@ -469,6 +475,7 @@ const buildProbe = (psychoJS) => ({
     heightPx = 200,
     backgroundRgb = [0, 0, 0],
     frames = 1,
+    opacity = 1,
   } = {}) => {
     setBackground(psychoJS, backgroundRgb);
     const boxCss = heightPx * 2;
@@ -486,6 +493,7 @@ const buildProbe = (psychoJS) => ({
       height: heightPx,
       pos: [0, 0],
       color: new util.Color(rgbString(rgb)),
+      opacity,
       wrapWidth: Infinity,
       autoLog: false,
     });

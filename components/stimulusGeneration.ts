@@ -443,6 +443,7 @@ const getRsvpReadingStimulus = (
     (extraInfo as RsvpReadingState).durationSec,
     reader,
     block_condition,
+    (extraInfo as RsvpReadingState).fontOpacity ?? 1,
   );
   return { targetSets: displaySets, identificationSets };
 };
