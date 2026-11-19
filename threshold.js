@@ -308,6 +308,7 @@ import {
   isAutomaticSpeechResponseEnabledForBlock,
   isRsvpSpeechPreflightBlocking,
   mountRsvpSpeechPreflight,
+  showRsvpSpeechPreparation,
 } from "./components/speech/speechPreflight.ts";
 
 import {
@@ -5695,6 +5696,8 @@ const experiment = (howManyBlocksAreThereInTotal) => {
     };
   }
 
+  let showedFirstSpeechPreparation = false;
+
   // Runs before every trial to set up for the trial
   function trialInstructionRoutineBegin(snapshot) {
     return async function () {
@@ -7210,10 +7213,17 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       )
         doubleCheckSizeToSpacing(target, flanker1, stimulusParameters);
       if (rsvpSpeechPreparationPromise) {
-        const prepared = await rsvpSpeechPreparationPromise;
-        if (!prepared) {
-          removeSkipTrialButton();
-          skipTrial();
+        const closePreparation = !showedFirstSpeechPreparation
+          ? showRsvpSpeechPreparation(rc.language.value)
+          : undefined;
+        showedFirstSpeechPreparation = true;
+        try {
+          if (!(await rsvpSpeechPreparationPromise)) {
+            removeSkipTrialButton();
+            skipTrial();
+          }
+        } finally {
+          closePreparation?.();
         }
       }
       /* --------------------------------- \PUBLIC -------------------------------- */
