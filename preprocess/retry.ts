@@ -11,6 +11,19 @@ export const getRetryDelayMs = (attempt: number) => {
   return delaySec * 1000 * jitter;
 };
 
+/** RFC 9110 Retry-After: delay-seconds or an HTTP-date. */
+export const parseRetryAfterMs = (
+  header: string | null,
+  now: number = Date.now(),
+): number | null => {
+  if (header === null || !header.trim()) return null;
+  const value = header.trim();
+  const seconds = Number(value);
+  if (Number.isFinite(seconds) && seconds >= 0) return seconds * 1000;
+  const dateMs = Date.parse(value);
+  return Number.isFinite(dateMs) ? Math.max(0, dateMs - now) : null;
+};
+
 /**
  * The backoff delay, raced against the browser's "online" event: when the
  * network returns, retry IMMEDIATELY instead of sitting out the (up to 30 s)

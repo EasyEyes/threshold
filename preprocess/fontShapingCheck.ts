@@ -325,7 +325,7 @@ export const checkFontShapingTables = async (
  * rejects, except faults explicitly listed in fontTolerateFaults. The check is
  * skipped when _needBrowser permits only non-HarfBuzz browsers. Fonts that
  * cannot be fetched or analyzed are skipped with a console warning; other
- * checks (e.g. isFontMissing) cover those cases.
+ * checks (e.g. checkFontPresence) cover those cases.
  *
  * @param df - The experiment dataframe
  * @param space - The execution space ("web" or "node")

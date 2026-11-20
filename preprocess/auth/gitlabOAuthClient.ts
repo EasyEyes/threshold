@@ -4,7 +4,11 @@
  */
 
 import { refreshAccessToken } from "../pkceUtils";
-import { getRetryDelayMs, wait } from "../retry";
+import {
+  getRetryDelayMs,
+  parseRetryAfterMs,
+  waitForRetryDelay as wait,
+} from "../retry";
 import {
   saveTokensToStorage,
   loadTokensFromStorage,
@@ -24,6 +28,27 @@ async function readAllowlistedErrorMessage(
     return undefined;
   }
 }
+
+const API_REQUEST_MAX_FETCHES = 6;
+const API_REQUEST_BUDGET_MS = 30_000;
+
+const responseError = async (
+  response: Response,
+  endpoint: string,
+  method: string,
+): Promise<Error> => {
+  const responseMessage = await readAllowlistedErrorMessage(response);
+  return Object.assign(
+    new Error(`API request failed: ${response.status} ${response.statusText}`),
+    {
+      status: response.status,
+      statusText: response.statusText,
+      endpoint,
+      method,
+      responseMessage,
+    },
+  );
+};
 
 export interface OAuthClientConfig {
   clientId: string;
@@ -158,8 +183,12 @@ export class GitLabOAuthClient {
   /**
    * Make an authenticated API request to GitLab.
    *
-   * Retries indefinitely on 401 (after token refresh), 429, 5xx, and network
-   * TypeError. Throws immediately on 403, 404, 409, 422, and any other 4xx.
+   * Retries 429, 5xx, and network TypeError within a six-fetch, 30-second
+   * retry/GET-stall budget. Non-GET requests have no timeout, but caller
+   * cancellation is honored. A 401 triggers at most one token refresh per
+   * request and does not reset that budget; a repeated 401 is an
+   * authentication failure. Throws immediately on 403, 404, 409, 422, and
+   * any other 4xx.
    * Status codes listed in `expectedStatuses` are returned as a raw Response
    * rather than thrown.
    *
@@ -174,8 +203,23 @@ export class GitLabOAuthClient {
     endpoint: string,
     options: RequestInit & { expectedStatuses?: number[] } = {},
   ): Promise<Response> {
-    const { expectedStatuses = [], ...fetchOptions } = options;
+    const {
+      expectedStatuses = [],
+      signal: callerSignal,
+      ...fetchOptions
+    } = options;
+    const callerAbortError = () =>
+      callerSignal?.reason ??
+      Object.assign(new Error("Request cancelled by caller"), {
+        name: "AbortError",
+      });
+    const throwIfCallerAborted = () => {
+      if (callerSignal?.aborted) throw callerAbortError();
+    };
+    const startedAt = Date.now();
+    throwIfCallerAborted();
     await this.ensureValidToken();
+    throwIfCallerAborted();
 
     const url = `${this.baseUrl}/api/v4${endpoint}`;
 
@@ -188,13 +232,48 @@ export class GitLabOAuthClient {
     const isGet =
       !fetchOptions.method || fetchOptions.method.toUpperCase() === "GET";
     let attempt = 0;
+    let fetchCount = 0;
+    let refreshedAfter401 = false;
+    const method = fetchOptions.method ?? "GET";
+    const elapsed = () => Date.now() - startedAt;
+    const budgetError = () =>
+      Object.assign(
+        new Error(
+          `API request exceeded the ${API_REQUEST_BUDGET_MS} ms request budget`,
+        ),
+        { code: "API_REQUEST_TIMEOUT", endpoint, method },
+      );
+    const canRetryAfter = (delayMs: number) =>
+      fetchCount < API_REQUEST_MAX_FETCHES &&
+      elapsed() + delayMs < API_REQUEST_BUDGET_MS;
 
     while (true) {
+      throwIfCallerAborted();
+      if (fetchCount >= API_REQUEST_MAX_FETCHES) throw budgetError();
+      const remainingMs = API_REQUEST_BUDGET_MS - elapsed();
+      if (remainingMs <= 0) throw budgetError();
+      fetchCount++;
       let controller: AbortController | undefined;
       let timerId: ReturnType<typeof setTimeout> | undefined;
+      let removeCallerAbortListener = () => {};
+      if (isGet || callerSignal) {
+        controller = new AbortController();
+        if (callerSignal) {
+          const abort = () => controller!.abort(callerSignal.reason);
+          if (callerSignal.aborted) abort();
+          else {
+            callerSignal.addEventListener("abort", abort, { once: true });
+            removeCallerAbortListener = () =>
+              callerSignal.removeEventListener("abort", abort);
+          }
+        }
+      }
       if (isGet) {
         controller = new AbortController();
-        timerId = setTimeout(() => controller!.abort(), 15_000);
+        timerId = setTimeout(
+          () => controller!.abort(),
+          Math.min(15_000, remainingMs),
+        );
       }
 
       try {
@@ -206,11 +285,14 @@ export class GitLabOAuthClient {
             ...(controller ? { signal: controller.signal } : {}),
           });
         } catch (e) {
+          if (callerSignal?.aborted) throw e;
           if (
             e instanceof TypeError ||
             (e instanceof DOMException && e.name === "AbortError")
           ) {
-            await wait(getRetryDelayMs(attempt++));
+            const delayMs = getRetryDelayMs(attempt++);
+            if (!canRetryAfter(delayMs)) throw e;
+            await wait(delayMs);
             continue;
           }
           throw e;
@@ -222,6 +304,13 @@ export class GitLabOAuthClient {
         if (response.ok) return response;
 
         if (status === 401) {
+          if (
+            refreshedAfter401 ||
+            fetchCount >= API_REQUEST_MAX_FETCHES ||
+            elapsed() >= API_REQUEST_BUDGET_MS
+          )
+            throw new Error("AUTH_TOKEN_INVALID");
+          refreshedAfter401 = true;
           if (!this.refreshPromise) {
             this.refreshPromise = this.performTokenRefresh().finally(() => {
               this.refreshPromise = null;
@@ -232,59 +321,26 @@ export class GitLabOAuthClient {
           } catch {
             throw new Error("AUTH_TOKEN_INVALID");
           }
-          const retryResponse = await fetch(url, {
-            ...fetchOptions,
-            headers: buildHeaders(),
-            ...(controller ? { signal: controller.signal } : {}),
-          });
-          if (retryResponse.status === 401)
-            throw new Error("AUTH_TOKEN_INVALID");
-          if (
-            !retryResponse.ok &&
-            !expectedStatuses.includes(retryResponse.status)
-          ) {
-            const responseMessage =
-              await readAllowlistedErrorMessage(retryResponse);
-            throw Object.assign(
-              new Error(
-                `API request failed: ${retryResponse.status} ${retryResponse.statusText}`,
-              ),
-              {
-                status: retryResponse.status,
-                statusText: retryResponse.statusText,
-                endpoint,
-                method: fetchOptions.method ?? "GET",
-                responseMessage,
-              },
-            );
-          }
-          return retryResponse;
+          // Re-enter the sole fetch/response path so the refreshed request gets
+          // the same timeout, network, 429, and 5xx handling as every other try.
+          continue;
         }
 
         if (status === 429 || (status >= 500 && status <= 599)) {
           const retryAfterHeader = response.headers.get("Retry-After");
           const delay =
-            retryAfterHeader !== null
-              ? parseFloat(retryAfterHeader) * 1000
-              : getRetryDelayMs(attempt);
+            parseRetryAfterMs(retryAfterHeader) ?? getRetryDelayMs(attempt);
           attempt++;
+          if (!canRetryAfter(delay))
+            throw await responseError(response, endpoint, method);
           await wait(delay);
           continue;
         }
 
-        const responseMessage = await readAllowlistedErrorMessage(response);
-        throw Object.assign(
-          new Error(`API request failed: ${status} ${response.statusText}`),
-          {
-            status,
-            statusText: response.statusText,
-            endpoint,
-            method: fetchOptions.method ?? "GET",
-            responseMessage,
-          },
-        );
+        throw await responseError(response, endpoint, method);
       } finally {
         clearTimeout(timerId);
+        removeCallerAbortListener();
       }
     }
   }

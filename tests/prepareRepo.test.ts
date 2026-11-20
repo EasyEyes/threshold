@@ -493,9 +493,8 @@ describe("createPavloviaExperiment — request-scoped repository retries", () =>
     );
   });
 
-  // Studio-only "overlapMetadataCalls": the files are gathered (runtime
-  // files fetched — the only `fetch` calls before the commit) while the
-  // repository is being created, instead of after.
+  // "overlapMetadataCalls": files are gathered while the repository is
+  // created, instead of waiting for repository creation to finish.
   describe("preparing files while the repository is created", () => {
     const { beginCompile, endCompile } = jest.requireActual(
       "../preprocess/compileMode",
@@ -539,12 +538,12 @@ describe("createPavloviaExperiment — request-scoped repository retries", () =>
       return { result, callback, fetchesBeforeRepositoryCreated };
     };
 
-    it("classic compile: gathers the files only after the repository exists", async () => {
+    it("classic compile: gathers the files while the repository is being created", async () => {
       beginCompile("compiler");
       const { result, callback, fetchesBeforeRepositoryCreated } = await run();
       expect(result).toBe(true);
       expect(callback).toHaveBeenCalledTimes(1);
-      expect(fetchesBeforeRepositoryCreated).toBe(0);
+      expect(fetchesBeforeRepositoryCreated).toBeGreaterThan(0);
     });
 
     it("Studio compile: gathers the files while the repository is being created", async () => {

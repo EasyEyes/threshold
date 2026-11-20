@@ -10,6 +10,7 @@ import { resourcesRepoName } from "./constants";
 import { GitLabAuth } from "./auth/gitlabAuth";
 import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
 import { getAuthConfig } from "./auth/config";
+import type { ResourceListings } from "./resourceCatalog";
 
 export const redirectToOauth2 = async () => {
   // Use GitLabAuth class for cleaner PKCE implementation with state validation
@@ -25,7 +26,7 @@ export const redirectToOauth2 = async () => {
  * @returns Tuple of [User, resourcesPromise, prolificTokenPromise] or null if no valid session
  */
 export const loadStoredSession = async (): Promise<
-  [User, Promise<{ [key: string]: string[] | null }>, Promise<string>] | null
+  [User, Promise<ResourceListings>, Promise<string>] | null
 > => {
   try {
     const config = getAuthConfig();
@@ -96,7 +97,7 @@ export const loadStoredSession = async (): Promise<
 
 export const getUserInfo = async (
   accessToken: string,
-): Promise<[User, Promise<{ [key: string]: string[] | null }>, string]> => {
+): Promise<[User, Promise<ResourceListings>, string]> => {
   const user = createUser(accessToken);
 
   // initialize account details

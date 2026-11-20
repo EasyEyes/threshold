@@ -128,6 +128,16 @@ describe("compile-phase listeners", () => {
     warn.mockRestore();
   });
 
+  it("enables artifact-preserving speed optimizations for classic compiles", () => {
+    beginCompile("compiler");
+    expect(optimizationOn("parallelPreamble")).toBe(true);
+    expect(optimizationOn("runtimeFileCache")).toBe(true);
+    expect(optimizationOn("overlapMetadataCalls")).toBe(true);
+    expect(optimizationOn("fastActivationPolling")).toBe(true);
+    expect(optimizationOn("hostedRuntime")).toBe(false);
+    expect(optimizationOn("singleProgressUi")).toBe(false);
+  });
+
   it("the single progress view is a Studio-only optimization", () => {
     beginCompile("compiler");
     expect(optimizationOn("singleProgressUi")).toBe(false);

@@ -29,6 +29,7 @@ import {
   TARGET_SOUND_LIST_FILES_MISSING,
   READING_CORPUS_TOO_SHORT,
   READING_CORPUS_INSUFFICIENT_FOILS,
+  RESOURCE_LISTING_UNAVAILABLE,
   FONT_NOT_VARIABLE,
   FONT_AXIS_NOT_FOUND,
   FONT_AXIS_VALUE_OUT_OF_RANGE,
@@ -62,6 +63,7 @@ import { fetchAdobeFontBytes, fetchGoogleFontBytes } from "./fontFetch";
 import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
 import { ExperimentTable } from "./experimentTable";
 import { alertParameter, alertValue } from "./alertHtml";
+import type { ResourceAvailability } from "./resourceCatalog";
 
 import {
   folderStructureCheckImage,
@@ -150,169 +152,310 @@ export const isBlockPresentAndProper = (df: any): Alert[] => {
   return blockValueErrors;
 };
 
-export const isFormMissing = (
+type ResourceNameEquals = (
+  availableName: string,
+  requestedName: string,
+) => boolean;
+
+const exactResourceName: ResourceNameEquals = (available, requested) =>
+  available === requested;
+const caseInsensitiveResourceName: ResourceNameEquals = (
+  available,
+  requested,
+) => available.toLowerCase() === requested.toLowerCase();
+
+/**
+ * Missing means absent from a READY listing. Every non-ready listing is
+ * unavailable. Local supply participates in both presence and ordinary
+ * validation; it never turns an unknown remote listing into a ready one.
+ *
+ * Overloads let sync and async validators share this one policy without
+ * exposing raw remote names to their callers.
+ */
+function checkResourcePresence(
+  availability: ResourceAvailability,
+  requestedNames: string[],
+  parameters: string[],
+  whenReady: (availableNames: string[]) => Alert[],
+  nameEquals?: ResourceNameEquals,
+): Alert[];
+function checkResourcePresence(
+  availability: ResourceAvailability,
+  requestedNames: string[],
+  parameters: string[],
+  whenReady: (availableNames: string[]) => Promise<Alert[]>,
+  nameEquals?: ResourceNameEquals,
+): Promise<Alert[]>;
+function checkResourcePresence(
+  availability: ResourceAvailability,
+  requestedNames: string[],
+  parameters: string[],
+  whenReady: (availableNames: string[]) => Alert[] | Promise<Alert[]>,
+  nameEquals: ResourceNameEquals = exactResourceName,
+): Alert[] | Promise<Alert[]> {
+  const remoteNames =
+    availability.remote.kind === "ready" ? availability.remote.names : [];
+  const availableNames = availability.localNames.length
+    ? [...remoteNames, ...availability.localNames]
+    : remoteNames;
+
+  if (availability.remote.kind !== "ready") {
+    const unverified = [
+      ...new Set(
+        requestedNames.filter(
+          (requested) =>
+            !availableNames.some((available) =>
+              nameEquals(available, requested),
+            ),
+        ),
+      ),
+    ];
+    if (unverified.length)
+      return [
+        RESOURCE_LISTING_UNAVAILABLE(availability.type, unverified, parameters),
+      ];
+  }
+
+  return whenReady(availableNames);
+}
+
+export const checkFormPresence = (
   requestedForm: string,
-  existingFormList: string[],
+  availability: ResourceAvailability<"forms">,
   formType: string,
-): Alert[] => {
-  const errorList: Alert[] = [];
-  if (!existingFormList.includes(requestedForm)) {
-    errorList.push(FORM_FILES_MISSING(formType, [requestedForm]));
-  }
+): Alert[] =>
+  checkResourcePresence(
+    availability,
+    [requestedForm],
+    [formType],
+    (existingFormList) => {
+      const errorList: Alert[] = [];
+      if (!existingFormList.includes(requestedForm)) {
+        errorList.push(FORM_FILES_MISSING(formType, [requestedForm]));
+      }
+      return errorList;
+    },
+  );
 
-  return errorList;
-};
-
-export const isImageMissing = (
+export const checkImagePresence = (
   requestedImageList: string[],
-  existingImageList: string[],
-): Alert[] => {
-  const errorList: Alert[] = [];
-  const missingImageList: string[] = [];
-  for (let i = 0; i < requestedImageList.length; i++) {
-    if (
-      !existingImageList.includes(requestedImageList[i]) &&
-      !missingImageList.includes(requestedImageList[i])
-    ) {
-      missingImageList.push(requestedImageList[i]);
-    }
-  }
-  if (missingImageList.length > 0) {
-    errorList.push(IMAGE_FILES_MISSING("showImage", missingImageList));
-  }
+  availability: ResourceAvailability<"images">,
+): Alert[] =>
+  checkResourcePresence(
+    availability,
+    requestedImageList,
+    ["showImage"],
+    (existingImageList) => {
+      const errorList: Alert[] = [];
+      const missingImageList: string[] = [];
+      for (let i = 0; i < requestedImageList.length; i++) {
+        if (
+          !existingImageList.includes(requestedImageList[i]) &&
+          !missingImageList.includes(requestedImageList[i])
+        ) {
+          missingImageList.push(requestedImageList[i]);
+        }
+      }
+      if (missingImageList.length > 0) {
+        errorList.push(IMAGE_FILES_MISSING("showImage", missingImageList));
+      }
+      return errorList;
+    },
+  );
 
-  return errorList;
-};
-
-export const isTextMissing = (
+export const checkTextPresence = (
   requestedTextList: string[],
-  existingTextList: string[],
+  availability: ResourceAvailability<"texts">,
   parameter: string = "readingCorpus",
-): Alert[] => {
-  const errorList: Alert[] = [];
-  const missingText = new Set();
+): Alert[] =>
+  checkResourcePresence(
+    availability,
+    requestedTextList,
+    [parameter],
+    (existingTextList) => {
+      const errorList: Alert[] = [];
+      const missingText = new Set();
+      for (const requested of requestedTextList) {
+        if (!existingTextList.includes(requested)) missingText.add(requested);
+      }
+      if (missingText.size > 0) {
+        errorList.push(
+          TEXT_FILES_MISSING(parameter, Array.from(missingText) as string[]),
+        );
+      }
+      return errorList;
+    },
+  );
 
-  for (const requested of requestedTextList) {
-    if (!existingTextList.includes(requested)) missingText.add(requested);
-  }
-
-  if (missingText.size > 0) {
-    errorList.push(
-      TEXT_FILES_MISSING(parameter, Array.from(missingText) as string[]),
-    );
-  }
-
-  return errorList;
-};
-
-export const isCodeMissing = (
+export const checkCodePresence = (
   requestedCodeList: string[],
-  existingCodeList: string[],
-): Alert[] => {
-  const errorList: Alert[] = [];
-  const missingCode = new Set();
+  availability: ResourceAvailability<"code">,
+): Alert[] =>
+  checkResourcePresence(
+    availability,
+    requestedCodeList,
+    ["movieComputeJS"],
+    (existingCodeList) => {
+      const errorList: Alert[] = [];
+      const missingCode = new Set();
+      for (const requested of requestedCodeList) {
+        if (!existingCodeList.includes(requested)) missingCode.add(requested);
+      }
+      if (missingCode.size > 0) {
+        errorList.push(
+          CODE_FILES_MISSING(
+            "movieComputeJS",
+            Array.from(missingCode) as string[],
+          ),
+        );
+      }
+      return errorList;
+    },
+  );
 
-  for (const requested of requestedCodeList) {
-    if (!existingCodeList.includes(requested)) missingCode.add(requested);
-  }
-
-  if (missingCode.size > 0) {
-    errorList.push(
-      CODE_FILES_MISSING("movieComputeJS", Array.from(missingCode) as string[]),
-    );
-  }
-
-  return errorList;
-};
-
-export const isImageFolderMissing = async (
+const findMissingImageFolders = (
   imageFoldersObject: any,
   existingFolderList: string[],
-  gitlabOAuthClient: GitLabOAuthClient,
-  fetchImageFiles?: (folderNamesObjectList: any[]) => Promise<any[]>,
-): Promise<Alert[]> => {
+) => {
   const errorList: Alert[] = [];
   const missingFolderList: string[] = [];
   const targetImageFolderList = imageFoldersObject.targetImageFolderList;
-
-  for (let i = 0; i < targetImageFolderList.length; i++) {
-    if (!existingFolderList.includes(targetImageFolderList[i] + ".zip")) {
-      missingFolderList.push(targetImageFolderList[i]);
+  for (const targetImageFolder of targetImageFolderList) {
+    if (!existingFolderList.includes(targetImageFolder + ".zip")) {
+      missingFolderList.push(targetImageFolder);
       errorList.push(
-        IMAGE_FOLDER_MISSING("targetImageFolder", targetImageFolderList[i]),
+        IMAGE_FOLDER_MISSING("targetImageFolder", targetImageFolder),
       );
     }
   }
-
-  if (missingFolderList.length !== targetImageFolderList.length) {
-    // available folders: mentioned in imageFoldersObjectList (requested) and not in missingFolderList
-    const imageFoldersObjectList = imageFoldersObject.targetImageObjectList;
-    const availableFolderList = imageFoldersObjectList.filter(
-      (folder: any) =>
-        folder.targetImageFolder !== "" &&
-        !missingFolderList.includes(folder.targetImageFolder),
-    );
-    const imageFileObjectList = fetchImageFiles
-      ? await fetchImageFiles(availableFolderList)
-      : await getImageFiles(availableFolderList, gitlabOAuthClient);
-    const errors = await folderStructureCheckImage(imageFileObjectList);
-    errorList.push(...errors);
-  }
-
-  return errorList;
+  return { errorList, missingFolderList };
 };
 
-export const isSoundFolderMissing = (
-  requestedFolderList: any,
-  existingFolderList: string[],
-): Alert[] => {
-  const errorList: Alert[] = [];
+const requestedImageFolderNames = (imageFoldersObject: any): string[] =>
+  imageFoldersObject.targetImageFolderList.map((name: string) => `${name}.zip`);
 
-  const keys = Object.keys(requestedFolderList);
-  const missingFolderList: any[] = [];
-  keys.map((key) => {
-    requestedFolderList[key].forEach((requestedFolder: any) => {
-      if (!existingFolderList.includes(requestedFolder + ".zip")) {
-        missingFolderList.push(requestedFolder + ".zip");
+/** Studio's synchronous name-only image-folder check. */
+export const checkImageFolderNamesPresence = (
+  imageFoldersObject: any,
+  availability: ResourceAvailability<"folders">,
+): Alert[] =>
+  checkResourcePresence(
+    availability,
+    requestedImageFolderNames(imageFoldersObject),
+    ["targetImageFolder"],
+    (existingFolderList) =>
+      findMissingImageFolders(imageFoldersObject, existingFolderList).errorList,
+  );
+
+export const checkImageFolderPresence = async (
+  imageFoldersObject: any,
+  availability: ResourceAvailability<"folders">,
+  gitlabOAuthClient: GitLabOAuthClient | (() => GitLabOAuthClient),
+  fetchImageFiles?: (folderNamesObjectList: any[]) => Promise<any[]>,
+): Promise<Alert[]> =>
+  checkResourcePresence(
+    availability,
+    requestedImageFolderNames(imageFoldersObject),
+    ["targetImageFolder"],
+    async (existingFolderList) => {
+      const { errorList, missingFolderList } = findMissingImageFolders(
+        imageFoldersObject,
+        existingFolderList,
+      );
+      const targetImageFolderList = imageFoldersObject.targetImageFolderList;
+      if (missingFolderList.length !== targetImageFolderList.length) {
+        const imageFoldersObjectList = imageFoldersObject.targetImageObjectList;
+        const availableFolderList = imageFoldersObjectList.filter(
+          (folder: any) =>
+            folder.targetImageFolder !== "" &&
+            !missingFolderList.includes(folder.targetImageFolder),
+        );
+        const imageFileObjectList = fetchImageFiles
+          ? await fetchImageFiles(availableFolderList)
+          : await getImageFiles(
+              availableFolderList,
+              typeof gitlabOAuthClient === "function"
+                ? gitlabOAuthClient()
+                : gitlabOAuthClient,
+            );
+        const errors = await folderStructureCheckImage(imageFileObjectList);
+        errorList.push(...errors);
       }
-    });
-    if (missingFolderList.length)
-      errorList.push(SOUND_FOLDER_MISSING(key, missingFolderList));
-    missingFolderList.splice(0);
-  });
+      return errorList;
+    },
+  );
 
-  return errorList;
-};
-
-export const isFontMissing = (
-  requestedFontList: string[],
-  existingFontList: string[],
+export const checkSoundFolderPresence = (
+  requestedFolderList: any,
+  availability: ResourceAvailability<"folders">,
 ): Alert[] => {
-  const errorList: Alert[] = [];
-  const missingFontList: string[] = [];
-  for (let i = 0; i < requestedFontList.length; i++) {
-    if (
-      !existingFontList.includes(requestedFontList[i]) &&
-      !missingFontList.includes(requestedFontList[i])
-    ) {
-      missingFontList.push(requestedFontList[i]);
-    }
-  }
-  if (missingFontList.length > 0) {
-    errorList.push(FONT_FILES_MISSING("font", missingFontList));
-  }
-
-  return errorList;
+  const keys = Object.keys(requestedFolderList);
+  const requestedNames = keys.flatMap((key) =>
+    requestedFolderList[key].map((name: string) => `${name}.zip`),
+  );
+  return checkResourcePresence(
+    availability,
+    requestedNames,
+    keys,
+    (existingFolderList) => {
+      const errorList: Alert[] = [];
+      keys.forEach((key) => {
+        const missingFolderList: any[] = [];
+        requestedFolderList[key].forEach((requestedFolder: any) => {
+          if (!existingFolderList.includes(requestedFolder + ".zip")) {
+            missingFolderList.push(requestedFolder + ".zip");
+          }
+        });
+        if (missingFolderList.length)
+          errorList.push(SOUND_FOLDER_MISSING(key, missingFolderList));
+      });
+      return errorList;
+    },
+  );
 };
 
-export const isPhraseFileMissing = (
+export const checkFontPresence = (
+  requestedFontList: string[],
+  availability: ResourceAvailability<"fonts">,
+  parameters: string[] = ["font"],
+): Alert[] =>
+  checkResourcePresence(
+    availability,
+    requestedFontList,
+    parameters,
+    (existingFontList) => {
+      const errorList: Alert[] = [];
+      const missingFontList: string[] = [];
+      for (let i = 0; i < requestedFontList.length; i++) {
+        if (
+          !existingFontList.includes(requestedFontList[i]) &&
+          !missingFontList.includes(requestedFontList[i])
+        ) {
+          missingFontList.push(requestedFontList[i]);
+        }
+      }
+      if (missingFontList.length > 0) {
+        errorList.push(FONT_FILES_MISSING("font", missingFontList));
+      }
+      return errorList;
+    },
+  );
+
+export const checkPhraseFilePresence = (
   requestedPhraseFile: string,
-  existingPhraseFileList: string[],
+  availability: ResourceAvailability<"phrases">,
   parameter = "_languagePhrasesSpreadsheet",
 ): Alert[] => {
   if (!requestedPhraseFile) return [];
-  if (existingPhraseFileList.includes(requestedPhraseFile)) return [];
-  return [PHRASE_FILE_MISSING(parameter, requestedPhraseFile)];
+  return checkResourcePresence(
+    availability,
+    [requestedPhraseFile],
+    [parameter],
+    (existingPhraseFileList) => {
+      if (existingPhraseFileList.includes(requestedPhraseFile)) return [];
+      return [PHRASE_FILE_MISSING(parameter, requestedPhraseFile)];
+    },
+  );
 };
 
 interface stringToString {
@@ -673,46 +816,41 @@ export const checkReadingFoils = (
   return offendingConditions.map((c) => READING_CORPUS_INSUFFICIENT_FOILS(c));
 };
 
-export const isImpulseResponseMissing = (
+export const checkImpulseResponsePresence = (
   requestedImpulseResponseList: string[],
-  existingImpulseResponseList: string[],
+  availability: ResourceAvailability<"impulseResponses">,
   parameter: string,
 ): Alert[] => {
-  const errors: Alert[] = [];
-  const missingFileNames: string[] = [];
-
-  if (requestedImpulseResponseList.length === 0) {
-    return errors;
-  }
-
-  for (const requestedFile of requestedImpulseResponseList) {
-    // Check if the filename has the correct suffix .gainVTime.xlsx or .gainVTime.csv
-    if (!requestedFile.match(/\.gainVTime\.(xlsx|csv)$/i)) {
-      errors.push(
-        IMPULSE_RESPONSE_FILE_INVALID_FORMAT(
-          requestedFile,
-          "Filename must end with .gainVTime.xlsx or .gainVTime.csv",
-          parameter,
-        ),
+  const hasValidSuffix = (name: string) =>
+    /\.gainVTime\.(xlsx|csv)$/i.test(name);
+  const formatErrors = requestedImpulseResponseList
+    .filter((name) => !hasValidSuffix(name))
+    .map((name) =>
+      IMPULSE_RESPONSE_FILE_INVALID_FORMAT(
+        name,
+        "Filename must end with .gainVTime.xlsx or .gainVTime.csv",
+        parameter,
+      ),
+    );
+  const validRequested = requestedImpulseResponseList.filter(hasValidSuffix);
+  const presenceErrors = checkResourcePresence(
+    availability,
+    validRequested,
+    ["_calibrateSoundSimulateLoudspeaker", "_calibrateSoundSimulateMicrophone"],
+    (existingNames) => {
+      const missingFileNames = validRequested.filter(
+        (requested) =>
+          !existingNames.some((existing) =>
+            caseInsensitiveResourceName(existing, requested),
+          ),
       );
-      continue;
-    }
-
-    if (
-      !existingImpulseResponseList.some(
-        (existingFile) =>
-          existingFile.toLowerCase() === requestedFile.toLowerCase(),
-      )
-    ) {
-      missingFileNames.push(requestedFile);
-    }
-  }
-
-  if (missingFileNames.length > 0) {
-    errors.push(IMPULSE_RESPONSE_FILES_MISSING(parameter, missingFileNames));
-  }
-
-  return errors;
+      return missingFileNames.length
+        ? [IMPULSE_RESPONSE_FILES_MISSING(parameter, missingFileNames)]
+        : [];
+    },
+    caseInsensitiveResourceName,
+  );
+  return [...formatErrors, ...presenceErrors];
 };
 
 export const validateImpulseResponseFile = async (
@@ -776,45 +914,40 @@ export const validateImpulseResponseFile = async (
  * Sound simulation requires both loudspeaker and microphone impulse responses
  */
 
-export const isFrequencyResponseMissing = (
+export const checkFrequencyResponsePresence = (
   requestedFrequencyResponseList: string[],
-  existingFrequencyResponseList: string[],
+  availability: ResourceAvailability<"frequencyResponses">,
   parameter: string,
 ): Alert[] => {
-  const errors: Alert[] = [];
-  const missingFileNames: string[] = [];
-
-  if (requestedFrequencyResponseList.length === 0) {
-    return errors;
-  }
-
-  for (const requestedFile of requestedFrequencyResponseList) {
-    // Check if the filename has the correct suffix .gainVFreq.xlsx or .gainVFreq.csv
-    if (!requestedFile.match(/\.gainVFreq\.(xlsx|csv)$/i)) {
-      errors.push(
-        FREQUENCY_RESPONSE_FILE_INVALID_FORMAT(
-          requestedFile,
-          "Filename must end with .gainVFreq.xlsx or .gainVFreq.csv",
-        ),
+  const hasValidSuffix = (name: string) =>
+    /\.gainVFreq\.(xlsx|csv)$/i.test(name);
+  const formatErrors = requestedFrequencyResponseList
+    .filter((name) => !hasValidSuffix(name))
+    .map((name) =>
+      FREQUENCY_RESPONSE_FILE_INVALID_FORMAT(
+        name,
+        "Filename must end with .gainVFreq.xlsx or .gainVFreq.csv",
+      ),
+    );
+  const validRequested = requestedFrequencyResponseList.filter(hasValidSuffix);
+  const presenceErrors = checkResourcePresence(
+    availability,
+    validRequested,
+    ["_calibrateSoundSimulateLoudspeaker", "_calibrateSoundSimulateMicrophone"],
+    (existingNames) => {
+      const missingFileNames = validRequested.filter(
+        (requested) =>
+          !existingNames.some((existing) =>
+            caseInsensitiveResourceName(existing, requested),
+          ),
       );
-      continue;
-    }
-
-    if (
-      !existingFrequencyResponseList.some(
-        (existingFile) =>
-          existingFile.toLowerCase() === requestedFile.toLowerCase(),
-      )
-    ) {
-      missingFileNames.push(requestedFile);
-    }
-  }
-
-  if (missingFileNames.length > 0) {
-    errors.push(FREQUENCY_RESPONSE_FILES_MISSING(parameter, missingFileNames));
-  }
-
-  return errors;
+      return missingFileNames.length
+        ? [FREQUENCY_RESPONSE_FILES_MISSING(parameter, missingFileNames)]
+        : [];
+    },
+    caseInsensitiveResourceName,
+  );
+  return [...formatErrors, ...presenceErrors];
 };
 
 export const validateFrequencyResponseFile = async (
@@ -848,115 +981,106 @@ export const validateFrequencyResponseFile = async (
   }
 };
 
-export const isTargetSoundListMissing = async (
+export const checkTargetSoundListPresence = async (
   requestedTargetSoundListList: {
     targetSoundList: string;
     column: string;
     targetSoundFolder: string;
     conditionTrials: string;
   }[],
-  existingTargetSoundListList: string[],
+  availability: ResourceAvailability<"targetSoundLists">,
   parameter: string,
   targetSoundFoldersFiles: any,
   gitlabOAuthClient: GitLabOAuthClient,
   fetchTargetSoundListFiles?: (names: string[]) => Promise<any[]>,
 ): Promise<Alert[]> => {
-  const errors: Alert[] = [];
-  const missingFileNames: string[] = [];
-  const missingColumns: string[] = [];
-  if (requestedTargetSoundListList.length === 0) {
-    return errors;
-  }
-
-  for (const requestedFile of requestedTargetSoundListList) {
-    // Check if the filename has the correct suffix .targetSoundList.xlsx or .targetSoundList.csv
-    if (
-      !requestedFile.targetSoundList.match(/\.targetSoundList\.(xlsx|csv)$/i)
-    ) {
-      errors.push(
-        TARGET_SOUND_LIST_FILE_INVALID_FORMAT(
-          requestedFile.targetSoundList,
-          "Filename must end with .targetSoundList.xlsx or .targetSoundList.csv",
-        ),
-      );
-      continue;
-    }
-
-    if (
-      !existingTargetSoundListList.some(
-        (existingFile) =>
-          existingFile.toLowerCase() ===
-          requestedFile.targetSoundList.toLowerCase(),
-      )
-    ) {
-      missingFileNames.push(requestedFile.targetSoundList);
-      missingColumns.push(requestedFile.column);
-    }
-  }
-
-  if (missingFileNames.length > 0) {
-    errors.push(
-      TARGET_SOUND_LIST_FILES_MISSING(
-        parameter,
-        missingFileNames,
-        missingColumns,
+  const hasValidSuffix = (name: string) =>
+    /\.targetSoundList\.(xlsx|csv)$/i.test(name);
+  const formatErrors = requestedTargetSoundListList
+    .filter((item) => !hasValidSuffix(item.targetSoundList))
+    .map((item) =>
+      TARGET_SOUND_LIST_FILE_INVALID_FORMAT(
+        item.targetSoundList,
+        "Filename must end with .targetSoundList.xlsx or .targetSoundList.csv",
       ),
     );
-  } else {
-    try {
-      const targetSoundFolders = targetSoundFoldersFiles.filter(
-        (file: any) => file.parameter === "targetSoundFolder",
+  const validRequests = requestedTargetSoundListList.filter((item) =>
+    hasValidSuffix(item.targetSoundList),
+  );
+  const presenceErrors = await checkResourcePresence(
+    availability,
+    validRequests.map((item) => item.targetSoundList),
+    [parameter],
+    async (existingNames) => {
+      const missingRequests = validRequests.filter(
+        (requested) =>
+          !existingNames.some((existing) =>
+            caseInsensitiveResourceName(existing, requested.targetSoundList),
+          ),
       );
-      const targetSoundListFiles = fetchTargetSoundListFiles
-        ? await fetchTargetSoundListFiles(
-            requestedTargetSoundListList.map(
-              (item: any) => item.targetSoundList,
-            ),
-          )
-        : await getTargetSoundListFiles(
-            requestedTargetSoundListList.map(
-              (item: any) => item.targetSoundList,
-            ),
-            gitlabOAuthClient,
-          );
-
-      for (const requestedTargetSoundList of requestedTargetSoundListList) {
-        const { targetSoundList, errors: targetSoundListErrors } =
-          await parseTargetSoundListFile(
-            targetSoundListFiles.find(
-              (file: any) =>
-                file.name === requestedTargetSoundList.targetSoundList,
-            ),
-            targetSoundFolders.find(
-              (file: any) =>
-                file.name.name === requestedTargetSoundList.targetSoundFolder,
-            ).file,
-            requestedTargetSoundList.column,
-            requestedTargetSoundList.conditionTrials,
-          );
-        if (targetSoundListErrors.length > 0) {
-          errors.push(
-            makeAlert({
-              name: "Target sound list file validation error",
-              message: targetSoundListErrors.join("\n"),
-              hint: "Please check the target sound list file format and try again.",
-              parameters: [parameter],
-            }),
-          );
-        }
+      if (missingRequests.length > 0) {
+        return [
+          TARGET_SOUND_LIST_FILES_MISSING(
+            parameter,
+            missingRequests.map((item) => item.targetSoundList),
+            missingRequests.map((item) => item.column),
+          ),
+        ];
       }
-    } catch (error: unknown) {
-      errors.push(
-        makeAlert({
-          name: "Target sound list file validation error",
-          message: `Failed to parse file`,
-          hint: "Please check the target sound list file format and try again.",
-          parameters: [parameter],
-        }),
-      );
-    }
-  }
-  return errors;
+      if (validRequests.length === 0) return [];
+
+      const errors: Alert[] = [];
+      try {
+        const targetSoundFolders = targetSoundFoldersFiles.filter(
+          (file: any) => file.parameter === "targetSoundFolder",
+        );
+        const targetSoundListFiles = fetchTargetSoundListFiles
+          ? await fetchTargetSoundListFiles(
+              validRequests.map((item) => item.targetSoundList),
+            )
+          : await getTargetSoundListFiles(
+              validRequests.map((item) => item.targetSoundList),
+              gitlabOAuthClient,
+            );
+
+        for (const requested of validRequests) {
+          const { errors: targetSoundListErrors } =
+            await parseTargetSoundListFile(
+              targetSoundListFiles.find(
+                (file: any) => file.name === requested.targetSoundList,
+              ),
+              targetSoundFolders.find(
+                (file: any) => file.name.name === requested.targetSoundFolder,
+              ).file,
+              requested.column,
+              requested.conditionTrials,
+            );
+          if (targetSoundListErrors.length > 0) {
+            errors.push(
+              makeAlert({
+                name: "Target sound list file validation error",
+                message: targetSoundListErrors.join("\n"),
+                hint: "Please check the target sound list file format and try again.",
+                parameters: [parameter],
+              }),
+            );
+          }
+        }
+      } catch (error: unknown) {
+        errors.push(
+          makeAlert({
+            name: "Target sound list file validation error",
+            message: `Failed to parse file`,
+            hint: "Please check the target sound list file format and try again.",
+            parameters: [parameter],
+          }),
+        );
+      }
+      return errors;
+    },
+    caseInsensitiveResourceName,
+  );
+  return [...formatErrors, ...presenceErrors];
 };
 
 /**
@@ -1117,7 +1241,7 @@ export const validateVariableFontSettings = async (
   for (const fontName of uniqueFontNames) {
     const fontData = fontFileMap.get(fontName);
     if (!fontData) {
-      // Font file not found - this is handled by isFontMissing check
+      // Font file not found - this is handled by checkFontPresence
       continue;
     }
 

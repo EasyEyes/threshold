@@ -46,6 +46,7 @@ const FACTORY_ARGS: Record<string, unknown[]> = {
   LOGGING_REQUIRES_AUTHOR_EMAIL: [["_loggingBool"]],
   LOGGING_CAUTION: [["_loggingBool"], { used: 1, limit: 10 }],
   INVALID_FOLDER_STRUCTURE: ["myFolder", "maskerSoundFolder"],
+  RESOURCE_LISTING_UNAVAILABLE: ["fonts", ["Sloan.woff2"], ["font"]],
   FONT_FILES_MISSING: ["font", ["SomeFont.ttf"]],
   IMAGE_FILES_MISSING: ["targetImage", ["a.png"]],
   FONT_FILES_MISSING_WEB: ["font", ["SomeFont.ttf"]],

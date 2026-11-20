@@ -47,6 +47,11 @@ import {
 } from "./sessionDate";
 import { generateResultsZip } from "./resultsZip";
 import { fetchAllPages } from "./fetchAllPages";
+import {
+  readyResourceListings,
+  type ResourceListings,
+  type ResourceType,
+} from "./resourceCatalog";
 import { wait, getRetryDelayMs } from "./retry";
 import { markCompilePhase } from "./compileTiming";
 import { optimizationOn } from "./compileMode";
@@ -450,24 +455,20 @@ export interface Repository {
 }
 
 /**
- * @param user queried user
- * @returns names of resource files in common "EasyEyesResources" repository (fonts and forms)
+ * List the EasyEyesResources tree once and group direct files by repository
+ * folder. A ready empty list is authoritative; any ordinary whole-tree or JSON
+ * failure marks every type failed, never empty. Pagination is bounded-parallel.
  */
 export const getCommonResourcesNames = async (
   user: User,
-): Promise<{ [key: string]: string[] | null }> => {
+  options: { signal?: AbortSignal } = {},
+): Promise<ResourceListings> => {
   const easyEyesResourcesRepo = await searchProjectByName(
     user,
     resourcesRepoName,
   );
 
-  if (!easyEyesResourcesRepo) {
-    const emptyResources: { [key: string]: string[] | null } = {};
-    for (const type of resourcesFileTypes) {
-      emptyResources[type] = [];
-    }
-    return emptyResources;
-  }
+  if (!easyEyesResourcesRepo) return readyResourceListings();
 
   const client = GitLabOAuthClient.loadFromStorage(
     getAuthConfig().clientId,
@@ -475,50 +476,64 @@ export const getCommonResourcesNames = async (
   );
   if (!client) throw new Error("AUTH_TOKEN_INVALID");
 
-  const resourcesNameByType: { [key: string]: string[] | null } = {};
+  try {
+    const responses = await fetchAllPages(
+      `/projects/${easyEyesResourcesRepo.id}/repository/tree/?recursive=true`,
+      client,
+      {
+        parallel: true,
+        maxConcurrent: 4,
+        ...(options.signal ? { signal: options.signal } : {}),
+      },
+    );
+    const allData = await Promise.all(
+      responses.map((res: Response) => res.json()),
+    );
+    const namesByType: Partial<Record<ResourceType, string[]>> = {};
+    for (const type of resourcesFileTypes) namesByType[type] = [];
 
-  await Promise.all(
-    resourcesFileTypes.map(async (type) => {
-      try {
-        const responses = await fetchAllPages(
-          `/projects/${easyEyesResourcesRepo.id}/repository/tree/?path=${type}`,
-          client,
-        );
-        const allData = await Promise.all(
-          responses.map((res: Response) => res.json()),
-        );
-        resourcesNameByType[type] = allData.flat().map((t: any) => t.name);
-      } catch (error) {
-        // Auth failures invalidate every type at once; surface them to the
-        // caller for re-authentication instead of masquerading as a
-        // per-type fetch failure.
-        if (isAuthenticationError(error)) throw error;
-        const apiError = error as {
-          status?: number;
-          responseMessage?: string;
-        };
-        if (
-          apiError?.status === 404 &&
-          apiError.responseMessage === "404 Tree Not Found"
-        ) {
-          resourcesNameByType[type] = [];
-          return;
-        }
-        sentry.captureError(
-          error,
-          "getCommonResourcesNames type fetch failed",
-          {
-            type,
-            status: apiError?.status,
-            responseMessage: apiError?.responseMessage,
-          },
-        );
-        resourcesNameByType[type] = null;
-      }
-    }),
-  );
-
-  return resourcesNameByType;
+    for (const entry of allData.flat()) {
+      if (
+        entry?.type !== "blob" ||
+        typeof entry.name !== "string" ||
+        typeof entry.path !== "string"
+      )
+        continue;
+      const segments = entry.path.split("/");
+      // The former per-type, non-recursive listings included direct children,
+      // not directories or files nested below them.
+      if (segments.length !== 2) continue;
+      const type = segments[0] as ResourceType;
+      if (resourcesFileTypes.includes(type))
+        namesByType[type]!.push(entry.name);
+    }
+    return readyResourceListings(namesByType);
+  } catch (error) {
+    if (options.signal?.aborted) throw options.signal.reason ?? error;
+    if (isAuthenticationError(error)) throw error;
+    const apiError = error as {
+      status?: number;
+      responseMessage?: string;
+    };
+    if (
+      apiError?.status === 404 &&
+      apiError.responseMessage === "404 Tree Not Found"
+    ) {
+      return readyResourceListings();
+    }
+    sentry.captureError(
+      error,
+      "getCommonResourcesNames recursive tree fetch failed",
+      {
+        type: "recursive-tree",
+        status: apiError?.status,
+        responseMessage: apiError?.responseMessage,
+      },
+    );
+    return Object.fromEntries(
+      resourcesFileTypes.map((type) => [type, { kind: "failed", error }]),
+    ) as ResourceListings;
+  }
 };
 
 export const downloadCommonResources = async (
@@ -1835,6 +1850,26 @@ export const createOrUpdateCommonResources = async (
 
   const prevResourcesList = await getCommonResourcesNames(user);
   const jsonFiles: ICommitAction[] = [];
+  let existenceClient: GitLabOAuthClient | null = null;
+
+  // A failed folder listing says nothing about an individual file. Only on
+  // that path, ask GitLab about the exact file instead of guessing "create"
+  // from an unavailable (and therefore not empty) folder.
+  const resourceFileExists = async (type: string, filename: string) => {
+    if (!existenceClient) {
+      existenceClient = GitLabOAuthClient.loadFromStorage(
+        getAuthConfig().clientId,
+        getAuthConfig().redirectUri,
+      );
+      if (!existenceClient) throw new Error("AUTH_TOKEN_INVALID");
+    }
+    const path = encodeGitlabFilePath(`${type}/${filename}`);
+    const response = await existenceClient.apiRequest(
+      `/projects/${commonResourcesRepo.id}/repository/files/${path}?ref=${defaultBranch}`,
+      { expectedStatuses: [404] },
+    );
+    return response.status !== 404;
+  };
 
   // Helper functions to identify specific file types by their filename patterns
   const isImpulseResponseFile = (file: File): boolean => {
@@ -1879,6 +1914,10 @@ export const createOrUpdateCommonResources = async (
       );
     }
 
+    const previousListing = prevResourcesList[type];
+    const previousNames =
+      previousListing.kind === "ready" ? previousListing.names : [];
+
     for (const file of filesOfType) {
       const useBase64 = !acceptableResourcesExtensionsOfTextDataType.includes(
         getFileExtension(file),
@@ -1887,10 +1926,12 @@ export const createOrUpdateCommonResources = async (
         ? await getBase64Data(file)
         : await getFileTextData(file);
 
+      const exists =
+        previousListing.kind === "ready"
+          ? previousNames.includes(file.name)
+          : await resourceFileExists(type, file.name);
       jsonFiles.push({
-        action: (prevResourcesList[type] ?? []).includes(file.name)
-          ? "update"
-          : "create",
+        action: exists ? "update" : "create",
         file_path: `${type}/${file.name}`,
         content,
         encoding: useBase64 ? "base64" : "text",

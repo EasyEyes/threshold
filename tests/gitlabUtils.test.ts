@@ -300,6 +300,42 @@ describe("createOrUpdateCommonResources — skips creation when repo already exi
   });
 });
 
+describe("createOrUpdateCommonResources — unavailable previous listing", () => {
+  afterEach(() => {
+    const constants = jest.requireMock("../preprocess/constants") as any;
+    constants.resourcesFileTypes = [];
+    constants.acceptableExtensions = {};
+  });
+
+  it("checks the exact file instead of guessing create versus update", async () => {
+    const constants = jest.requireMock("../preprocess/constants") as any;
+    constants.resourcesFileTypes = ["fonts"];
+    constants.acceptableExtensions = { fonts: ["woff2"] };
+    mockSearch.mockResolvedValue({ id: "42", name: "EasyEyesResources" });
+    const client = makeApiClient({});
+    mockLoadFromStorage.mockReturnValue(client);
+    const { fetchAllPages: mockFetchAllPages } = jest.requireMock(
+      "../preprocess/fetchAllPages",
+    );
+    mockFetchAllPages.mockRejectedValue(
+      Object.assign(new Error("Forbidden"), { status: 403 }),
+    );
+
+    await createOrUpdateCommonResources(makeUser(), [
+      { name: "Sloan.woff2" } as File,
+    ]);
+
+    const fileLookup = client.apiRequest.mock.calls.find(([url]: [string]) =>
+      url.includes("/repository/files/fonts/Sloan.woff2"),
+    );
+    expect(fileLookup?.[1]).toMatchObject({ expectedStatuses: [404] });
+    const commitCall = client.apiRequest.mock.calls.find(([url]: [string]) =>
+      url.includes("/repository/commits"),
+    );
+    expect(JSON.parse(commitCall[1].body).actions[0].action).toBe("update");
+  });
+});
+
 // ─── Cycle 3: getCommonResourcesNames finds repo via search ──────────────────
 
 describe("getCommonResourcesNames — finds EasyEyesResources via search", () => {
@@ -675,7 +711,7 @@ const resourceTypes = [
   "frequencyResponses",
   "targetSoundLists",
   "phrases",
-];
+] as const;
 
 describe("getCommonResourcesNames — parallel fetch", () => {
   beforeEach(() => {
@@ -688,80 +724,74 @@ describe("getCommonResourcesNames — parallel fetch", () => {
       [];
   });
 
-  it("happy path — all types resolve with non-null string arrays", async () => {
+  it("happy path — every type is ready with string names", async () => {
     mockSearch.mockResolvedValue({ id: "42", name: "EasyEyesResources" });
     mockLoadFromStorage.mockReturnValue(makeApiClient({}));
     const { fetchAllPages: mockFetchAllPages } = jest.requireMock(
       "../preprocess/fetchAllPages",
     );
     mockFetchAllPages.mockResolvedValue([
-      { json: jest.fn().mockResolvedValue([{ name: "resource.bin" }]) },
+      {
+        json: jest.fn().mockResolvedValue([
+          {
+            name: "resource.bin",
+            path: "fonts/resource.bin",
+            type: "blob",
+          },
+        ]),
+      },
     ]);
 
     const result = await getCommonResourcesNames(makeUser());
 
+    expect(result.fonts).toEqual({ kind: "ready", names: ["resource.bin"] });
     for (const type of resourceTypes) {
-      expect(Array.isArray(result[type])).toBe(true);
-      expect(result[type]).not.toBeNull();
+      expect(result[type].kind).toBe("ready");
+      expect(Array.isArray(result[type].names)).toBe(true);
     }
+    expect(mockFetchAllPages).toHaveBeenCalledTimes(1);
+    expect(mockFetchAllPages.mock.calls[0][0]).toContain("recursive=true");
+    expect(mockFetchAllPages.mock.calls[0][2]).toEqual({
+      parallel: true,
+      maxConcurrent: 4,
+    });
   });
 
-  it("partial-failure path — failing type is null, remaining types are populated", async () => {
+  it("whole-tree failure path — every type is failed, none is inventively empty", async () => {
     mockSearch.mockResolvedValue({ id: "42", name: "EasyEyesResources" });
     mockLoadFromStorage.mockReturnValue(makeApiClient({}));
     const { fetchAllPages: mockFetchAllPages } = jest.requireMock(
       "../preprocess/fetchAllPages",
     );
-    mockFetchAllPages.mockImplementation((path: string) => {
-      if (path.endsWith("=fonts"))
-        return Promise.reject(new Error("network error"));
-      return Promise.resolve([
-        { json: jest.fn().mockResolvedValue([{ name: "file.bin" }]) },
-      ]);
-    });
+    mockFetchAllPages.mockRejectedValue(new Error("network error"));
 
     const result = await getCommonResourcesNames(makeUser());
 
-    expect(result["fonts"]).toBeNull();
-    for (const type of resourceTypes.filter((t) => t !== "fonts")) {
-      expect(Array.isArray(result[type])).toBe(true);
-      expect(result[type]).not.toBeNull();
+    for (const type of resourceTypes) {
+      expect(result[type].kind).toBe("failed");
+      expect(result[type]).not.toHaveProperty("names");
     }
   });
 
-  it("treats a missing resource directory as an empty list", async () => {
+  it("treats an empty repository tree as ready-empty for every type", async () => {
     mockSearch.mockResolvedValue({ id: "42", name: "EasyEyesResources" });
     mockLoadFromStorage.mockReturnValue(makeApiClient({}));
     const { fetchAllPages: mockFetchAllPages } = jest.requireMock(
       "../preprocess/fetchAllPages",
     );
-    mockFetchAllPages.mockImplementation((path: string) => {
-      if (path.endsWith("=targetSoundLists")) {
-        return Promise.reject(
-          Object.assign(new Error("404 Tree Not Found"), {
-            status: 404,
-            responseMessage: "404 Tree Not Found",
-          }),
-        );
-      }
-      return Promise.resolve([
-        { json: jest.fn().mockResolvedValue([{ name: "file.bin" }]) },
-      ]);
-    });
+    mockFetchAllPages.mockRejectedValue(
+      Object.assign(new Error("404 Tree Not Found"), {
+        status: 404,
+        responseMessage: "404 Tree Not Found",
+      }),
+    );
 
     const result = await getCommonResourcesNames(makeUser());
 
-    expect(result.targetSoundLists).toEqual([]);
-    expect(
-      mockFetchAllPages.mock.calls.filter(([path]: [string]) =>
-        path.endsWith("=targetSoundLists"),
-      ),
-    ).toHaveLength(1);
-    for (const type of resourceTypes.filter(
-      (type) => type !== "targetSoundLists",
-    )) {
-      expect(result[type]).toEqual(["file.bin"]);
+    for (const type of resourceTypes) {
+      expect(result[type]).toEqual({ kind: "ready", names: [] });
     }
+    expect(mockFetchAllPages).toHaveBeenCalledTimes(1);
   });
 
   it("does not treat a missing project as an empty resource directory", async () => {
@@ -780,7 +810,8 @@ describe("getCommonResourcesNames — parallel fetch", () => {
     const result = await getCommonResourcesNames(makeUser());
 
     for (const type of resourceTypes) {
-      expect(result[type]).toBeNull();
+      expect(result[type].kind).toBe("failed");
+      expect(result[type]).not.toHaveProperty("names");
     }
   });
 });

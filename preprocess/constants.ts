@@ -2,7 +2,7 @@ export const resourcesRepoName = "EasyEyesResources";
 
 export const PROLIFIC_SUPPORTED_CURRENCIES: string[] = ["USD", "GBP"];
 
-export const resourcesFileTypes: string[] = [
+export const resourcesFileTypes = [
   "fonts",
   "forms",
   "texts",
@@ -13,7 +13,7 @@ export const resourcesFileTypes: string[] = [
   "frequencyResponses",
   "targetSoundLists",
   "phrases",
-];
+] as const;
 
 export interface IUserFileTypes {
   [key: string]: string[];

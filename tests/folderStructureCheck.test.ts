@@ -4,10 +4,15 @@ import { refreshAccessToken } from "../preprocess/pkceUtils";
 
 // ── Module mocks ──────────────────────────────────────────────────────────────
 
-jest.mock("../preprocess/retry", () => ({
-  getRetryDelayMs: jest.fn(() => 0),
-  wait: jest.fn().mockResolvedValue(undefined),
-}));
+jest.mock("../preprocess/retry", () => {
+  const actual = jest.requireActual("../preprocess/retry");
+  return {
+    ...actual,
+    getRetryDelayMs: jest.fn(() => 0),
+    wait: jest.fn().mockResolvedValue(undefined),
+    waitForRetryDelay: jest.fn().mockResolvedValue(undefined),
+  };
+});
 
 jest.mock("../preprocess/pkceUtils", () => ({
   refreshAccessToken: jest.fn(),

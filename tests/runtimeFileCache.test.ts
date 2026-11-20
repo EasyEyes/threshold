@@ -146,21 +146,15 @@ afterEach(() => endCompile());
 describe("getGitlabBodyForThreshold — classic compile (Compiler tab)", () => {
   beforeEach(() => beginCompile("compiler"));
 
-  it("is only optimized for Studio compiles until switched on for all", () => {
-    expect(COMPILE_OPTIMIZATIONS_FOR.runtimeFileCache).toBe("studio");
-  });
-
-  it("fetches the files one after another", async () => {
+  it("uses the same artifact-preserving cache and parallelism as Studio", async () => {
+    expect(COMPILE_OPTIMIZATIONS_FOR.runtimeFileCache).toBe("all");
     const peak = trackConcurrency();
     await getGitlabBodyForThreshold(0, 3, user, "deploy-A");
-    expect(peak.max).toBe(1);
-  });
+    expect(peak.max).toBeGreaterThan(1);
 
-  it("never caches, even with a deploy stamp", async () => {
     await getGitlabBodyForThreshold(0, 3, user, "deploy-A");
-    await getGitlabBodyForThreshold(0, 3, user, "deploy-A");
-    expect(getAssetFileContent).toHaveBeenCalledTimes(4);
-    expect(getAssetFileContentBase64).toHaveBeenCalledTimes(2);
+    expect(getAssetFileContent).toHaveBeenCalledTimes(2);
+    expect(getAssetFileContentBase64).toHaveBeenCalledTimes(1);
   });
 });
 

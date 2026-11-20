@@ -6,9 +6,13 @@
  * activation). A handful of speed optimizations live inside that pipeline;
  * this module decides whether they are on for the current compile.
  *
- * Today they are on for Studio compiles only. To give every compile an
- * optimization, change its entry in COMPILE_OPTIMIZATIONS_FOR from "studio"
- * to "all" — nothing else needs to change.
+ * Artifact-preserving speed optimizations (parallel work, metadata overlap,
+ * runtime file caching, activation polling) are enabled for both paths.
+ * `hostedRuntime` remains Studio-only because externally hosting the runtime
+ * changes the classic self-contained-repository architecture.
+ * `singleProgressUi` also remains Studio-only for now: its current progress
+ * view is still a blocking SweetAlert dialog, so enabling it alone would not
+ * make classic compilation non-blocking.
  */
 
 export type CompileSource = "compiler" | "studio";
@@ -58,10 +62,12 @@ export const COMPILE_OPTIMIZATIONS_FOR: Record<
   // Timing is on for both so the two paths can be compared like for like; it
   // only records performance marks and prints a console table.
   timing: "all",
-  parallelPreamble: "studio",
-  runtimeFileCache: "studio",
-  overlapMetadataCalls: "studio",
-  fastActivationPolling: "studio",
+  parallelPreamble: "all",
+  runtimeFileCache: "all",
+  overlapMetadataCalls: "all",
+  fastActivationPolling: "all",
+  // hostedRuntime remains Studio-only: moving runtime files out of the
+  // experiment repository changes the classic artifact architecture.
   hostedRuntime: "studio",
   singleProgressUi: "studio",
 };

@@ -2,7 +2,35 @@ import {
   getRetryDelayMs,
   BASE_DELAY_SEC,
   MAX_DELAY_SEC,
+  parseRetryAfterMs,
 } from "../preprocess/retry";
+
+describe("parseRetryAfterMs", () => {
+  it("parses delay-seconds", () => {
+    expect(parseRetryAfterMs("5", 1_000)).toBe(5_000);
+  });
+
+  it("parses an HTTP-date relative to now", () => {
+    expect(parseRetryAfterMs("Wed, 21 Oct 2015 07:28:00 GMT", 0)).toBe(
+      Date.parse("Wed, 21 Oct 2015 07:28:00 GMT"),
+    );
+  });
+
+  it("returns null for garbage and empty headers", () => {
+    expect(parseRetryAfterMs("soon-ish", 0)).toBeNull();
+    expect(parseRetryAfterMs("", 0)).toBeNull();
+    expect(parseRetryAfterMs(null)).toBeNull();
+  });
+
+  it("clamps an already-past HTTP-date to zero", () => {
+    expect(
+      parseRetryAfterMs(
+        "Wed, 21 Oct 2015 07:28:00 GMT",
+        Date.parse("Wed, 21 Oct 2015 08:28:00 GMT"),
+      ),
+    ).toBe(0);
+  });
+});
 
 describe("getRetryDelayMs", () => {
   it("returns a value in [computed*0.8, computed*1.2] for attempt 0", () => {

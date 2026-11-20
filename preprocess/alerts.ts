@@ -254,6 +254,27 @@ export const INVALID_FOLDER_STRUCTURE = (
 };
 
 // TODO Too much duplicated code for similar file missing errors!
+export const RESOURCE_LISTING_UNAVAILABLE = (
+  resourceType: string,
+  filenames: string[],
+  parameters: string[] = [],
+): Alert => {
+  const htmlList = filenames
+    .map((filename) => `<li>${alertValue(filename)}</li>`)
+    .join("");
+  return makeAlert({
+    code: "RESOURCE_LISTING_UNAVAILABLE",
+    name: "Resource list unavailable",
+    message: `Could not verify the following resource${
+      filenames.length === 1 ? "" : "s"
+    } because the ${alertValue(
+      resourceType,
+    )} list could not be fetched: <ul>${htmlList}</ul>`,
+    hint: "Retry loading EasyEyesResources, or supply the named file with the experiment. An unavailable list is not an empty list.",
+    parameters: [...new Set(parameters)],
+  });
+};
+
 export const FONT_FILES_MISSING = (
   parameter: string,
   missingFileNameList: string[],

@@ -3,24 +3,24 @@ import { read, utils } from "xlsx";
 import Papa from "papaparse";
 
 import {
-  isFormMissing,
-  isFontMissing,
-  isTextMissing,
-  isSoundFolderMissing,
-  isCodeMissing,
-  isImageMissing,
-  isImpulseResponseMissing,
+  checkFormPresence,
+  checkFontPresence,
+  checkTextPresence,
+  checkSoundFolderPresence,
+  checkCodePresence,
+  checkImagePresence,
+  checkImpulseResponsePresence,
   validateImpulseResponseFile,
-  isFrequencyResponseMissing,
+  checkFrequencyResponsePresence,
   validateFrequencyResponseFile,
-  isImageFolderMissing,
-  isTargetSoundListMissing,
+  checkImageFolderPresence,
+  checkTargetSoundListPresence,
   isBlockPresentAndProper,
   validateVariableFontSettings,
   validateFontFeatureAnalysis,
   checkReadingCorpusLength,
   checkReadingFoils,
-  isPhraseFileMissing,
+  checkPhraseFilePresence,
 } from "./experimentFileChecks";
 import { alertParameter, alertValue } from "./alertHtml";
 import { validateExperimentTable } from "./validateExperimentTable";
@@ -89,6 +89,12 @@ import {
 import { collectInternationalPhraseReferences } from "./internationalPhraseAudit";
 import { checkStudyPhraseAnalysis } from "./studyPhraseAnalysis";
 import { selectPhraseSource } from "./selectPhraseSource";
+import { getProlificParticipantGroups } from "./prolificMetadata";
+import {
+  readyResourceAvailabilities,
+  withLocalResourceNames,
+  type ResourceAvailabilities,
+} from "./resourceCatalog";
 import {
   resolveLanguageValues,
   resolveNamedValues,
@@ -155,72 +161,34 @@ async function validateProlificParticipantGroupNames(user: any, errors: any[]) {
       const prolificToken = await getProlificToken(user);
 
       if (prolificToken) {
-        // Fetch participant groups from Netlify function
-        const response = await fetch(
-          `/.netlify/functions/prolific/participant-groups/`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              authorization: `Token ${prolificToken}`,
-            },
-          },
-        );
+        const participantGroups =
+          await getProlificParticipantGroups(prolificToken);
 
-        if (response.ok) {
-          const data = await response.json();
-          const participantGroups = data?.results || [];
-
-          // Check completion group
-          if (completionGroupName) {
-            const completionGroupExists = participantGroups.some(
-              (g: any) =>
-                g.name?.trim().toLowerCase() ===
-                completionGroupName.toLowerCase(),
-            );
-
-            if (!completionGroupExists) {
-              errors.push(
-                PROLIFIC_PARTICIPANT_GROUP_NOT_FOUND(
-                  "_prolific2CompletionPathAddToGroup",
-                  completionGroupName,
-                ),
-              );
-            }
-          }
-
-          // Check aborted group
-          if (abortedGroupName) {
-            const abortedGroupExists = participantGroups.some(
-              (g: any) =>
-                g.name?.trim().toLowerCase() === abortedGroupName.toLowerCase(),
-            );
-
-            if (!abortedGroupExists) {
-              errors.push(
-                PROLIFIC_PARTICIPANT_GROUP_NOT_FOUND(
-                  "_prolific2AbortedAddToGroup",
-                  abortedGroupName,
-                ),
-              );
-            }
-          }
-        } else {
-          // API error - add warning
-          if (completionGroupName) {
+        if (completionGroupName) {
+          const completionGroupExists = participantGroups.some(
+            (g: any) =>
+              g.name?.trim().toLowerCase() ===
+              completionGroupName.toLowerCase(),
+          );
+          if (!completionGroupExists) {
             errors.push(
-              PROLIFIC_API_ERROR(
+              PROLIFIC_PARTICIPANT_GROUP_NOT_FOUND(
                 "_prolific2CompletionPathAddToGroup",
-                `HTTP ${response.status}: ${response.statusText}`,
                 completionGroupName,
               ),
             );
           }
-          if (abortedGroupName) {
+        }
+
+        if (abortedGroupName) {
+          const abortedGroupExists = participantGroups.some(
+            (g: any) =>
+              g.name?.trim().toLowerCase() === abortedGroupName.toLowerCase(),
+          );
+          if (!abortedGroupExists) {
             errors.push(
-              PROLIFIC_API_ERROR(
+              PROLIFIC_PARTICIPANT_GROUP_NOT_FOUND(
                 "_prolific2AbortedAddToGroup",
-                `HTTP ${response.status}: ${response.statusText}`,
                 abortedGroupName,
               ),
             );
@@ -372,6 +340,22 @@ export const prepareExperimentFileForThreshold = async (
     let table = new ExperimentTable(parsed.data);
     const validateResourcesBool = space === "web" || isLocal;
     const localFetchers = easyeyesResources?.localFetchers;
+    // Web compiles receive typed availability from Table. Node, local, and
+    // archive compiles already have authoritative local name lists, adapted
+    // here once; individual phrase files are Files rather than names.
+    const availability: ResourceAvailabilities =
+      easyeyesResources?.availability ??
+      readyResourceAvailabilities({
+        ...(easyeyesResources ?? {}),
+        phrases: ((easyeyesResources?.phrases as File[]) || []).map(
+          (file) => file.name,
+        ),
+      });
+    const phraseAvailability = () =>
+      withLocalResourceNames(
+        availability.phrases,
+        ((easyeyesResources?.phrases as File[]) || []).map((file) => file.name),
+      );
 
     // Capture only explicit source references before custom symbol substitution.
     const internationalPhraseReferences = collectInternationalPhraseReferences(
@@ -423,9 +407,9 @@ export const prepareExperimentFileForThreshold = async (
       }
     }
     const missingNamedPhraseFileErrors = validateResourcesBool
-      ? isPhraseFileMissing(
+      ? checkPhraseFilePresence(
           requestedNamedPhraseFile,
-          (easyeyesResources.phrases || []).map((file: File) => file.name),
+          phraseAvailability(),
           "_phrasesSpreadsheet",
         )
       : [];
@@ -504,10 +488,7 @@ export const prepareExperimentFileForThreshold = async (
       }
     }
     const missingPhraseFileErrors = validateResourcesBool
-      ? isPhraseFileMissing(
-          requestedPhraseFile,
-          (easyeyesResources.phrases || []).map((file: File) => file.name),
-        )
+      ? checkPhraseFilePresence(requestedPhraseFile, phraseAvailability())
       : [];
     errors.push(...missingPhraseFileErrors);
     const languagePhraseFileMissing = missingPhraseFileErrors.length > 0;
@@ -817,9 +798,7 @@ export const prepareExperimentFileForThreshold = async (
     const typekitFontColumnMap = typekitFonts.fontColumnMap;
 
     if (validateResourcesBool) {
-      errors.push(
-        ...isFontMissing(requestedFontList, easyeyesResources.fonts || []),
-      );
+      errors.push(...checkFontPresence(requestedFontList, availability.fonts));
       const error: any = await webFontChecker(requestedFontListWeb);
       const name = filename ? filename.split(".")[0] : "experiment";
       const typekitError: any = await processTypekitFonts(
@@ -915,17 +894,17 @@ export const prepareExperimentFileForThreshold = async (
     const requestedForms: any = getFormNames(parsed);
     if (validateResourcesBool && requestedForms.consentForm)
       errors.push(
-        ...isFormMissing(
+        ...checkFormPresence(
           requestedForms.consentForm,
-          easyeyesResources.forms || [],
+          availability.forms,
           "_consentForm",
         ),
       );
     if (validateResourcesBool && requestedForms.debriefForm)
       errors.push(
-        ...isFormMissing(
+        ...checkFormPresence(
           requestedForms.debriefForm,
-          easyeyesResources.forms || [],
+          availability.forms,
           "_debriefForm",
         ),
       );
@@ -933,16 +912,14 @@ export const prepareExperimentFileForThreshold = async (
     // ! Validate requested text
     const requestedTextList: any[] = getTextList(table);
     if (validateResourcesBool)
-      errors.push(
-        ...isTextMissing(requestedTextList, easyeyesResources.texts || []),
-      );
+      errors.push(...checkTextPresence(requestedTextList, availability.texts));
 
     const readingCorpusFoilsList = getReadingCorpusFoilsList(table);
     if (validateResourcesBool)
       errors.push(
-        ...isTextMissing(
+        ...checkTextPresence(
           readingCorpusFoilsList,
-          easyeyesResources.texts || [],
+          availability.texts,
           "readingCorpusFoils",
         ),
       );
@@ -973,15 +950,15 @@ export const prepareExperimentFileForThreshold = async (
     const requestedImageList: any[] = getImageNames(parsed);
     if (validateResourcesBool)
       errors.push(
-        ...isImageMissing(requestedImageList, easyeyesResources.images || []),
+        ...checkImagePresence(requestedImageList, availability.images),
       );
 
     // validate requested impulse response files
     const requestedImpulseResponseList: any[] = getImpulseResponseList(parsed);
     if (validateResourcesBool && requestedImpulseResponseList.length > 0) {
-      const impulseResponseMissingErrors = isImpulseResponseMissing(
+      const impulseResponseMissingErrors = checkImpulseResponsePresence(
         requestedImpulseResponseList,
-        easyeyesResources.impulseResponses || [],
+        availability.impulseResponses,
         "impulse response files",
       );
       errors.push(...impulseResponseMissingErrors);
@@ -1026,9 +1003,9 @@ export const prepareExperimentFileForThreshold = async (
     const requestedFrequencyResponseList: any[] =
       getFrequencyResponseList(parsed);
     if (validateResourcesBool && requestedFrequencyResponseList.length > 0) {
-      const frequencyResponseMissingErrors = isFrequencyResponseMissing(
+      const frequencyResponseMissingErrors = checkFrequencyResponsePresence(
         requestedFrequencyResponseList,
-        easyeyesResources.frequencyResponses || [],
+        availability.frequencyResponses,
         "frequency response files",
       );
       errors.push(...frequencyResponseMissingErrors);
@@ -1077,9 +1054,9 @@ export const prepareExperimentFileForThreshold = async (
         folderList.targetSoundFolder.length > 0)
     ) {
       missingFolderErrors.push(
-        ...isSoundFolderMissing(
+        ...checkSoundFolderPresence(
           maskerAndTargetFolders,
-          easyeyesResources.folders || [],
+          availability.folders,
         ),
       );
       errors.push(...missingFolderErrors);
@@ -1134,9 +1111,9 @@ export const prepareExperimentFileForThreshold = async (
         errors.push(...folderStructureErrors);
       } else {
         if (targetSoundListList.length > 0) {
-          const e = await isTargetSoundListMissing(
+          const e = await checkTargetSoundListPresence(
             targetSoundListList,
-            easyeyesResources.targetSoundLists || [],
+            availability.targetSoundLists,
             "targetSoundList",
             folderStructureFiles,
             _fscClient,
@@ -1158,19 +1135,18 @@ export const prepareExperimentFileForThreshold = async (
       validateResourcesBool &&
       imageFolders.targetImageFolderList.length > 0
     ) {
-      let _imgClient: any = null;
-      if (!localFetchers?.getImageFiles) {
-        _imgClient = GitLabOAuthClient.loadFromStorage(
-          getAuthConfig().clientId,
-          getAuthConfig().redirectUri,
-        );
-        if (!_imgClient) throw new Error("Not authenticated");
-      }
       errors.push(
-        ...(await isImageFolderMissing(
+        ...(await checkImageFolderPresence(
           imageFolders,
-          easyeyesResources.folders || [],
-          _imgClient,
+          availability.folders,
+          () => {
+            const client = GitLabOAuthClient.loadFromStorage(
+              getAuthConfig().clientId,
+              getAuthConfig().redirectUri,
+            );
+            if (!client) throw new Error("Not authenticated");
+            return client;
+          },
           localFetchers?.getImageFiles,
         )),
       );
@@ -1182,9 +1158,7 @@ export const prepareExperimentFileForThreshold = async (
     // ! validate requested code files
     const requestedCodeList: any[] = getCodeList(parsed);
     if (validateResourcesBool)
-      errors.push(
-        ...isCodeMissing(requestedCodeList, easyeyesResources.code || []),
-      );
+      errors.push(...checkCodePresence(requestedCodeList, availability.code));
 
     // Build normalized DataFrame from ExperimentTable (no duplicates, clean data)
     let df = _tableToNormalizedDf(table);

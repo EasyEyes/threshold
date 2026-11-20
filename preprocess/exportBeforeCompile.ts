@@ -39,6 +39,7 @@ import {
   getFileExtension,
 } from "./fileUtils";
 import { getCommonResourcesNames } from "./gitlabUtils";
+import type { ResourceListings } from "./resourceCatalog";
 import { searchProjectByName } from "./gitlabSearch";
 import { GitLabOAuthClient } from "./auth/gitlabOAuthClient";
 import { getAuthConfig } from "./auth/config";
@@ -275,10 +276,9 @@ export const exportStudyBeforeCompiling = async (
 
     const zip = new JSZip();
 
-    // Bundle each referenced resource from the scientist's EasyEyesResources
-    // repository. Listing or fetch failures skip that resource: the receiving
-    // compile will report whatever turns out to be missing.
-    let resourceNamesByType: { [key: string]: string[] | null } = {};
+    // Bundle referenced resources whose listings loaded. Failed listings stay
+    // unavailable; they are not treated as authoritative empty folders.
+    let resourceNamesByType: ResourceListings | null = null;
     try {
       resourceNamesByType = await getCommonResourcesNames(user);
     } catch (error) {
@@ -414,7 +414,8 @@ export const exportStudyBeforeCompiling = async (
 
       await Promise.all(
         resourcesFileTypes.map(async (type) => {
-          const names = resourceNamesByType[type] || [];
+          const listing = resourceNamesByType?.[type];
+          const names = listing?.kind === "ready" ? listing.names : [];
           await Promise.all(
             names
               .filter((name) => isResourceReferenced(tokens, name))
