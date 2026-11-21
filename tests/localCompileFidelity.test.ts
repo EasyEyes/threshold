@@ -401,7 +401,7 @@ describe("glossary usage compiler integration", () => {
       }
     },
   );
-  it("A4 warns about a known unused study parameter and generates condition files", async () => {
+  it("A4 silently accepts a known unused study parameter and generates condition files", async () => {
     const table = writeTable("unused-parameter.csv", makeTable());
     const result = await compileExperimentTableLocally(
       table,
@@ -416,7 +416,7 @@ describe("glossary usage compiler integration", () => {
           warning.name === "Glossary parameter not audited as used" &&
           warning.parameters.includes("conditionTrials"),
       ),
-    ).toBe(true);
+    ).toBe(false);
     expect(result.blockingErrors).toEqual([]);
     expect(result.fileStringList.length).toBeGreaterThan(0);
   });

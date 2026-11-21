@@ -143,9 +143,7 @@ async function loadPhrasesForNode(retry = true): Promise<any> {
     try {
       const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText}`);
-      const payload = await res.json();
-      initPhrases(payload);
-      return payload;
+      return await res.json();
     } catch (err) {
       if (!retry) throw err;
       const delayMs = getRetryDelayMs(attempt++);
@@ -230,12 +228,7 @@ const constructForEXperiment = async (
     });
 
   let result = await compile();
-  if (
-    result.warnings.some(
-      (warning) => warning.code === "glossary_audit_version_mismatch",
-    ) &&
-    (await refreshCatalogsOnce())
-  ) {
+  if (result.glossaryAuditVersionMismatch && (await refreshCatalogsOnce())) {
     result = await compile();
   }
 
@@ -501,13 +494,7 @@ const loadExampleCatalogs = async (forceRefresh = false) => {
         Object.keys(glossary.glossary || {}).length
       } params).`,
     );
-    writeResourceCache("glossary", {
-      fetchedAt: Date.now(),
-      pinnedVersion: null,
-      payload: glossary,
-    });
   }
-  initGlossary(glossary);
 
   const phrasesUrl = process.env.PHRASES_URL || DEFAULT_PHRASES_URL;
   let phrasesPayload: any;
@@ -521,13 +508,23 @@ const loadExampleCatalogs = async (forceRefresh = false) => {
     console.log(`Fetching phrases from ${phrasesUrl} ...`);
     phrasesPayload = await loadPhrasesForNode(!forceRefresh);
     console.log(`Phrases loaded.`);
+  }
+
+  // Fetch both catalogs before replacing the ones used by this batch.
+  initGlossary(glossary);
+  initPhrases(phrasesPayload);
+  if (!cachedGlossary)
+    writeResourceCache("glossary", {
+      fetchedAt: Date.now(),
+      pinnedVersion: null,
+      payload: glossary,
+    });
+  if (!cachedPhrases)
     writeResourceCache("phrases", {
       fetchedAt: Date.now(),
       pinnedVersion: null,
       payload: phrasesPayload,
     });
-  }
-  if (cachedPhrases) initPhrases(phrasesPayload);
 
   // Pin (or skip, when the cached pin still matches the cached version).
   if (glossaryPinnedVersion === glossary.version) {
@@ -563,16 +560,10 @@ const main = async () => {
   const refreshCatalogsOnce = async (): Promise<boolean> => {
     if (catalogsRefreshed) return false;
     catalogsRefreshed = true;
-    console.log(
-      "Glossary/audit version mismatch. Refreshing local glossary and phrases, then retrying compilation once.",
-    );
     try {
       await loadExampleCatalogs(true);
       return true;
-    } catch (error) {
-      console.error(
-        `Local catalog refresh failed: ${(error as Error).message}`,
-      );
+    } catch {
       return false;
     }
   };
