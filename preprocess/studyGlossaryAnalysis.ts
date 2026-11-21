@@ -1,4 +1,4 @@
-import { getEasyEyesBaseUrl } from "../components/easyeyesBaseUrl";
+import { fetchCompilerAudit } from "./fetchCompilerAudit";
 import { getGlossaryVersion } from "../parameters/glossaryRegistry";
 import { conditionParameters } from "./studyPhraseAnalysis";
 import {
@@ -15,6 +15,7 @@ export async function checkStudyGlossaryAnalysis(
   references: GlossaryReference[],
   normalized?: Record<string, string>[],
   localIndex?: PhraseSourceIndex,
+  analysisRequired = true,
 ): Promise<{
   errors: Alert[];
   report?: PhrasePathReport & {
@@ -22,35 +23,24 @@ export async function checkStudyGlossaryAnalysis(
     studyDefinedParameters: GlossaryReference[];
   };
 }> {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 15000);
   try {
     const fingerprint =
       localIndex?.fingerprint ?? process.env.PHRASE_ANALYSIS_FINGERPRINT;
     if (!fingerprint)
       throw new Error("Glossary analysis build metadata missing");
     const conditions = conditionParameters(table, normalized);
-    let report: PhrasePathReport;
-    if (localIndex) report = analyseGlossaryPaths(localIndex, conditions);
-    else {
-      const response = await fetch(
-        `${await getEasyEyesBaseUrl()}/.netlify/functions/study-phrase-analysis`,
-        {
+    const report = localIndex
+      ? analyseGlossaryPaths(localIndex, conditions)
+      : await fetchCompilerAudit<PhrasePathReport>("study-phrase-analysis", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          cache: "no-store",
-          signal: controller.signal,
           body: JSON.stringify({
             schemaVersion: 1,
             analysis: "glossary",
             fingerprint,
             conditions,
           }),
-        },
-      );
-      if (!response.ok) throw new Error("Study glossary analysis unavailable");
-      report = await response.json();
-    }
+        });
     if (
       report.schemaVersion !== 1 ||
       report.fingerprint !== fingerprint ||
@@ -87,6 +77,7 @@ export async function checkStudyGlossaryAnalysis(
       },
     };
   } catch {
+    if (!analysisRequired) return { errors: [] };
     return {
       errors: [
         {
@@ -100,7 +91,5 @@ export async function checkStudyGlossaryAnalysis(
         },
       ],
     };
-  } finally {
-    clearTimeout(timer);
   }
 }

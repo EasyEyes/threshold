@@ -1,4 +1,4 @@
-import { getEasyEyesBaseUrl } from "../components/easyeyesBaseUrl";
+import { fetchCompilerAudit } from "./fetchCompilerAudit";
 import { getGlossary } from "../parameters/glossaryRegistry";
 import { getPhrases, getPhrasesVersion } from "../parameters/phrasesRegistry";
 import { ExperimentTable } from "./experimentTable";
@@ -84,6 +84,7 @@ export async function checkStudyPhraseAnalysis(
   references: Reference[],
   normalized?: Record<string, string>[],
   localIndex?: PhraseSourceIndex,
+  analysisRequired = true,
 ): Promise<{
   errors: Alert[];
   report?: PhrasePathReport & {
@@ -96,32 +97,21 @@ export async function checkStudyPhraseAnalysis(
 }> {
   const language = table.colBOrDefault("_language");
   let errors: Alert[] = [];
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 15000);
   try {
     const phrases = getPhrases();
+    // Check explicit keys against the catalog even if source analysis is unavailable.
     errors = validateStudyPhraseDefinitions(references, phrases);
     const fingerprint =
       localIndex?.fingerprint ?? process.env.PHRASE_ANALYSIS_FINGERPRINT;
     if (!fingerprint) throw new Error("Phrase analysis build metadata missing");
     const conditions = conditionParameters(table, normalized);
-    let report: PhrasePathReport;
-    if (localIndex) {
-      report = analysePhrasePaths(localIndex, conditions);
-    } else {
-      const response = await fetch(
-        `${await getEasyEyesBaseUrl()}/.netlify/functions/study-phrase-analysis`,
-        {
+    const report = localIndex
+      ? analysePhrasePaths(localIndex, conditions)
+      : await fetchCompilerAudit<PhrasePathReport>("study-phrase-analysis", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          cache: "no-store",
-          signal: controller.signal,
           body: JSON.stringify({ schemaVersion: 1, fingerprint, conditions }),
-        },
-      );
-      if (!response.ok) throw new Error("Study phrase analysis unavailable");
-      report = (await response.json()) as PhrasePathReport;
-    }
+        });
     if (
       report.schemaVersion !== 1 ||
       report.fingerprint !== fingerprint ||
@@ -185,6 +175,7 @@ export async function checkStudyPhraseAnalysis(
       },
     };
   } catch (error) {
+    if (!analysisRequired) return { errors };
     console.error(
       "[study-phrase-analysis] Validation could not be completed",
       error,
@@ -199,7 +190,5 @@ export async function checkStudyPhraseAnalysis(
       parameters: [],
     });
     return { errors };
-  } finally {
-    clearTimeout(timeout);
   }
 }
