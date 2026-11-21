@@ -4,7 +4,7 @@ import {
   getSuperMatchingParams,
 } from "../parameters/glossaryRegistry";
 import { loadGlossaryRows } from "../parameters/glossaryLink";
-import { getEasyEyesBaseUrl } from "../components/easyeyesBaseUrl";
+import { fetchCompilerAudit } from "./fetchCompilerAudit";
 import { OBSOLETE_PARAMETER, type Alert } from "./alerts";
 import { alertParameter, escapeAlertHtml } from "./alertHtml";
 
@@ -115,19 +115,13 @@ export async function checkGlossaryAudit(
       OBSOLETE_PARAMETER(parameter, key),
     );
 
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 15000);
   try {
-    let audit = localAudit;
-    if (!audit) {
-      const response = await fetch(
-        `${await getEasyEyesBaseUrl()}/.netlify/functions/glossary-audit-compiler`,
-        { cache: "no-store", signal: controller.signal },
-      );
-      if (!response.ok) throw new Error("Audit unavailable");
-      audit = await response.json();
-    }
-    if (!audit) throw new Error("Audit missing");
+    if (!getGlossaryVersion()) throw new Error("Glossary version missing");
+    const audit =
+      localAudit ??
+      (await fetchCompilerAudit<GlossaryCompilerAudit>(
+        "glossary-audit-compiler",
+      ));
     const warnings = validateGlossaryAudit(refs, audit);
     if (!warnings.length) return warnings;
     await loadGlossaryRows();
@@ -147,7 +141,5 @@ export async function checkGlossaryAudit(
         parameters: [],
       },
     ];
-  } finally {
-    clearTimeout(timer);
   }
 }

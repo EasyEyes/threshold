@@ -533,9 +533,6 @@ export const prepareExperimentFileForThreshold = async (
     }
 
     if (!user.currentExperiment) user.currentExperiment = {};
-    // Resolve the study language and defaults before evaluating source guards.
-    // Invalid studies already have blocking diagnostics; avoid an extra request.
-    delete user.currentExperiment.phraseAnalysis;
 
     // Web-parity resource validation: run the web compiler's resource checks
     // in node too (isLocal), sourcing resources from local folders via
@@ -1265,24 +1262,34 @@ export const prepareExperimentFileForThreshold = async (
       );
     }
 
-    // Use the final normalized condition values, including resolved custom values.
+    // Analyse normalized values, including resolved custom values. Web source
+    // analyses are optional. The local examples workflow requires its index.
     if (!errors.some((error) => error.kind === "error")) {
-      const analysis = await checkStudyPhraseAnalysis(
-        table,
-        internationalPhraseReferences,
-        df.toCollection(),
-        isLocal ? easyeyesResources.phraseAnalysisIndex : undefined,
-      );
-      errors.push(...analysis.errors);
-      user.currentExperiment.phraseAnalysis = analysis.report;
-      const glossaryAnalysis = await checkStudyGlossaryAnalysis(
-        table,
-        collectStudyGlossaryReferences(parsed.data),
-        df.toCollection(),
-        isLocal ? easyeyesResources.phraseAnalysisIndex : undefined,
-      );
-      errors.push(...glossaryAnalysis.errors);
-      user.currentExperiment.glossaryAnalysis = glossaryAnalysis.report;
+      const normalized = df.toCollection();
+      const localIndex = isLocal
+        ? easyeyesResources.phraseAnalysisIndex
+        : undefined;
+      const [phraseAnalysis, glossaryAnalysis] = await Promise.all([
+        checkStudyPhraseAnalysis(
+          table,
+          internationalPhraseReferences,
+          normalized,
+          localIndex,
+          isLocal,
+        ),
+        checkStudyGlossaryAnalysis(
+          table,
+          collectStudyGlossaryReferences(parsed.data),
+          normalized,
+          localIndex,
+          isLocal,
+        ),
+      ]);
+      errors.push(...phraseAnalysis.errors, ...glossaryAnalysis.errors);
+      if (phraseAnalysis.report)
+        user.currentExperiment.phraseAnalysis = phraseAnalysis.report;
+      if (glossaryAnalysis.report)
+        user.currentExperiment.glossaryAnalysis = glossaryAnalysis.report;
     }
 
     /* --------------------------------- Errors --------------------------------- */
