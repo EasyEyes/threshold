@@ -83,8 +83,9 @@ import { parsePhraseFile } from "../../source/components/parsePhraseFile";
 import type { PhraseTable } from "../../source/components/parsePhraseFile";
 import { checkStudyGlossaryAnalysis } from "./studyGlossaryAnalysis";
 import {
+  checkObsoleteGlossaryReferences,
   collectStudyGlossaryReferences,
-  checkGlossaryAudit,
+  hasGlossaryAuditVersionMismatch,
 } from "./glossaryAudit";
 import { collectInternationalPhraseReferences } from "./internationalPhraseAudit";
 import { checkStudyPhraseAnalysis } from "./studyPhraseAnalysis";
@@ -309,6 +310,7 @@ export const prepareExperimentFileForThreshold = async (
   filename?: string,
   isLocal: boolean = false,
 ) => {
+  const compileStatus = { glossaryAuditVersionMismatch: false };
   try {
     // Column letters in error messages are relative to the original file until
     // disabled conditions are dropped below; start each run with no mapping.
@@ -361,7 +363,7 @@ export const prepareExperimentFileForThreshold = async (
     const internationalPhraseReferences = collectInternationalPhraseReferences(
       parsed.data,
     );
-    const glossaryAuditRows = parsed.data;
+    const glossaryReferenceRows = parsed.data;
 
     // Resolve named phrases before language phrases and type validation.
     const requestedNamedPhraseFile =
@@ -521,15 +523,17 @@ export const prepareExperimentFileForThreshold = async (
 
     errors.push(...validateExperimentTable(table, sourceTable));
 
-    // Report input problems before requesting an audit, while keeping audit
-    // references tied to the original enabled rows rather than resolved values.
     if (!errors.some((error) => error.kind === "error")) {
-      errors.push(
-        ...(await checkGlossaryAudit(
-          glossaryAuditRows,
-          isLocal ? easyeyesResources.glossaryAudit : undefined,
-        )),
-      );
+      const references = collectStudyGlossaryReferences(glossaryReferenceRows);
+      const obsoleteErrors = checkObsoleteGlossaryReferences(references);
+      errors.push(...obsoleteErrors);
+      if (isLocal && obsoleteErrors.length === 0) {
+        compileStatus.glossaryAuditVersionMismatch =
+          await hasGlossaryAuditVersionMismatch(
+            references,
+            easyeyesResources.glossaryAudit,
+          );
+      }
     }
 
     if (!user.currentExperiment) user.currentExperiment = {};
@@ -1310,6 +1314,7 @@ export const prepareExperimentFileForThreshold = async (
         requestedFrequencyResponseList,
         requestedTargetSoundLists,
         requestedPhraseFile,
+        compileStatus,
       );
     } else {
       durations.currentDuration = EstimateDurationForScientistPage(parsed);
@@ -1352,6 +1357,7 @@ export const prepareExperimentFileForThreshold = async (
         requestedFrequencyResponseList,
         requestedTargetSoundLists,
         requestedPhraseFile,
+        compileStatus,
       );
     }
   } catch (e: any) {
@@ -1368,7 +1374,22 @@ export const prepareExperimentFileForThreshold = async (
       kind: "error",
       parameters: unexpectedPhrase ? [unexpectedPhrase] : [],
     });
-    callback(user, {}, [], [], [], [], [], [], errors, [], [], [], "");
+    callback(
+      user,
+      {},
+      [],
+      [],
+      [],
+      [],
+      [],
+      [],
+      errors,
+      [],
+      [],
+      [],
+      "",
+      compileStatus,
+    );
   }
 };
 

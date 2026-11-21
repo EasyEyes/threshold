@@ -152,7 +152,7 @@ it.each(["not-a-language", "en,fr"])(
   },
 );
 
-it("warns about a missing source candidate without blocking a defined study key", async () => {
+it("silently compiles a defined study key with a missing source candidate", async () => {
   const result = await compile("EE_Translator", "en", {
     ...sourceIndex,
     sites: [
@@ -166,13 +166,11 @@ it("warns about a missing source candidate without blocking a defined study key"
     ],
   });
   expect(result.blockingErrors).toEqual([]);
-  expect(result.warnings).toEqual(
-    expect.arrayContaining([
-      expect.objectContaining({
-        name: "Warning: 1 missing phrase",
-        kind: "warning",
-      }),
-    ]),
+  expect(result.warnings.map((warning) => warning.name)).not.toContain(
+    "Glossary audit unavailable",
+  );
+  expect(result.warnings.map((warning) => warning.name)).not.toContain(
+    "Warning: 1 missing phrase",
   );
 });
 
@@ -221,7 +219,7 @@ it.each([
 );
 
 it.each(["unavailable", "stale"] as const)(
-  "A2/A3/A5 compiles corrected input with a %s audit, then clears the warning when it recovers",
+  "A2/A3/A5 compiles corrected input with a %s audit, and remains silent when it recovers",
   async (state) => {
     const requests = mockGlossaryAudit(state);
     const invalid = await compile(
@@ -245,13 +243,11 @@ it.each(["unavailable", "stale"] as const)(
     expect(requests).toHaveLength(1);
     expect(corrected.blockingErrors).toEqual([]);
     expect(corrected.fileStringList.length).toBeGreaterThan(0);
-    expect(corrected.warnings).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          name: "Glossary audit unavailable",
-          kind: "warning",
-        }),
-      ]),
+    expect(corrected.warnings.map((warning) => warning.name)).not.toContain(
+      "Glossary audit unavailable",
+    );
+    expect(corrected.warnings.map((warning) => warning.name)).not.toContain(
+      "Warning: 1 missing phrase",
     );
 
     const recoveredRequests = mockGlossaryAudit("matching");
@@ -284,12 +280,10 @@ it("does not skip the glossary audit for a nonblocking input warning", async () 
     ),
   ).toBe(true);
   expect(result.blockingErrors).toEqual([]);
-  expect(result.warnings).toEqual(
-    expect.arrayContaining([
-      expect.objectContaining({
-        name: "Glossary audit unavailable",
-        kind: "warning",
-      }),
-    ]),
+  expect(result.warnings.map((warning) => warning.name)).not.toContain(
+    "Glossary audit unavailable",
+  );
+  expect(result.warnings.map((warning) => warning.name)).not.toContain(
+    "Warning: 1 missing phrase",
   );
 });

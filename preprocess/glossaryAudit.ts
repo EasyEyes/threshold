@@ -3,7 +3,6 @@ import {
   getGlossaryVersion,
   getSuperMatchingParams,
 } from "../parameters/glossaryRegistry";
-import { loadGlossaryRows } from "../parameters/glossaryLink";
 import { fetchCompilerAudit } from "./fetchCompilerAudit";
 import { OBSOLETE_PARAMETER, type Alert } from "./alerts";
 import { alertParameter, escapeAlertHtml } from "./alertHtml";
@@ -51,12 +50,10 @@ export function collectStudyGlossaryReferences(
   return [...references.values()];
 }
 
-class GlossaryAuditVersionMismatch extends Error {}
-
-export function validateGlossaryAudit(
+function getUnusedGlossaryKeys(
   refs: GlossaryReference[],
   audit: GlossaryCompilerAudit,
-): Alert[] {
+): Set<string> {
   if (
     !audit?.id ||
     !audit.generatedAt ||
@@ -76,8 +73,16 @@ export function validateGlossaryAudit(
     refs.some((ref) => !used.has(ref.key) && !unused.has(ref.key))
   )
     throw new Error("Incomplete glossary audit report");
+  return unused;
+}
+
+export function validateGlossaryAudit(
+  refs: GlossaryReference[],
+  audit: GlossaryCompilerAudit,
+): Alert[] {
+  const unused = getUnusedGlossaryKeys(refs, audit);
   if (audit.glossaryVersion !== getGlossaryVersion())
-    throw new GlossaryAuditVersionMismatch(
+    throw new Error(
       `Loaded glossary version ${escapeAlertHtml(
         getGlossaryVersion() ?? "unknown",
       )} does not match completed audit version ${escapeAlertHtml(
@@ -100,46 +105,32 @@ export function validateGlossaryAudit(
     }));
 }
 
-export async function checkGlossaryAudit(
-  rows: readonly (readonly string[])[],
-  localAudit?: GlossaryCompilerAudit,
-): Promise<Alert[]> {
-  const refs = collectStudyGlossaryReferences(rows);
-  if (!refs.length) return [];
-
+export function checkObsoleteGlossaryReferences(
+  refs: GlossaryReference[],
+): Alert[] {
   // Numbered parameters can inherit an obsolete Glossary definition.
   const glossary = getGlossary();
-  const obsolete = refs.filter(({ key }) => glossary[key]?.type === "obsolete");
-  if (obsolete.length)
-    return obsolete.map(({ parameter, key }) =>
-      OBSOLETE_PARAMETER(parameter, key),
-    );
+  return refs
+    .filter(({ key }) => glossary[key]?.type === "obsolete")
+    .map(({ parameter, key }) => OBSOLETE_PARAMETER(parameter, key));
+}
 
+export async function hasGlossaryAuditVersionMismatch(
+  refs: GlossaryReference[],
+  localAudit?: GlossaryCompilerAudit,
+): Promise<boolean> {
+  const loadedVersion = getGlossaryVersion();
+  if (!refs.length || !loadedVersion) return false;
   try {
-    if (!getGlossaryVersion()) throw new Error("Glossary version missing");
     const audit =
       localAudit ??
       (await fetchCompilerAudit<GlossaryCompilerAudit>(
         "glossary-audit-compiler",
       ));
-    const warnings = validateGlossaryAudit(refs, audit);
-    if (!warnings.length) return warnings;
-    await loadGlossaryRows();
-    return validateGlossaryAudit(refs, audit);
-  } catch (error) {
-    const mismatch = error instanceof GlossaryAuditVersionMismatch;
-    return [
-      {
-        name: "Glossary audit unavailable",
-        ...(mismatch ? { code: "glossary_audit_version_mismatch" } : {}),
-        message: mismatch
-          ? error.message
-          : "A complete usage audit for the loaded Glossary version could not be loaded.",
-        hint: "Compilation can continue. The Compiler checks the latest completed audit on each attempt.",
-        context: "preprocessor",
-        kind: "warning",
-        parameters: [],
-      },
-    ];
+    // Refresh local catalogs only when a complete report confirms a mismatch.
+    getUnusedGlossaryKeys(refs, audit);
+    return audit.glossaryVersion !== loadedVersion;
+  } catch {
+    return false;
   }
 }

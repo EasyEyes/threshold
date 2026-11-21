@@ -51,6 +51,7 @@ export interface LocalCompileResult {
   /** Errors sorted by parameter name, exactly like the web compiler page. */
   blockingErrors: Alert[];
   warnings: Alert[];
+  glossaryAuditVersionMismatch: boolean;
   /** Descriptions of web-compiler checks that cannot run locally. */
   skippedChecks: string[];
   requestedImpulseResponseList: string[];
@@ -250,6 +251,7 @@ export const compileExperimentTableLocally = async (
         requestedFrequencyResponseList: string[],
         requestedTargetSoundLists: string[],
         requestedPhraseFile: string,
+        compileStatus: { glossaryAuditVersionMismatch: boolean },
       ) => {
         // Same split + sort as the web compiler page (source/Table.js):
         // warnings never block; blocking errors sorted by parameter list,
@@ -272,6 +274,8 @@ export const compileExperimentTableLocally = async (
           fileStringList,
           blockingErrors,
           warnings,
+          glossaryAuditVersionMismatch:
+            compileStatus.glossaryAuditVersionMismatch,
           skippedChecks,
           requestedImpulseResponseList,
           requestedFrequencyResponseList,

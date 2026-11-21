@@ -99,10 +99,8 @@ it.each(["phrases", "glossary"] as const)(
 
     const result = await compile(user);
     expect(result.files.length).toBeGreaterThan(0);
-    expect(result.alerts.filter(({ kind }) => kind === "error")).toEqual([]);
-    expect(requests).toEqual(
-      expect.arrayContaining(["usage", "phrases", "glossary"]),
-    );
+    expect(result.alerts).toEqual([]);
+    expect(requests.sort()).toEqual(["glossary", "phrases"]);
     if (unavailable === "phrases") {
       expect(user.currentExperiment.phraseAnalysis).toBeUndefined();
       expect(user.currentExperiment.glossaryAnalysis?.fingerprint).toBe(
@@ -117,15 +115,11 @@ it.each(["phrases", "glossary"] as const)(
 
     recovering = true;
     const retried = await compile(user);
+    expect(requests).not.toContain("usage");
     const contents = (files: File[]) =>
       Promise.all(files.map(async (file) => [file.name, await file.text()]));
     expect(await contents(retried.files)).toEqual(await contents(result.files));
-    expect(retried.alerts).toContainEqual(
-      expect.objectContaining({
-        code: "study_phrase_candidates_missing",
-        kind: "warning",
-      }),
-    );
+    expect(retried.alerts).toEqual([]);
     expect(user.currentExperiment.phraseAnalysis?.fingerprint).toBe(
       index.fingerprint,
     );
@@ -140,7 +134,7 @@ it("compiles without requesting source analysis when build metadata is missing",
   const requests = mockAuditServices();
   const result = await compile();
   expect(result.files.length).toBeGreaterThan(0);
-  expect(requests).toEqual(["usage"]);
+  expect(requests).toEqual([]);
 });
 
 it.each([
@@ -174,10 +168,8 @@ it.each([
     const requests = mockAuditServices(fail);
     const result = await compile();
     expect(result.files.length).toBeGreaterThan(0);
-    expect(result.alerts.filter(({ kind }) => kind === "error")).toEqual([]);
-    expect(requests).toEqual(
-      expect.arrayContaining(["usage", "phrases", "glossary"]),
-    );
+    expect(result.alerts).toEqual([]);
+    expect(requests.sort()).toEqual(["glossary", "phrases"]);
   },
 );
 
