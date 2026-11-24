@@ -9,10 +9,12 @@ import JSZip from "jszip";
 import { doesFileNameContainIgnoreDirectory } from "./folderStructureCheck";
 import { stripBlankEnds } from "./parameterName";
 import { _superMatching } from "./experimentFileChecks";
+import { parseSoundBackground } from "../components/soundBackgroundRef";
 
 export const getFolderNames = (parsed: any): any => {
   let maskedfolderList: string[] = [];
   let targetfolderList: string[] = [];
+  let soundBackgroundList: string[] = [];
   let targetTaskList: string[] = [];
   let targetKindList: string[] = [];
   for (let i = 0; i < parsed.data.length; i++) {
@@ -20,6 +22,8 @@ export const getFolderNames = (parsed: any): any => {
       maskedfolderList = [...parsed.data[i]];
     } else if (parsed.data[i][0] == "targetSoundFolder") {
       targetfolderList = [...parsed.data[i]];
+    } else if (parsed.data[i][0] == "soundBackground") {
+      soundBackgroundList = [...parsed.data[i]];
     } else if (parsed.data[i][0] == "targetTask") {
       targetTaskList = [...parsed.data[i]];
     } else if (parsed.data[i][0] == "targetKind") {
@@ -29,6 +33,7 @@ export const getFolderNames = (parsed: any): any => {
 
   maskedfolderList.shift();
   targetfolderList.shift();
+  soundBackgroundList.shift();
   targetTaskList.shift();
   targetKindList.shift();
 
@@ -73,6 +78,13 @@ export const getFolderNames = (parsed: any): any => {
   //remove empty strings from the lists
   maskedfolderList = maskedfolderList.filter((item: string) => item !== "");
   targetfolderList = targetfolderList.filter((item: string) => item !== "");
+  const soundBackgroundFolder = [
+    ...new Set(
+      soundBackgroundList
+        .map((value) => parseSoundBackground(value)?.folder)
+        .filter((folder): folder is string => Boolean(folder)),
+    ),
+  ];
 
   // let folderList: string[] = maskedfolderList.concat(targetfolderList);
   // folderList = folderList.filter(
@@ -83,6 +95,7 @@ export const getFolderNames = (parsed: any): any => {
   return {
     maskerSoundFolder: maskedfolderList,
     targetSoundFolder: targetfolderList,
+    soundBackgroundFolder,
     folderAndTargetKindObjectList: folderAndTargetKindObjectList,
   };
 };

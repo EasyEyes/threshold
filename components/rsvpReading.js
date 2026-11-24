@@ -19,6 +19,7 @@ import {
   showTimingBarsBool,
 } from "./global";
 import { psychoJS } from "./globalPsychoJS";
+import { endSoundBackground } from "./soundBackground.js";
 import {
   incrementTrialCompletedThisBlock,
   incrementTrialCorrectThisBlock,
@@ -529,6 +530,7 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
         )
       )
         void closeActiveRsvpSpeechTrial();
+      endSoundBackground();
       if (start !== undefined && rsvpReadingTargetSets.past.length > 0) {
         rsvpReadingTargetSets.past[
           rsvpReadingTargetSets.past.length - 1
@@ -559,6 +561,7 @@ export const _rsvpReading_trialRoutineEachFrame = (t, frameN, instructions) => {
     if (t < rsvpDelayBeforeResponseStartT + delaySec) {
       return true;
     }
+    endSoundBackground();
 
     if (restInstructionsBool) {
       instructions.tSTart = t;

@@ -1048,11 +1048,14 @@ export const prepareExperimentFileForThreshold = async (
       maskerSoundFolder: folderList.maskerSoundFolder,
       targetSoundFolder: folderList.targetSoundFolder,
     };
+    if (folderList.soundBackgroundFolder?.length)
+      maskerAndTargetFolders.soundBackground = folderList.soundBackgroundFolder;
     const missingFolderErrors: any = [];
     if (
       validateResourcesBool &&
       (folderList.maskerSoundFolder.length > 0 ||
-        folderList.targetSoundFolder.length > 0)
+        folderList.targetSoundFolder.length > 0 ||
+        folderList.soundBackgroundFolder?.length > 0)
     ) {
       missingFolderErrors.push(
         ...checkSoundFolderPresence(

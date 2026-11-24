@@ -27,6 +27,7 @@ import {
   rsvpSpeechRuntime,
   skipTrialOrBlock,
 } from "./global.js";
+import { endSoundBackground } from "./soundBackground.js";
 import {
   measureGazeError,
   calculateError,
@@ -267,6 +268,7 @@ export const _repeatedLetters_trialRoutineEachFrame = (
     instructions.tSTart = t;
     instructions.frameNStart = frameN;
     instructions.setAutoDraw(true);
+    endSoundBackground();
   }
 };
 
@@ -306,6 +308,7 @@ export const _rsvpReading_trialRoutineEnd = (
   doneWithPracticeSoResetQuest,
   paramReader,
 ) => {
+  endSoundBackground();
   // Add response data
   addRsvpReadingTrialResponsesToData();
   addTrialStaircaseSummariesToData(currentLoop, psychoJS);

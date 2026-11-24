@@ -533,6 +533,11 @@ import {
   undrawAllRSVPReadingStims,
 } from "./components/rsvpReading.js";
 import {
+  beginSoundBackground,
+  endSoundBackground,
+  preloadSoundBackgrounds,
+} from "./components/soundBackground.js";
+import {
   constrainFontTransparencyLevel,
   getFontOpacity,
   isFontTransparencyThreshold,
@@ -1636,6 +1641,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
           ) !== "original",
         signal: mediaAbort.signal,
       });
+      await preloadSoundBackgrounds(paramReader);
     } catch (error) {
       if (!status.terminated) throw error;
     } finally {
@@ -7928,6 +7934,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
       }
       if (toShowCursor()) {
         showCursor();
+        endSoundBackground();
         return Scheduler.Event.NEXT;
       }
 
@@ -8033,6 +8040,10 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         }
       }
       /* -------------------------------------------------------------------------- */
+
+      // Any target kind with a stimulus; a pure questionAndAnswer page is
+      // itself the response screen.
+      void beginSoundBackground();
 
       switchKind(targetKind.current, {
         vocoderPhrase: async () => {
@@ -8614,6 +8625,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
         // RSVP words are autoDraw stims that are normally undrawn later in this
         // per-frame loop. Skipping short-circuits that, so erase any word still
         // on screen to avoid it lingering into the next block.
+        endSoundBackground();
         if (targetKind.current === "rsvpReading") {
           undrawAllRSVPReadingStims();
           if (
@@ -9858,6 +9870,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             instructions.tSTart = t;
             instructions.frameNStart = frameN;
             instructions.setAutoDraw(true);
+            endSoundBackground();
           }
         },
         movie: () => {
@@ -9894,6 +9907,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             instructions.tSTart = t;
             instructions.frameNStart = frameN;
             instructions.setAutoDraw(true);
+            endSoundBackground();
           }
         },
         vernier: () => {
@@ -9926,6 +9940,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             instructions.tSTart = t;
             instructions.frameNStart = frameN;
             instructions.setAutoDraw(true);
+            endSoundBackground();
           }
         },
       });
@@ -9998,6 +10013,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               frameN >= targetImage.frameNStart + 60;
             if (paintedEnough || fallback) {
               showCursor();
+              endSoundBackground();
               parseImageQuestionAndAnswer(status.block_condition);
               key_resp.corr = await questionAndAnswerForImage(
                 status.block_condition,
@@ -10021,6 +10037,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
             0.1
         ) {
           showCursor();
+          endSoundBackground();
           parseImageQuestionAndAnswer(status.block_condition);
           key_resp.corr = await questionAndAnswerForImage(
             status.block_condition,
@@ -10073,6 +10090,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
               ? whereRaw
               : "top";
             showCursor();
+            endSoundBackground();
             parseImageQuestionAndAnswer(status.block_condition, {
               skipIdentify: true,
             });
@@ -10162,6 +10180,7 @@ const experiment = (howManyBlocksAreThereInTotal) => {
   function trialRoutineEnd(snapshot) {
     return async function () {
       setCurrentFn("trialRoutineEnd");
+      endSoundBackground();
       // Memory telemetry for EVERY targetKind: heap-column validity plus the
       // renderer's texture cache (invisible to the heap columns). Sampled at
       // trial end so non-letter kinds (reading, rsvp, image, movie, vernier)

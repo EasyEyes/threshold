@@ -29,6 +29,15 @@ export const collectStudyMedia = (reader) => {
     add("targetImageFolder", "folders/", ".zip");
     add("targetSoundFolder", "folders/", ".zip");
     add("maskerSoundFolder", "folders/", ".zip");
+    const background = get("soundBackground");
+    if (typeof background === "string" && background.trim()) {
+      const head = background
+        .trim()
+        .split("/")[0]
+        .replace(/\.zip$/i, "");
+      const folder = head.replace(/\.(wav|aac)$/i, "");
+      if (folder) urls.add(`folders/${folder}.zip`);
+    }
     add("targetSoundList", "targetSoundLists/");
     add("showImage", "images/");
   }
