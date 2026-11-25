@@ -60,6 +60,8 @@ import {
 } from "../components/compatibilityCheck";
 import { getDeviceType } from "../components/compatibilityUI";
 
+const { status } = require("../components/status");
+
 const baseRows = (): Record<string, string[]> => ({
   // Passing defaults: "all" ignores browser/OS restrictions; the device
   // type is whatever this environment reports.
@@ -79,6 +81,7 @@ const mkRc = (): any => ({
 });
 
 beforeEach(() => {
+  status.compatibilityUnmetNeeds = [];
   window.matchMedia = jest.fn().mockReturnValue({ matches: false });
 });
 
@@ -141,6 +144,16 @@ describe("checkSystemCompatibility returns the current evaluation's needs", () =
     );
     expect(second.unmetNeeds).toEqual([]);
     expect(second.proceed).toBe(true);
+  });
+
+  test("current verdict is available to termination and cleared after recovery", async () => {
+    await checkSystemCompatibility(mkReader(failingCores), "en", mkRc());
+    expect(status.compatibilityUnmetNeeds).toEqual([
+      "_needProcessorCoresMinimum",
+    ]);
+
+    await checkSystemCompatibility(mkReader(passingCores), "en", mkRc());
+    expect(status.compatibilityUnmetNeeds).toEqual([]);
   });
 
   test("no standalone row on the recompute-style call (psychoJS null)", async () => {

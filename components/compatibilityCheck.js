@@ -1,4 +1,5 @@
 import { onStudyTermination } from "./interaction/termination";
+import { status } from "./status";
 import { getGlossary } from "../parameters/glossaryRegistry";
 import { isProlificExperiment } from "./externalServices.ts";
 import { readi18nPhrases } from "./readPhrases";
@@ -861,8 +862,10 @@ export const checkSystemCompatibility = async (
     );
   }
 
-  if (psychoJS && unmetNeeds.length > 0) {
-    const unmetNeedsString = unmetNeeds.join(",");
+  const currentUnmetNeeds = [...new Set(unmetNeeds)];
+  status.compatibilityUnmetNeeds = currentUnmetNeeds;
+  if (psychoJS && currentUnmetNeeds.length > 0) {
+    const unmetNeedsString = currentUnmetNeeds.join(",");
     psychoJS.experiment.addData("unmetNeeds", unmetNeedsString);
     psychoJS.experiment.nextEntry();
   }
@@ -870,7 +873,7 @@ export const checkSystemCompatibility = async (
     notes: notes,
     proceed: deviceIsCompatibleBool,
     promptRefresh: promptRefresh,
-    unmetNeeds: [...new Set(unmetNeeds)],
+    unmetNeeds: currentUnmetNeeds,
   };
 };
 

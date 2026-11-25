@@ -174,6 +174,7 @@ const resetState = () => {
   status.nthBlock = undefined;
   status.trial = undefined;
   status.terminated = false;
+  status.compatibilityUnmetNeeds = [];
   delete status.fullscreenQuitAudit;
 };
 
@@ -279,6 +280,21 @@ describe("stampUnloadExit — label the pending row when the page unloads live",
         experimentCompleteBool: false,
       },
     ]);
+  });
+
+  test("current incompatibility stays primary over a later tab close", () => {
+    status.currentFunction = "compatChooseCamera";
+    status.compatibilityUnmetNeeds = ["_needMemoryGB"];
+
+    stampUnloadExit();
+
+    const addData = experiment().experiment.addData as jest.Mock;
+    expect(addData).toHaveBeenCalledWith("unmetNeeds", "_needMemoryGB");
+    expect(addData).toHaveBeenCalledWith("error", "incompatible");
+    expect(addData).not.toHaveBeenCalledWith(
+      "error",
+      expect.stringContaining("participant:tabClosed"),
+    );
   });
 
   test("does NOT stamp when PsychoJS already ended the experiment", () => {

@@ -8,6 +8,7 @@ const RUN_LEVEL_FIELDS = new Set([
   "nthBlock",
   "consentGiven",
   "terminated", // set once by quitPsychoJS's termination audit
+  "compatibilityUnmetNeeds", // latest run-level compatibility verdict
   "fullscreenQuitAudit", // staged while the quit-feedback prompt is open
 ]);
 

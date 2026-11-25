@@ -39,7 +39,12 @@ import {
 
 import { rc, status } from "./global";
 import { paramReader } from "../parameters/paramReader.ts";
-import { quitPsychoJS, terminationProgressSuffix } from "./lifetime.js";
+import {
+  quitPsychoJS,
+  reasonPreservingCompatibilityRejection,
+  splitTerminationColumns,
+  terminationProgressSuffix,
+} from "./lifetime.js";
 import { psychoJS } from "./globalPsychoJS.js";
 import {
   clearFullscreenWasLost,
@@ -461,8 +466,13 @@ const _experiment = () => psychoJS._experiment ?? psychoJS.experiment;
  */
 const _stageQuitAudit = (rcQuitTrigger) => {
   try {
+    const reason = reasonPreservingCompatibilityRejection(
+      fullscreenQuitLabel(rcQuitTrigger) + terminationProgressSuffix(),
+    );
+    const { unmetNeeds, error } = splitTerminationColumns(reason);
     status.fullscreenQuitAudit = {
-      error: fullscreenQuitLabel(rcQuitTrigger) + terminationProgressSuffix(),
+      ...(unmetNeeds ? { unmetNeeds } : {}),
+      error,
       currentFunction: status.currentFunction ?? "",
       experimentCompleteBool: false,
       whyQuit: "",
@@ -494,7 +504,12 @@ const _handleQuit = async (rcQuitTrigger) => {
         paramReader,
         undefined,
         undefined,
-        fullscreenQuitLabel(rcQuitTrigger),
+        reasonPreservingCompatibilityRejection(
+          fullscreenQuitLabel(rcQuitTrigger),
+        ),
+        status.compatibilityUnmetNeeds?.length
+          ? { deviceIncompatible: true }
+          : undefined,
       );
     } catch (e) {
       console.warn("quitPsychoJS from fullscreen-pause overlay failed:", e);

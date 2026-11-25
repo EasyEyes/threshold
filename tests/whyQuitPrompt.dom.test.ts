@@ -29,6 +29,11 @@ jest.mock("../threshold", () => ({ paramReader: {} }));
 const quitPsychoJS = jest.fn();
 jest.mock("../components/lifetime.js", () => ({
   quitPsychoJS: (...args: unknown[]) => quitPsychoJS(...args),
+  reasonPreservingCompatibilityRejection: (reason: string) => reason,
+  splitTerminationColumns: (reason: string) => ({
+    unmetNeeds: "",
+    error: reason,
+  }),
   terminationProgressSuffix: () => "",
 }));
 

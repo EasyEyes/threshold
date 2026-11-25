@@ -19,7 +19,10 @@ jest.mock("sweetalert2", () => ({
   default: { fire: (...args: unknown[]) => swalFire(...args) },
 }));
 
-const mockStatus: { terminated: boolean } = { terminated: false };
+const mockStatus: {
+  terminated: boolean;
+  compatibilityUnmetNeeds?: string[];
+} = { terminated: false };
 const phraseOrNull = jest.fn(() => null);
 jest.mock("../components/global", () => ({
   rc: { isIntentionalFullscreenExit: () => false },
@@ -31,6 +34,19 @@ jest.mock("../threshold", () => ({ paramReader: {} }));
 const quitPsychoJS = jest.fn();
 jest.mock("../components/lifetime.js", () => ({
   quitPsychoJS: (...args: unknown[]) => quitPsychoJS(...args),
+  reasonPreservingCompatibilityRejection: (reason: string) => {
+    const needs = mockStatus.compatibilityUnmetNeeds ?? [];
+    return needs.length && reason.startsWith("fullscreenQuit")
+      ? `${needs.join(",")},incompatible`
+      : reason;
+  },
+  splitTerminationColumns: (reason: string) => {
+    const tokens = reason.split(",");
+    return {
+      unmetNeeds: tokens.filter((token) => token.startsWith("_")).join(","),
+      error: tokens.filter((token) => !token.startsWith("_")).join(","),
+    };
+  },
   terminationProgressSuffix: () => "",
 }));
 
@@ -135,6 +151,7 @@ beforeEach(() => {
   addData.mockClear();
   phraseOrNull.mockClear();
   mockStatus.terminated = false;
+  mockStatus.compatibilityUnmetNeeds = [];
   delete (mockStatus as any).fullscreenQuitAudit;
 });
 
@@ -463,6 +480,31 @@ describe("staged quit audit (tab close during the prompt)", () => {
     await flushMicrotasks();
     expect(quitPsychoJS).toHaveBeenCalledTimes(1);
     expect(quitPsychoJS.mock.calls[0][5]).toBe("fullscreenQuit");
+  });
+
+  test("current incompatibility stays primary in the staged and final quit audit", async () => {
+    mockStatus.compatibilityUnmetNeeds = ["_needMemoryGB"];
+    const releasePrompt = await heldWhyQuitPrompt();
+
+    try {
+      expect((mockStatus as any).fullscreenQuitAudit).toMatchObject({
+        error: "incompatible",
+        unmetNeeds: "_needMemoryGB",
+      });
+    } finally {
+      releasePrompt({ isConfirmed: true, value: "" });
+      await flushMicrotasks();
+    }
+
+    expect(quitPsychoJS).toHaveBeenCalledWith(
+      "",
+      false,
+      undefined,
+      undefined,
+      undefined,
+      "_needMemoryGB,incompatible",
+      { deviceIncompatible: true },
+    );
   });
 
   test("Resume never touches the row: no whyQuit column without the modal", async () => {

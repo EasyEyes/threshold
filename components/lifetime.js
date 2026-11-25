@@ -159,6 +159,16 @@ export const incompatibleExitReason = (
   return "compatibility:unclassifiedRejection";
 };
 
+const PARTICIPANT_EXIT_REASON =
+  /^(fullscreenQuit|fullscreenExit|escapeKey|participant:tabClosed)(?=$|:|\s|\()/;
+
+/** A current compatibility rejection outranks a later participant exit. */
+export const reasonPreservingCompatibilityRejection = (reason = "") => {
+  const needs = status.compatibilityUnmetNeeds ?? [];
+  if (!needs.length || !PARTICIPANT_EXIT_REASON.test(reason)) return reason;
+  return incompatibleExitReason("", needs);
+};
+
 /** Progress suffix for termination cells, e.g. " (block 3/31, trial 12/40)".
  * Also used by the fullscreen-pause overlay, which pre-stamps the quit
  * audit before its feedback prompt (tab-close-during-prompt protection). */
@@ -218,11 +228,13 @@ export const stampUnloadExit = () => {
     if (experiment.__unloadStamped) return;
     const where = status.currentFunction ? `:${status.currentFunction}` : "";
     experiment.__unloadStamped = true;
-    experiment.addData("experimentCompleteBool", false);
-    experiment.addData(
-      "error",
+    const reason = reasonPreservingCompatibilityRejection(
       `participant:tabClosed${where}${terminationProgressSuffix()}`,
     );
+    const { unmetNeeds, error } = splitTerminationColumns(reason);
+    experiment.addData("experimentCompleteBool", false);
+    if (unmetNeeds) experiment.addData("unmetNeeds", unmetNeeds);
+    experiment.addData("error", error);
     experiment.addData("currentFunction", status.currentFunction ?? "");
     // ExperimentHandler.save() uploads only COMPLETED entries — commit, or
     // the label dies with the page.
@@ -370,6 +382,11 @@ export async function quitPsychoJS(
 
   // Claim termination synchronously, before uploads, RC callbacks or dialogs can
   // yield. Pending page continuations see this terminal state immediately.
+  if (!isCompleted) {
+    const primaryReason = reasonPreservingCompatibilityRejection(unmetNeeds);
+    if (primaryReason !== unmetNeeds) deviceIncompatible = true;
+    unmetNeeds = primaryReason;
+  }
   status.terminated = true;
   psychoJS.scheduler?.stop();
   stopInteractionObservation();

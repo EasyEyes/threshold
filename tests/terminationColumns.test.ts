@@ -166,6 +166,7 @@ beforeEach(() => {
   status.nthBlock = undefined;
   status.trial = undefined;
   status.terminated = false;
+  status.compatibilityUnmetNeeds = [];
 });
 
 // ── splitTerminationColumns — the pure router ─────────────────────────────────
@@ -592,5 +593,24 @@ describe("quitPsychoJS routes every incompatible outcome to both columns of ONE 
     expect(out.unmetNeeds).toEqual([]);
     expect(out.error).toEqual(["compatibility:unclassifiedRejection"]);
     expect(out.code).toEqual(["deviceIncompatible"]);
+  });
+});
+
+describe("current incompatibility remains the primary outcome", () => {
+  test("BraveSilverPear471: memory rejection is not overwritten by fullscreenQuit", async () => {
+    status.compatibilityUnmetNeeds = ["_needMemoryGB"];
+
+    await quitPsychoJS(
+      "",
+      false,
+      mockParamReader,
+      true,
+      false,
+      "fullscreenQuit",
+    );
+
+    expect(cells("unmetNeeds")).toEqual(["_needMemoryGB"]);
+    expect(cells("error")).toEqual(["incompatible"]);
+    expect(cells("completionCodeEnglish")).toEqual(["deviceIncompatible"]);
   });
 });
