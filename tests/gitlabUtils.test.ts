@@ -115,6 +115,8 @@ import {
   getRecruitmentServiceConfig,
   setRepoName,
   searchRepoNameMatches,
+  runExperiment,
+  pavloviaRecordNeedsCredit,
 } from "../preprocess/gitlabUtils";
 import {
   extractWorkbookFormatting,
@@ -146,13 +148,151 @@ function makeUser(overrides: Record<string, any> = {}) {
     accessToken: "",
     projectList: Promise.resolve([]),
     initProjectList: jest.fn().mockResolvedValue(undefined),
-    currentExperiment: { _pavloviaNewExperimentBool: false },
+    currentExperiment: { _pavloviaNewStudyBool: false },
     totalProjectPages: 1,
     ...overrides,
   } as any;
 }
 
 beforeEach(() => jest.clearAllMocks());
+
+describe("runExperiment", () => {
+  it.each([
+    [
+      { message: "Insufficient credits assigned to this experiment" },
+      403,
+      { activationFailure: "insufficient-credits" },
+    ],
+    [
+      { error: "the experiment does not have any assigned credit left" },
+      403,
+      { activationFailure: "insufficient-credits" },
+    ],
+    [
+      { error: "rejected", errorCode: 60 },
+      403,
+      { activationFailure: "insufficient-credits" },
+    ],
+    [
+      { context: "when changing status", error: { errorCode: 60 } },
+      400,
+      { activationFailure: "insufficient-credits" },
+    ],
+    [
+      { newStatus: "INACTIVE", message: "No credits" },
+      200,
+      { activationFailure: "insufficient-credits" },
+    ],
+    [{ message: "Forbidden" }, 403, null],
+    [{ message: "Forbidden", runMode: "CREDIT" }, 403, null],
+  ])(
+    "classifies a rejected activation with response %j (HTTP %i)",
+    async (body, status, result) => {
+      mockLoadFromStorage.mockReturnValue(makeApiClient({}));
+      const warn = jest.spyOn(console, "warn").mockImplementation(() => {});
+      const fetchMock = jest
+        .spyOn(global, "fetch")
+        .mockResolvedValue(new Response(JSON.stringify(body), { status }));
+
+      try {
+        await expect(
+          runExperiment(
+            makeUser(),
+            { id: 42 } as any,
+            "https://run.pavlovia.org/scientist/compiled-study",
+          ),
+        ).resolves.toEqual(result);
+        expect(fetchMock).toHaveBeenCalledTimes(1);
+        expect(fetchMock).toHaveBeenCalledWith(
+          "https://pavlovia.org/api/v2/experiments/42/status",
+          expect.objectContaining({ method: "PUT" }),
+        );
+        if (result) expect(Swal.fire).not.toHaveBeenCalled();
+        else
+          expect(Swal.fire).toHaveBeenCalledWith(
+            expect.objectContaining({ title: "Failed to change mode." }),
+          );
+      } finally {
+        fetchMock.mockRestore();
+        warn.mockRestore();
+      }
+    },
+  );
+
+  it("returns Pavlovia's reply when the study is set to RUNNING", async () => {
+    mockLoadFromStorage.mockReturnValue(makeApiClient({}));
+    const fetchMock = jest
+      .spyOn(global, "fetch")
+      .mockResolvedValue(
+        new Response(JSON.stringify({ newStatus: "RUNNING" }), { status: 200 }),
+      );
+    try {
+      await expect(
+        runExperiment(makeUser(), { id: 42 } as any, "https://example.test"),
+      ).resolves.toEqual({ newStatus: "RUNNING" });
+      expect(Swal.fire).not.toHaveBeenCalled();
+    } finally {
+      fetchMock.mockRestore();
+    }
+  });
+});
+
+describe("pavloviaRecordNeedsCredit", () => {
+  const now = new Date("2026-11-24");
+  const record = (experiment: any, nbAvailableCredits = 0) => ({
+    credits: {
+      nbAssignedCredits: nbAvailableCredits,
+      nbReservedCredits: 0,
+      nbConsumedCredits: 0,
+      nbAvailableCredits,
+    },
+    experiment: { status2: "RUNNING", ...experiment },
+  });
+  const nyuLicense = {
+    licenseId: "license-id",
+    institutionName: "New York University",
+    expirationDate: "2027-08-24",
+  };
+
+  it("lets a study run on an unexpired institutional license without credit", () => {
+    expect(
+      pavloviaRecordNeedsCredit(
+        record({ runMode: "LICENSE", license: nyuLicense }),
+        now,
+      ),
+    ).toBe(false);
+  });
+
+  it("needs credit when the license has expired and no credit is available", () => {
+    expect(
+      pavloviaRecordNeedsCredit(
+        record({
+          runMode: "LICENSE",
+          license: { ...nyuLicense, expirationDate: "2026-01-01" },
+        }),
+        now,
+      ),
+    ).toBe(true);
+  });
+
+  it("needs credit for a RUNNING credit-mode study with no available credit", () => {
+    expect(pavloviaRecordNeedsCredit(record({ runMode: "CREDIT" }), now)).toBe(
+      true,
+    );
+  });
+
+  it("lets a credit-mode study run while it has available credit", () => {
+    expect(
+      pavloviaRecordNeedsCredit(record({ runMode: "CREDIT" }, 5), now),
+    ).toBe(false);
+  });
+
+  it("does not claim missing credit when Pavlovia reports no credit numbers", () => {
+    expect(
+      pavloviaRecordNeedsCredit({ experiment: { runMode: "CREDIT" } }, now),
+    ).toBe(false);
+  });
+});
 
 describe("getProlificStudyConfig", () => {
   it("loads the selected repository's persisted Prolific settings", async () => {
@@ -584,7 +724,7 @@ describe("setRepoName — new experiment uses searchProjectsByName", () => {
     mockSearchMany.mockResolvedValue([{ name: "myExp1" }]);
 
     const user = makeUser({
-      currentExperiment: { _pavloviaNewExperimentBool: true },
+      currentExperiment: { _pavloviaNewStudyBool: true },
     });
     const result = await setRepoName(user, "myExp");
 
@@ -595,7 +735,7 @@ describe("setRepoName — new experiment uses searchProjectsByName", () => {
   it("uses a search started earlier (searchRepoNameMatches) instead of searching again", async () => {
     mockSearchMany.mockResolvedValue([{ name: "myExp3" }]);
     const user = makeUser({
-      currentExperiment: { _pavloviaNewExperimentBool: true },
+      currentExperiment: { _pavloviaNewStudyBool: true },
     });
 
     // The name is used as given; it is not rewritten.
@@ -609,7 +749,7 @@ describe("setRepoName — new experiment uses searchProjectsByName", () => {
 
   it("rejects an illegal spreadsheet name rather than rewriting it", async () => {
     const user = makeUser({
-      currentExperiment: { _pavloviaNewExperimentBool: true },
+      currentExperiment: { _pavloviaNewStudyBool: true },
     });
     await expect(setRepoName(user, "my Exp!")).rejects.toMatchObject({
       name: "IllegalRepoNameError",
@@ -628,7 +768,7 @@ describe("setRepoName — new experiment uses searchProjectsByName", () => {
         return projectListSpy();
       },
       initProjectList: jest.fn(),
-      currentExperiment: { _pavloviaNewExperimentBool: true },
+      currentExperiment: { _pavloviaNewStudyBool: true },
       totalProjectPages: 1,
     };
     await setRepoName(user, "myExp");
@@ -643,7 +783,7 @@ describe("setRepoName — new experiment uses searchProjectsByName", () => {
     mockSearchMany.mockResolvedValue(manyVariants);
 
     const user = makeUser({
-      currentExperiment: { _pavloviaNewExperimentBool: true },
+      currentExperiment: { _pavloviaNewStudyBool: true },
     });
     const result = await setRepoName(user, "myExp");
 
@@ -654,7 +794,7 @@ describe("setRepoName — new experiment uses searchProjectsByName", () => {
     mockSearchMany.mockResolvedValue([{ name: "myExp1" }, { name: "myExp2" }]);
 
     const user = makeUser({
-      currentExperiment: { _pavloviaNewExperimentBool: true },
+      currentExperiment: { _pavloviaNewStudyBool: true },
     });
     const result = await setRepoName(user, "myExp");
 
@@ -665,7 +805,7 @@ describe("setRepoName — new experiment uses searchProjectsByName", () => {
     mockSearchMany.mockResolvedValue([]);
 
     const user = makeUser({
-      currentExperiment: { _pavloviaNewExperimentBool: true },
+      currentExperiment: { _pavloviaNewStudyBool: true },
     });
     const result = await setRepoName(user, "myExp");
 
@@ -676,7 +816,7 @@ describe("setRepoName — new experiment uses searchProjectsByName", () => {
     mockSearchMany.mockResolvedValue([{ name: "myExp1" }, { name: "myExp3" }]);
 
     const user = makeUser({
-      currentExperiment: { _pavloviaNewExperimentBool: true },
+      currentExperiment: { _pavloviaNewStudyBool: true },
     });
     const result = await setRepoName(user, "myExp");
 
@@ -690,7 +830,7 @@ describe("setRepoName — new experiment uses searchProjectsByName", () => {
     ]);
 
     const user = makeUser({
-      currentExperiment: { _pavloviaNewExperimentBool: true },
+      currentExperiment: { _pavloviaNewStudyBool: true },
     });
     const result = await setRepoName(user, "myExp");
 
@@ -826,7 +966,7 @@ describe("setRepoName — reuse mode uses searchProjectsByName", () => {
     mockSearchMany.mockResolvedValue(manyVariants);
 
     const user = makeUser({
-      currentExperiment: { _pavloviaNewExperimentBool: false },
+      currentExperiment: { _pavloviaNewStudyBool: false },
     });
     const result = await setRepoName(user, "myExp");
 
@@ -837,7 +977,7 @@ describe("setRepoName — reuse mode uses searchProjectsByName", () => {
     mockSearchMany.mockResolvedValue([{ name: "myExp1" }]);
 
     const user = makeUser({
-      currentExperiment: { _pavloviaNewExperimentBool: false },
+      currentExperiment: { _pavloviaNewStudyBool: false },
     });
     const result = await setRepoName(user, "myExp");
 
@@ -849,7 +989,7 @@ describe("setRepoName — reuse mode uses searchProjectsByName", () => {
     mockSearchMany.mockResolvedValue([]);
 
     const user = makeUser({
-      currentExperiment: { _pavloviaNewExperimentBool: false },
+      currentExperiment: { _pavloviaNewStudyBool: false },
     });
     const result = await setRepoName(user, "myExp");
 
@@ -1543,7 +1683,7 @@ describe("createPavloviaExperiment — no duplicate-name guard in starting state
 
   it("does not show 'starting state invalid' dialog even when project name is already taken", async () => {
     const user = makeUser({
-      currentExperiment: { _pavloviaNewExperimentBool: true },
+      currentExperiment: { _pavloviaNewStudyBool: true },
     });
     // searchProjectByName returns an existing project — old guard would block here
     mockSearch.mockResolvedValue({ id: "1", name: "existingRepo" });
@@ -1573,7 +1713,7 @@ describe("createPavloviaExperiment — no duplicate-name guard in starting state
     projectList.catch(() => {});
     const user = makeUser({
       projectList,
-      currentExperiment: { _pavloviaNewExperimentBool: true },
+      currentExperiment: { _pavloviaNewStudyBool: true },
     });
     mockSearch.mockResolvedValue({ id: "1", name: "dupeProject" });
 

@@ -781,9 +781,12 @@ export const prepareExperimentFileForThreshold = async (
       user.currentExperiment.prolificWorkspaceModeBool = false;
     }
 
-    user.currentExperiment._pavloviaNewExperimentBool = table.colBBool(
-      "_pavloviaNewExperimentBool",
-    );
+    // _pavloviaNewExperimentBool is the old name of _pavloviaNewStudyBool.
+    user.currentExperiment._pavloviaNewStudyBool =
+      table.colB("_pavloviaNewStudyBool") === "" &&
+      table.colB("_pavloviaNewExperimentBool") !== ""
+        ? table.colBBool("_pavloviaNewExperimentBool")
+        : table.colBBool("_pavloviaNewStudyBool");
 
     // ! Validate requested fonts
     const requestedFontList: string[] = getFontNameListBySource(

@@ -133,7 +133,7 @@ it("tells the scientist which resource is missing, without retrying", async () =
     accessToken: "",
     projectList: Promise.resolve([]),
     initProjectList: jest.fn().mockResolvedValue(undefined),
-    currentExperiment: { _pavloviaNewExperimentBool: true },
+    currentExperiment: { _pavloviaNewStudyBool: true },
     totalProjectPages: 1,
   };
 

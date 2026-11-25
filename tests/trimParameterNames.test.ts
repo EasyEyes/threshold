@@ -111,8 +111,8 @@ describe("whitespace-padded parameter names downstream", () => {
     expect(getDesiredSamplingRate(parsed)).toBe("22050");
   });
 
-  it("leading-space _pavloviaNewExperimentBool produces no validation errors", () => {
-    const csv = ` _pavloviaNewExperimentBool,TRUE,
+  it("leading-space _pavloviaNewStudyBool produces no validation errors", () => {
+    const csv = ` _pavloviaNewStudyBool,TRUE,
 block,,1,1
 conditionName,,condA,condB
 targetKind,,letter,letter`;
@@ -129,7 +129,7 @@ targetKind,,letter,letter`;
   });
 
   it("trimmed names flow into the map used to generate block CSVs", () => {
-    const csv = ` _pavloviaNewExperimentBool,TRUE,
+    const csv = ` _pavloviaNewStudyBool,TRUE,
 block,,1
  targetKind,,letter`;
     const p = Papa.parse(csv, { skipEmptyLines: true });
@@ -138,7 +138,7 @@ block,,1
     // _tableToNormalizedDf (main.ts) builds the block-file dataframe from
     // this map; its keys become the block CSV header read by the runtime.
     const keys = [...t.toParamValuesMap().keys()];
-    expect(keys).toContain("_pavloviaNewExperimentBool");
+    expect(keys).toContain("_pavloviaNewStudyBool");
     expect(keys).toContain("targetKind");
     expect(keys.every((k) => k === k.trim())).toBe(true);
   });
@@ -185,8 +185,8 @@ targetKind,,letter,letter`;
     const csv = `block,,1,1
 conditionName,,condA,condB
 targetKind,,letter,letter
-_pavloviaNewExperimentBool,NOTABOOL,
- _pavloviaNewExperimentBool,TRUE,`;
+_pavloviaNewStudyBool,NOTABOOL,
+ _pavloviaNewStudyBool,TRUE,`;
     const p = Papa.parse(csv, { skipEmptyLines: true });
     trimParameterNames(p.data as string[][]);
     const t = new ExperimentTable(p.data as readonly (readonly string[])[]);

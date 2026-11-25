@@ -173,14 +173,14 @@ export const DEFAULT_EXPERIMENT_LANGUAGE = "en";
 
 export type UserExperimentDefaults = {
   pavloviaPreferRunningModeBool: boolean;
-  _pavloviaNewExperimentBool: boolean;
+  _pavloviaNewStudyBool: boolean;
   _stepperBool: boolean;
   _language: string;
 };
 
 export const EMPTY_USER_EXPERIMENT_DEFAULTS: UserExperimentDefaults = {
   pavloviaPreferRunningModeBool: true,
-  _pavloviaNewExperimentBool: true,
+  _pavloviaNewStudyBool: true,
   _stepperBool: true,
   _language: DEFAULT_EXPERIMENT_LANGUAGE,
 };
@@ -204,7 +204,7 @@ export class User {
     pavloviaPreferRunningModeBool: boolean;
     prolificWorkspaceModeBool: boolean;
     prolificWorkspaceProjectId: string;
-    _pavloviaNewExperimentBool: boolean;
+    _pavloviaNewStudyBool: boolean;
     _stepperBool: boolean;
     _language: string;
     _phrasesColumnName?: string;
@@ -225,7 +225,7 @@ export class User {
       pavloviaPreferRunningModeBool: defaults.pavloviaPreferRunningModeBool,
       prolificWorkspaceModeBool: false,
       prolificWorkspaceProjectId: "",
-      _pavloviaNewExperimentBool: defaults._pavloviaNewExperimentBool,
+      _pavloviaNewStudyBool: defaults._pavloviaNewStudyBool,
       _stepperBool: defaults._stepperBool,
       _language: defaults._language,
       languageDirection: "ltr",
@@ -444,7 +444,7 @@ export const setRepoName = async (
   return versionedRepoName(
     baseName,
     matches,
-    !!user.currentExperiment._pavloviaNewExperimentBool,
+    !!user.currentExperiment._pavloviaNewStudyBool,
   );
 };
 
@@ -2814,7 +2814,7 @@ export const _createExperimentTask_prepareRepo = async (
 ): Promise<{ repo: any; repoName: string; deleteActions: ICommitAction[] }> => {
   const existingRepo = await searchProjectByName(user, projectName);
 
-  if (user.currentExperiment._pavloviaNewExperimentBool || !existingRepo) {
+  if (user.currentExperiment._pavloviaNewStudyBool || !existingRepo) {
     let currentName = projectName;
     for (let attempt = 0; attempt < NAME_CONFLICT_RETRY_CAP; attempt++) {
       try {
@@ -3150,11 +3150,86 @@ export const createPavloviaExperiment = async (
 
 /* -------------------------------------------------------------------------- */
 
+// Pavlovia server errors carry a numeric errorCode (60 = CREDIT_NOT_ENOUGH,
+// see psychojs GUI._userFriendlyError) and nest their text under `error`.
+const PAVLOVIA_CREDIT_NOT_ENOUGH = 60;
+
+const PAVLOVIA_ERROR_TEXT_KEYS = [
+  "error",
+  "message",
+  "detail",
+  "details",
+  "description",
+  "reason",
+];
+
+const collectPavloviaErrorText = (value: unknown, depth = 0): string[] => {
+  if (typeof value === "string") return [value];
+  if (!value || typeof value !== "object" || depth > 4) return [];
+  return PAVLOVIA_ERROR_TEXT_KEYS.flatMap((key) =>
+    collectPavloviaErrorText(
+      (value as Record<string, unknown>)[key],
+      depth + 1,
+    ),
+  );
+};
+
+const hasPavloviaErrorCode = (value: unknown, depth = 0): boolean => {
+  if (!value || typeof value !== "object" || depth > 4) return false;
+  const code = (value as { errorCode?: unknown }).errorCode;
+  if (
+    Number(code) === PAVLOVIA_CREDIT_NOT_ENOUGH ||
+    code === "CREDIT_NOT_ENOUGH"
+  )
+    return true;
+  return hasPavloviaErrorCode((value as { error?: unknown }).error, depth + 1);
+};
+
+export const isPavloviaCreditRejection = (
+  status: number,
+  body: unknown,
+): boolean =>
+  status === 402 ||
+  hasPavloviaErrorCode(body) ||
+  collectPavloviaErrorText(body).some((text) => /\bcredits?\b/i.test(text));
+
+const readPavloviaBody = async (response: Response): Promise<any> => {
+  const text = await response.text().catch(() => "");
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text ? { message: text } : {};
+  }
+};
+
+const pavloviaErrorMessage = (body: any): string =>
+  collectPavloviaErrorText(body).join(" ").trim();
+
+// Local testing only: in the DevTools Console run
+//   localStorage.simulatePavloviaNoCredit = "1"
+// to make activation fail as if the study had no Pavlovia credit.
+const simulatingPavloviaNoCredit = (): boolean => {
+  if (typeof window === "undefined") return false;
+  if (!["localhost", "127.0.0.1"].includes(window.location.hostname))
+    return false;
+  try {
+    return window.localStorage.getItem("simulatePavloviaNoCredit") === "1";
+  } catch {
+    return false;
+  }
+};
+
 export const runExperiment = async (
   user: User,
   newRepo: Repository,
   experimentUrl: string,
 ) => {
+  if (simulatingPavloviaNoCredit()) {
+    console.warn(
+      "[Pavlovia activation] Simulating a no-credit rejection (localStorage.simulatePavloviaNoCredit).",
+    );
+    return { activationFailure: "insufficient-credits" as const };
+  }
   const runClient = GitLabOAuthClient.loadFromStorage(
     getAuthConfig().clientId,
     getAuthConfig().redirectUri,
@@ -3183,27 +3258,34 @@ export const runExperiment = async (
         },
       );
 
-      if (running.ok) {
-        return await running.json();
-      }
-
       // Transient server errors — retry
-      if ([500, 502, 503, 429].includes(running.status)) {
-        if (attempt < maxRetries - 1) {
-          await wait(getRetryDelayMs(attempt));
-          continue;
-        }
+      if (
+        !running.ok &&
+        [500, 502, 503, 429].includes(running.status) &&
+        attempt < maxRetries - 1
+      ) {
+        await wait(getRetryDelayMs(attempt));
+        continue;
       }
 
-      // Non-retryable error or retries exhausted
-      const errorData = await running.json().catch(() => ({}));
+      const body = await readPavloviaBody(running);
+      if (running.ok && body?.newStatus === "RUNNING") return body;
+
+      console.warn(
+        `[Pavlovia activation] Pavlovia did not set the study to RUNNING (HTTP ${running.status}).`,
+        body,
+      );
+      if (isPavloviaCreditRejection(running.status, body)) {
+        return { activationFailure: "insufficient-credits" as const };
+      }
+
       await Swal.fire({
         icon: "error",
         title: `Failed to change mode.`,
         text: `We failed to change your study mode to RUNNING (${
           running.status
         }). ${
-          errorData.message ||
+          pavloviaErrorMessage(body) ||
           "Please try to refresh the status in a while, or refresh the page to start again."
         }`,
         confirmButtonColor: "#666",
@@ -3226,7 +3308,8 @@ export const runExperiment = async (
   return null;
 };
 
-export const getExperimentStatus = async (user: User, newRepo: Repository) => {
+/** Pavlovia's record of the study: `{ experiment, credits, ... }`. */
+const getPavloviaExperimentRecord = async (user: User, newRepo: Repository) => {
   const statusClient = GitLabOAuthClient.loadFromStorage(
     getAuthConfig().clientId,
     getAuthConfig().redirectUri,
@@ -3245,9 +3328,40 @@ export const getExperimentStatus = async (user: User, newRepo: Repository) => {
       },
     },
   );
+  return running.json();
+};
 
-  const result = await running.json();
+export const getExperimentStatus = async (user: User, newRepo: Repository) => {
+  const result = await getPavloviaExperimentRecord(user, newRepo);
   return result.experiment.status2;
+};
+
+/**
+ * Whether Pavlovia will refuse participants for lack of credit. Pavlovia
+ * accepts RUNNING without credit and only checks when a participant opens a
+ * session, so status2 alone can't tell. A study runs on an unexpired
+ * institutional license (runMode LICENSE) or on available credits.
+ */
+export const pavloviaRecordNeedsCredit = (record: any, now = new Date()) => {
+  const experiment = record?.experiment;
+  if (!experiment) return false;
+  const license = experiment.license;
+  const licenseExpired =
+    !!license?.expirationDate && new Date(license.expirationDate) < now;
+  if (experiment.runMode === "LICENSE" && license && !licenseExpired)
+    return false;
+  const available = Number(record?.credits?.nbAvailableCredits);
+  return Number.isFinite(available) && available <= 0;
+};
+
+export const getPavloviaNeedsCredit = async (
+  user: User,
+  newRepo: Repository,
+): Promise<boolean> => {
+  if (simulatingPavloviaNoCredit()) return true;
+  return pavloviaRecordNeedsCredit(
+    await getPavloviaExperimentRecord(user, newRepo),
+  );
 };
 
 export const setExperimentSaveFormat = async (

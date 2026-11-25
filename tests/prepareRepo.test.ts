@@ -111,7 +111,7 @@ function makeUser(overrides: Record<string, any> = {}) {
     projectList: Promise.resolve([]),
     initProjectList: jest.fn().mockResolvedValue(undefined),
     currentExperiment: {
-      _pavloviaNewExperimentBool: true,
+      _pavloviaNewStudyBool: true,
       participantRecruitmentServiceName: "",
     },
     totalProjectPages: 1,
